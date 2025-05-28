@@ -7,10 +7,10 @@ import { Favicon } from '@/components/favicon';
 import { Metadata } from 'next';
 
 interface PublicListPageProps {
-  params: {
+  params: Promise<{
     username: string;
     listId: string;
-  };
+  }>;
 }
 
 // Generate metadata for SEO and social sharing

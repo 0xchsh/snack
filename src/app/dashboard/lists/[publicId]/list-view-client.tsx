@@ -155,7 +155,7 @@ export function ListViewClient({ list }: ListViewClientProps) {
           }
           
         } catch (error) {
-          if (error.name === 'NotAllowedError') {
+          if (error instanceof Error && error.name === 'NotAllowedError') {
             console.log('🚫 Clipboard permission denied. Try clicking the "⌘V Paste link" button instead.');
             // Don't show alert for permission denied, just log it
           } else {
@@ -276,7 +276,7 @@ export function ListViewClient({ list }: ListViewClientProps) {
         alert(`Added ${successful.length} links successfully from clipboard.\n\nFailed to add:\n${failed.join('\n')}`);
       }
     } catch (error) {
-      if (error.name === 'NotAllowedError') {
+      if (error instanceof Error && error.name === 'NotAllowedError') {
         alert('Clipboard access denied by browser. This is common on HTTP sites.\n\nTo add links:\n1. Copy your URL\n2. Paste it in the input field above\n3. Click "Add link"\n\nOr use HTTPS for automatic clipboard access.');
       } else {
         console.error('Error reading clipboard or adding links:', error);
