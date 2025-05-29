@@ -2,6 +2,9 @@ import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { DashboardClient } from './dashboard-client';
+import { Button } from '@/components/ui/button';
+import { Settings, User } from 'lucide-react';
+import Link from 'next/link';
 
 export default async function DashboardPage() {
   const user = await currentUser();
@@ -41,6 +44,25 @@ export default async function DashboardPage() {
           <p className="text-muted-foreground">
             Create and manage your curated lists
           </p>
+        </div>
+        <div className="flex items-center space-x-3">
+          {user.imageUrl ? (
+            <img
+              src={user.imageUrl}
+              alt="Profile picture"
+              className="w-8 h-8 rounded-full object-cover border border-gray-200"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center border border-gray-200">
+              <User className="w-4 h-4 text-gray-500" />
+            </div>
+          )}
+          <Link href="/dashboard/profile">
+            <Button variant="outline" size="sm">
+              <Settings className="w-4 h-4 mr-2" />
+              Profile
+            </Button>
+          </Link>
         </div>
       </div>
       
