@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth, clerkClient } from '@clerk/nextjs/server';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 import { z } from 'zod';
 
 const updateProfileSchema = z.object({
   username: z.string()
-    .min(1, 'Username is required')
-    .max(16, 'Username must be 16 characters or less')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, hyphens, and underscores')
-    .regex(/^[a-zA-Z0-9]/, 'Username must start with a letter or number')
-    .regex(/[a-zA-Z0-9]$/, 'Username must end with a letter or number')
+    .min(3, 'Username must be at least 3 characters')
+    .max(15, 'Username must be 15 characters or less')
+    .regex(/^[a-zA-Z0-9]+$/, 'Username can only contain letters and numbers')
     .optional(),
   firstName: z.string().max(50, 'First name must be 50 characters or less').optional(),
   lastName: z.string().max(50, 'Last name must be 50 characters or less').optional(),
@@ -30,28 +28,24 @@ export async function PATCH(request: NextRequest) {
     const { username, firstName, lastName, email } = validatedData;
 
     // Get current user from database
-    const currentUser = await prisma.user.findUnique({
-      where: { clerkId: userId }
-    });
+    const { data: currentUser, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('clerk_id', userId)
+      .single();
 
-    if (!currentUser) {
+    if (userError || !currentUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Check if username is being changed and if it's available
     if (username && username !== currentUser.username) {
-      const existingUser = await prisma.user.findFirst({
-        where: {
-          username: {
-            equals: username,
-            mode: 'insensitive'
-          },
-          NOT: {
-            clerkId: userId
-          }
-        }
-      });
-
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('id')
+        .ilike('username', username)
+        .neq('clerk_id', userId)
+        .single();
       if (existingUser) {
         return NextResponse.json(
           { error: 'Username is already taken' },
@@ -63,8 +57,8 @@ export async function PATCH(request: NextRequest) {
     // Prepare updates for database
     const dbUpdates: any = {};
     if (username !== undefined) dbUpdates.username = username;
-    if (firstName !== undefined) dbUpdates.firstName = firstName;
-    if (lastName !== undefined) dbUpdates.lastName = lastName;
+    if (firstName !== undefined) dbUpdates.first_name = firstName;
+    if (lastName !== undefined) dbUpdates.last_name = lastName;
 
     // Prepare updates for Clerk
     const clerkUpdates: any = {};
@@ -89,10 +83,16 @@ export async function PATCH(request: NextRequest) {
     // Update database if needed
     let updatedUser = currentUser;
     if (Object.keys(dbUpdates).length > 0) {
-      updatedUser = await prisma.user.update({
-        where: { clerkId: userId },
-        data: dbUpdates
-      });
+      const { data: updated, error: updateError } = await supabase
+        .from('users')
+        .update(dbUpdates)
+        .eq('clerk_id', userId)
+        .select()
+        .single();
+      if (updateError) {
+        return NextResponse.json({ error: updateError.message || 'Failed to update user' }, { status: 500 });
+      }
+      updatedUser = updated;
     }
 
     // Sync username to Clerk metadata for future reference
@@ -114,8 +114,8 @@ export async function PATCH(request: NextRequest) {
       success: true,
       user: {
         username: updatedUser.username,
-        firstName: updatedUser.firstName,
-        lastName: updatedUser.lastName
+        firstName: updatedUser.first_name,
+        lastName: updatedUser.last_name
       },
       message: 'Profile updated successfully'
     });

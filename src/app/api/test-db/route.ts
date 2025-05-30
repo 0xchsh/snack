@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { currentUser } from '@clerk/nextjs/server';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 
 export async function GET() {
   try {
@@ -12,15 +12,14 @@ export async function GET() {
 
     console.log('Testing database connection for user:', user.id);
 
-    // Test the exact same query that's failing in the dashboard
-    const dbUser = await prisma.user.findUnique({
-      where: { clerkId: user.id },
-      include: {
-        lists: {
-          orderBy: { updatedAt: 'desc' },
-        },
-      },
-    });
+    // Fetch user and lists from Supabase
+    const { data: dbUser, error } = await supabase
+      .from('users')
+      .select('*, lists(*)')
+      .eq('clerk_id', user.id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
 
     return NextResponse.json({
       status: 'success',

@@ -1,6 +1,6 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 import { DashboardClient } from './dashboard-client';
 import { Button } from '@/components/ui/button';
 import { Settings, User } from 'lucide-react';
@@ -13,28 +13,52 @@ export default async function DashboardPage() {
     redirect('/sign-in');
   }
 
-  // Get or create user in database
-  let dbUser = await prisma.user.findUnique({
-    where: { clerkId: user.id },
-    include: {
-      lists: {
-        orderBy: { updatedAt: 'desc' },
-      },
-    },
-  });
+  // Get or create user in Supabase
+  let { data: dbUser, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('clerk_id', user.id)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    // PGRST116 = no rows returned, ignore for create
+    throw error;
+  }
 
   if (!dbUser) {
-    // Create user if doesn't exist
-    dbUser = await prisma.user.create({
-      data: {
-        clerkId: user.id,
+    const { data: newUser, error: insertErr } = await supabase
+      .from('users')
+      .insert({
+        clerk_id: user.id,
         username: user.username || `user_${Date.now()}`,
-      },
-      include: {
-        lists: true,
-      },
-    });
+      })
+      .select('*')
+      .single();
+
+    if (insertErr) throw insertErr;
+    dbUser = newUser;
   }
+
+  // Fetch lists for this user
+  const { data: lists, error: listErr } = await supabase
+    .from('lists')
+    .select('*, items(count), users:users(username)')
+    .eq('user_id', dbUser.id)
+    .order('updated_at', { ascending: false });
+
+  if (listErr) throw listErr;
+
+  const mappedLists = (lists || []).map((l: any) => ({
+    id: l.id,
+    publicId: l.public_id,
+    title: l.title,
+    description: l.description,
+    emoji: l.emoji,
+    createdAt: l.created_at ? new Date(l.created_at) : new Date(),
+    updatedAt: l.updated_at ? new Date(l.updated_at) : new Date(),
+    itemCount: Array.isArray(l.items) ? l.items.length : 0,
+    username: l.users?.username || '',
+  }));
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -66,7 +90,7 @@ export default async function DashboardPage() {
         </div>
       </div>
       
-      <DashboardClient lists={dbUser.lists} />
+      <DashboardClient lists={mappedLists} />
     </div>
   );
 } 

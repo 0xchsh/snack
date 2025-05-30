@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { currentUser } from '@clerk/nextjs/server';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 
 interface RouteParams {
   params: Promise<{
@@ -20,16 +20,26 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     const { emoji, title, description, viewMode } = await request.json();
 
     // Find the list and verify ownership
-    const list = await prisma.list.findUnique({
-      where: { publicId },
-      include: { user: true },
-    });
+    const { data: list, error: listError } = await supabase
+      .from('lists')
+      .select('*, user:users(clerk_id)')
+      .eq('public_id', publicId)
+      .single();
 
-    if (!list) {
+    console.log('Fetched list:', list);
+    console.log('Fetched list.user:', list?.user);
+
+    if (listError || !list) {
       return NextResponse.json({ error: 'List not found' }, { status: 404 });
     }
 
-    if (list.user.clerkId !== user.id) {
+    let userObj = null;
+    if (Array.isArray(list.user)) {
+      userObj = list.user[0] ?? null;
+    } else {
+      userObj = list.user ?? null;
+    }
+    if (!userObj || userObj.clerk_id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -49,18 +59,21 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       updateData.description = description;
     }
     
-    if (viewMode !== undefined) {
-      // Validate viewMode
-      if (viewMode === 'LIST' || viewMode === 'GALLERY') {
-        updateData.viewMode = viewMode;
-      }
+    if (viewMode !== undefined && (viewMode === 'LIST' || viewMode === 'GALLERY')) {
+      updateData.view_mode = viewMode;
     }
 
     // Update the list
-    const updatedList = await prisma.list.update({
-      where: { publicId },
-      data: updateData,
-    });
+    const { data: updatedList, error: updateError } = await supabase
+      .from('lists')
+      .update(updateData)
+      .eq('public_id', publicId)
+      .select()
+      .single();
+
+    if (updateError) {
+      return NextResponse.json({ error: 'Failed to update list' }, { status: 500 });
+    }
 
     return NextResponse.json(updatedList);
   } catch (error) {

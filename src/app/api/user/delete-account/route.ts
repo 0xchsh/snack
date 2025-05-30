@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth, clerkClient } from '@clerk/nextjs/server';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 import { z } from 'zod';
 
 const deleteAccountSchema = z.object({
@@ -20,34 +20,36 @@ export async function DELETE(request: NextRequest) {
 
     // Parse and validate request body
     const body = await request.json();
-    const validatedData = deleteAccountSchema.parse(body);
+    deleteAccountSchema.parse(body);
 
-    // Verify user exists in database
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId },
-      include: {
-        lists: {
-          include: {
-            items: true
-          }
-        }
-      }
-    });
+    // Fetch lists for stats (optional)
+    const { data: lists, error: listErr } = await supabase
+      .from('lists')
+      .select('id')
+      .eq('user_id', userId);
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    if (listErr) throw listErr;
+
+    const listIds = lists?.map((l) => l.id) || [];
+    const listCount = listIds.length;
+
+    let itemCount = 0;
+    if (listCount > 0) {
+      const { count, error: itemErr } = await supabase
+        .from('items')
+        .select('*', { count: 'exact', head: true })
+        .in('list_id', listIds);
+      if (itemErr) throw itemErr;
+      itemCount = count ?? 0;
     }
 
-    // Count what will be deleted for logging
-    const listCount = user.lists.length;
-    const itemCount = user.lists.reduce((sum, list) => sum + list.items.length, 0);
+    // Delete user (cascade removes lists/items)
+    const { error: deleteErr } = await supabase
+      .from('users')
+      .delete()
+      .eq('clerk_id', userId);
 
-    console.log(`Deleting user ${userId}: ${listCount} lists, ${itemCount} items`);
-
-    // Delete user from database (cascade will handle lists and items)
-    await prisma.user.delete({
-      where: { clerkId: userId }
-    });
+    if (deleteErr) throw deleteErr;
 
     // Delete user from Clerk
     try {
@@ -55,10 +57,7 @@ export async function DELETE(request: NextRequest) {
       await client.users.deleteUser(userId);
     } catch (clerkError) {
       console.error('Clerk deletion error:', clerkError);
-      // Continue even if Clerk deletion fails - database cleanup is more important
     }
-
-    console.log(`Successfully deleted user ${userId} and ${listCount} lists with ${itemCount} items`);
 
     return NextResponse.json({
       success: true,

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
+import { createClient } from '@supabase/supabase-js';
 
 interface List {
   id: string;
@@ -15,10 +16,33 @@ interface List {
   emoji: string | null;
   createdAt: Date;
   updatedAt: Date;
+  itemCount?: number;
+  username?: string;
 }
 
 interface DashboardClientProps {
   lists: List[];
+}
+
+// LiveItemCount component
+function LiveItemCount({ listId, initialCount }: { listId: string, initialCount?: number }) {
+  const [count, setCount] = useState<number | undefined>(initialCount);
+  useEffect(() => {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    let isMounted = true;
+    supabase
+      .from('items')
+      .select('id', { count: 'exact', head: true })
+      .eq('list_id', listId)
+      .then(({ count }) => {
+        if (isMounted) setCount(count ?? 0);
+      });
+    return () => { isMounted = false; };
+  }, [listId]);
+  return <>{typeof count === 'number' ? `${count} item${count === 1 ? '' : 's'}` : ''}</>;
 }
 
 export function DashboardClient({ lists }: DashboardClientProps) {
@@ -84,24 +108,32 @@ export function DashboardClient({ lists }: DashboardClientProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {lists.map((list) => (
             <Link key={list.id} href={`/dashboard/lists/${list.publicId}`}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-2xl">{list.emoji || '📝'}</span>
-                    <CardTitle className="truncate">{list.title}</CardTitle>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer p-0 overflow-hidden border-2 border-gray-200">
+                {/* Image Stack */}
+                <div className="relative h-32 w-full flex items-end justify-center bg-gradient-to-tr from-orange-100 to-purple-100">
+                  {/* Simulate stack with colored divs */}
+                  <div className="absolute left-6 top-4 w-4/5 h-20 rounded-xl bg-purple-200 z-0" style={{ filter: 'blur(2px)' }} />
+                  <div className="absolute left-3 top-2 w-4/5 h-24 rounded-xl bg-orange-200 z-10" style={{ filter: 'blur(1px)' }} />
+                  <div className="relative w-11/12 h-28 rounded-xl bg-white z-20 flex items-center justify-center overflow-hidden shadow-md">
+                    {/* Main image or emoji fallback */}
+                    <span className="text-5xl">{list.emoji || '📝'}</span>
                   </div>
-                  {list.description && (
-                    <CardDescription className="line-clamp-2">
-                      {list.description}
-                    </CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center text-sm text-muted-foreground">
-                    <span>ID: {list.publicId}</span>
-                    <span>{new Date(list.updatedAt).toLocaleDateString()}</span>
+                </div>
+                {/* Info Section */}
+                <div className="flex items-center gap-4 px-6 py-5 border-t border-gray-100 bg-white">
+                  {/* Avatar */}
+                  <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-3xl border border-gray-200">
+                    <span>{list.emoji || '🌐'}</span>
                   </div>
-                </CardContent>
+                  {/* Text Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-bold text-xl leading-tight truncate">{list.title}</div>
+                    <div className="text-gray-500 text-base truncate">{list.username || ''}</div>
+                    <div className="text-gray-400 text-sm mt-1">
+                      <LiveItemCount listId={list.id} initialCount={list.itemCount} /> · 72K views
+                    </div>
+                  </div>
+                </div>
               </Card>
             </Link>
           ))}

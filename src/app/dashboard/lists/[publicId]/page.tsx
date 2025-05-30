@@ -1,6 +1,6 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect, notFound } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 import { ListViewClient } from './list-view-client';
 
 interface ListPageProps {
@@ -17,34 +17,44 @@ export default async function ListPage({ params }: ListPageProps) {
     redirect('/sign-in');
   }
 
-  // Get the list with its items
-  const list = await prisma.list.findUnique({
-    where: { 
-      publicId,
-    },
-    include: {
-      items: {
-        orderBy: [
-          { order: 'desc' },
-          { createdAt: 'desc' }
-        ],
-      },
-      user: true,
-    },
-  });
+  // Get the list with its items and user
+  const { data: list, error } = await supabase
+    .from('lists')
+    .select('*, items(*), users(*)')
+    .eq('public_id', publicId)
+    .single();
 
-  if (!list) {
+  if (error || !list) {
     notFound();
   }
 
   // Check if the current user owns this list
-  if (list.user.clerkId !== user.id) {
+  if (list.users?.clerk_id !== user.id) {
     redirect('/dashboard');
   }
 
+  // Map snake_case fields to camelCase for the client component
+  const mappedList = {
+    ...list,
+    publicId: list.public_id,
+    createdAt: list.created_at,
+    updatedAt: list.updated_at,
+    viewMode: list.view_mode,
+    items: (list.items || []).map((item: any) => ({
+      ...item,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at,
+      listId: item.list_id,
+    })),
+    user: list.users ? {
+      id: list.users.id,
+      username: list.users.username,
+    } : undefined,
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
-      <ListViewClient list={list} />
+      <ListViewClient list={mappedList} />
     </div>
   );
 } 

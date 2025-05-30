@@ -1,16 +1,23 @@
 import { Suspense } from 'react';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 import { ProfileSettings } from '@/components/profile-settings';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 async function getUser(clerkId: string) {
-  const user = await prisma.user.findUnique({
-    where: { clerkId }
-  });
+  const { data: user, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('clerk_id', clerkId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    throw error;
+  }
+
   return user;
 }
 

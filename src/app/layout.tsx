@@ -37,15 +37,25 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-          <header>
-            <SignedOut>
-              <SignInButton />
-              <SignUpButton />
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </header>
+        <nav className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm flex items-center justify-between px-6 h-14">
+          <div className="font-bold text-xl text-orange-600">Snack</div>
+          <div className="flex items-center gap-6">
+            <a href="/dashboard" className="text-gray-700 hover:text-orange-600 font-medium">Dashboard</a>
+            <a href="/dashboard/profile" className="text-gray-700 hover:text-orange-600 font-medium">Profile</a>
+            <form action="/sign-out" method="post">
+              <button type="submit" className="text-gray-700 hover:text-orange-600 font-medium">Sign Out</button>
+            </form>
+          </div>
+        </nav>
+        <header>
+          <SignedOut>
+            <SignInButton />
+            <SignUpButton />
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+        </header>
         {children}
         <Toaster position="top-right" richColors />
       </body>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { currentUser } from '@clerk/nextjs/server';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 import ogs from 'open-graph-scraper';
 import { extractFaviconFromOG } from '@/lib/favicon';
 
@@ -33,16 +33,17 @@ export async function POST(request: Request, { params }: RouteParams) {
     }
 
     // Find the list and verify ownership
-    const list = await prisma.list.findUnique({
-      where: { publicId },
-      include: { user: true },
-    });
+    const { data: list, error: listError } = await supabase
+      .from('lists')
+      .select('*, user:users(clerk_id)')
+      .eq('public_id', publicId)
+      .single();
 
-    if (!list) {
+    if (listError || !list) {
       return NextResponse.json({ error: 'List not found' }, { status: 404 });
     }
 
-    if (list.user.clerkId !== user.id) {
+    if (list.user.clerk_id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -70,25 +71,36 @@ export async function POST(request: Request, { params }: RouteParams) {
     }
 
     // Get the highest order number and add 1 to put new items at the top
-    const highestOrderItem = await prisma.listItem.findFirst({
-      where: { listId: list.id },
-      orderBy: { order: 'desc' },
-    });
+    const { data: highestOrderItem } = await supabase
+      .from('items')
+      .select('order')
+      .eq('list_id', list.id)
+      .order('order', { ascending: false })
+      .limit(1)
+      .single();
 
     const nextOrder = highestOrderItem ? highestOrderItem.order + 1 : 1;
 
     // Create the new list item
-    const newItem = await prisma.listItem.create({
-      data: {
-        title,
-        url,
-        description,
-        image,
-        favicon,
-        order: nextOrder,
-        listId: list.id,
-      },
-    });
+    const { data: newItem, error: createError } = await supabase
+      .from('items')
+      .insert([
+        {
+          title,
+          url,
+          description,
+          image,
+          favicon,
+          order: nextOrder,
+          list_id: list.id,
+        },
+      ])
+      .select()
+      .single();
+
+    if (createError) {
+      return NextResponse.json({ error: 'Failed to create list item' }, { status: 500 });
+    }
 
     return NextResponse.json(newItem, { status: 201 });
   } catch (error) {

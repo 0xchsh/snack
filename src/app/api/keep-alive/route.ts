@@ -1,16 +1,17 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 
 export async function GET() {
   try {
     // Simple database query to keep the connection alive
-    const result = await prisma.$queryRaw`SELECT 1 as healthy`;
+    const { error } = await supabase.rpc('health_check'); // You may need to create a simple function in Supabase
+    if (error) throw error;
     
     return NextResponse.json({
       status: 'success',
       message: 'Database connection healthy',
       timestamp: new Date().toISOString(),
-      result
+      result: [{ healthy: 1 }]
     }, { status: 200 });
   } catch (error) {
     console.error('Keep-alive database query failed:', error);

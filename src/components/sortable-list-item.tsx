@@ -127,7 +127,7 @@ export function SortableListItem({ item, onDelete, isDeleting = false, isDragOve
                   {isDeleting ? (
                     <div className="animate-spin rounded-full h-2.5 w-2.5 border-b-2 border-red-500"></div>
                   ) : (
-                    <Trash2 className="h-3 w-3" />
+                    <Trash2 className="h-4 w-4" />
                   )}
                 </Button>
               </div>

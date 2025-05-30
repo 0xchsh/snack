@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 import { Card, CardContent } from '@/components/ui/card';
 import { ExternalLink } from 'lucide-react';
 import Image from 'next/image';
@@ -17,29 +17,18 @@ interface PublicListPageProps {
 export async function generateMetadata({ params }: PublicListPageProps): Promise<Metadata> {
   const { username, listId } = await params;
   
-  const list = await prisma.list.findFirst({
-    where: {
-      publicId: listId,
-      user: {
-        username: username,
-      },
-    },
-    include: {
-      user: true,
-      items: {
-        orderBy: { order: 'asc' },
-      },
-    },
-  });
+  const { data: list, error } = await supabase
+    .from('lists')
+    .select('*, items(*), users:users(username)')
+    .eq('public_id', listId)
+    .single();
 
-  if (!list) {
-    return {
-      title: 'List Not Found',
-    };
+  if (error || !list || list.users?.username !== username) {
+    return { title: 'List Not Found' };
   }
 
-  const title = `${list.emoji ? list.emoji + ' ' : ''}${list.title} by ${list.user.username}`;
-  const description = list.description || `A curated list of ${list.items.length} links by ${list.user.username}`;
+  const title = `${list.emoji ? list.emoji + ' ' : ''}${list.title} by ${list.users.username}`;
+  const description = list.description || `A curated list of ${list.items.length} links by ${list.users.username}`;
 
   return {
     title,
@@ -61,23 +50,13 @@ export async function generateMetadata({ params }: PublicListPageProps): Promise
 export default async function PublicListPage({ params }: PublicListPageProps) {
   const { username, listId } = await params;
 
-  // Fetch the list with user and items
-  const list = await prisma.list.findFirst({
-    where: {
-      publicId: listId,
-      user: {
-        username: username,
-      },
-    },
-    include: {
-      user: true,
-      items: {
-        orderBy: { order: 'asc' },
-      },
-    },
-  });
+  const { data: list, error } = await supabase
+    .from('lists')
+    .select('*, items(*), users:users(username, clerk_id)')
+    .eq('public_id', listId)
+    .single();
 
-  if (!list) {
+  if (error || !list || list.users?.username !== username) {
     notFound();
   }
 
@@ -104,11 +83,11 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
           <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200 shadow-sm">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">
-                {list.user.username.charAt(0).toUpperCase()}
+                {list.users.username.charAt(0).toUpperCase()}
               </span>
             </div>
             <span className="text-sm text-gray-600">Curated by</span>
-            <span className="font-semibold text-gray-900">{list.user.username}</span>
+            <span className="font-semibold text-gray-900">{list.users.username}</span>
             <span className="text-gray-400">•</span>
             <span className="text-sm text-gray-600">
               {list.items.length} {list.items.length === 1 ? 'link' : 'links'}
@@ -117,10 +96,10 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
         </div>
 
         {/* List Items */}
-        {list.viewMode === 'LIST' ? (
+        {list.view_mode === 'LIST' ? (
           <div className="max-w-[672px] mx-auto">
             <div className="space-y-3">
-              {list.items.map((item, index) => (
+              {list.items.map((item: any) => (
                 <Card key={item.id} className="overflow-hidden hover:shadow-md transition-all duration-200 group border border-gray-200 bg-white h-full rounded-xl gap-0 py-0">
                   <CardContent className="p-0 h-full flex flex-col">
                     <a 
@@ -169,7 +148,7 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {list.items.map((item, index) => (
+            {list.items.map((item: any) => (
               <Card key={item.id} className="group hover:shadow-md transition-all duration-200 border border-gray-200 bg-white h-full gap-0 py-0 cursor-pointer rounded-xl">
                 <CardContent className="p-0 h-full flex flex-col">
                   <a 

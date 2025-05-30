@@ -34,6 +34,7 @@ import {
 } from '@dnd-kit/sortable';
 import { ViewModeToggle } from '@/components/view-mode-toggle';
 import { GalleryListItem } from '@/components/gallery-list-item';
+import { SortableDropIndicator } from '@/components/sortable-drop-indicator';
 
 interface ListItem {
   id: string;
@@ -667,16 +668,16 @@ export function ListViewClient({ list }: ListViewClientProps) {
                   onClick={viewPublicList}
                   className="border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg cursor-pointer"
                 >
-                  <ExternalLink className="h-4 w-4 mr-2" />
                   View
+                  <ExternalLink className="h-4 w-4 ml-2" />
                 </Button>
                 <Button 
                   size="sm"
                   onClick={copySnackLink}
                   className="bg-orange-500 text-white hover:bg-orange-600 border-orange-500 rounded-lg font-medium cursor-pointer"
                 >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Snack Link
+                  Copy
+                  <Copy className="h-4 w-4 ml-2" />
                 </Button>
               </div>
             </div>
@@ -742,7 +743,7 @@ export function ListViewClient({ list }: ListViewClientProps) {
             <DragOverlay>
               {activeItem ? (
                 viewMode === 'LIST' ? (
-                  <div className="opacity-95 scale-105">
+                  <div className="opacity-95 scale-105 shadow-xl">
                     <SortableListItem 
                       item={activeItem} 
                       onDelete={() => {}} 
@@ -751,7 +752,7 @@ export function ListViewClient({ list }: ListViewClientProps) {
                     />
                   </div>
                 ) : (
-                  <div className="opacity-95 scale-105">
+                  <div className="opacity-95 scale-105 shadow-xl">
                     <GalleryListItem 
                       item={activeItem} 
                       onDelete={() => {}} 

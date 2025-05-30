@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 import { z } from 'zod';
 
 // Rate limiting store (in production, use Redis or similar)
@@ -11,11 +11,9 @@ const RATE_LIMIT_REQUESTS = 10; // 10 requests per minute
 
 const checkUsernameSchema = z.object({
   username: z.string()
-    .min(1, 'Username is required')
-    .max(16, 'Username must be 16 characters or less')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, hyphens, and underscores')
-    .regex(/^[a-zA-Z0-9]/, 'Username must start with a letter or number')
-    .regex(/[a-zA-Z0-9]$/, 'Username must end with a letter or number')
+    .min(3, 'Username must be at least 3 characters')
+    .max(15, 'Username must be 15 characters or less')
+    .regex(/^[a-zA-Z0-9]+$/, 'Username can only contain letters and numbers (no spaces or special characters)')
 });
 
 function checkRateLimit(userId: string): boolean {
@@ -57,23 +55,23 @@ export async function POST(request: NextRequest) {
     const { username } = validatedData;
 
     // Check if username is available (excluding current user)
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        username: {
-          equals: username,
-          mode: 'insensitive' // Case-insensitive check
-        },
-        NOT: {
-          clerkId: userId
-        }
-      }
-    });
+    const { data: existingUser, error } = await supabase
+      .from('users')
+      .select('id')
+      .ilike('username', username)
+      .neq('clerk_id', userId)
+      .maybeSingle();
+
+    if (error && error.code !== 'PGRST116') {
+      // Ignore no-rows error
+      throw error;
+    }
 
     const isAvailable = !existingUser;
 
     return NextResponse.json({
       available: isAvailable,
-      username: username,
+      username,
       message: isAvailable ? 'Username is available' : 'Username is already taken'
     });
 
