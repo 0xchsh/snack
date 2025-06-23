@@ -153,13 +153,13 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
           <div className="max-w-[672px] mx-auto">
             <div className="space-y-3">
               {list.items.map((item: any) => (
-                <Card key={item.id} className="overflow-hidden hover:shadow-md transition-all duration-200 group border border-gray-200 bg-white h-full rounded-xl gap-0 py-0">
-                  <CardContent className="p-0 h-full flex flex-col">
+                <Card key={item.id} className="overflow-hidden hover:shadow-md transition-all duration-200 group border border-gray-200 bg-white h-full rounded-xl gap-0">
+                  <CardContent className="p-2 py-3 h-full flex flex-col">
                     <a 
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-2 h-[72px] hover:cursor-pointer"
+                      className="flex items-center gap-3 h-[72px] hover:cursor-pointer"
                     >
                       {/* Image */}
                       {item.image ? (

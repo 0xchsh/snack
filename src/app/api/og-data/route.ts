@@ -23,6 +23,37 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 });
     }
 
+    // Special handling for YouTube links
+    const youtubeMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/|user\/.*#p\/u\/\d+\/))([\w-]{11})/);
+    if (youtubeMatch) {
+      const videoId = youtubeMatch[1];
+      // Fetch title using YouTube oEmbed (no API key required)
+      try {
+        const oEmbedRes = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+        if (oEmbedRes.ok) {
+          const oEmbed = await oEmbedRes.json();
+          return NextResponse.json({
+            title: oEmbed.title,
+            description: oEmbed.author_name ? `by ${oEmbed.author_name}` : null,
+            image: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+            siteName: 'YouTube',
+            url: url
+          });
+        }
+      } catch (err) {
+        // If oEmbed fails, fallback to OG scraping below
+        console.warn('YouTube oEmbed failed:', err);
+      }
+      // Fallback: just use the thumbnail and video ID as title
+      return NextResponse.json({
+        title: `YouTube Video (${videoId})`,
+        description: null,
+        image: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+        siteName: 'YouTube',
+        url: url
+      });
+    }
+
     // Fetch OG data
     const { error, result } = await ogs({ url });
 

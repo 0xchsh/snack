@@ -54,9 +54,9 @@ export function SortableListItem({ item, onDelete, isDeleting = false, isDragOve
       style={isDragOverlay ? undefined : style}
       className={`${isDragging && !isDragOverlay ? 'opacity-50' : ''} ${isDeleting ? 'opacity-50 pointer-events-none' : ''} transition-all duration-200 relative`}
     >
-      <Card className={`overflow-hidden hover:shadow-md transition-all duration-200 group border border-[#D1D5DB] ${isDragging && !isDragOverlay ? 'bg-gray-200 border-gray-300' : 'bg-white'} rounded-lg ${isDragOverlay ? 'shadow-xl' : ''} gap-0 py-0`}>
+      <Card className={`overflow-hidden hover:shadow-md transition-all duration-200 group border border-[#D1D5DB] ${isDragging && !isDragOverlay ? 'bg-gray-200 border-gray-300' : 'bg-white'} rounded-lg ${isDragOverlay ? 'shadow-xl' : ''} gap-0`}>
         <CardContent 
-          className={`p-2 ${!isDragOverlay ? 'cursor-grab active:cursor-grabbing' : ''}`}
+          className={`p-2 py-3 ${!isDragOverlay ? 'cursor-grab active:cursor-grabbing' : ''}`}
           {...(!isDragOverlay ? attributes : {})}
           {...(!isDragOverlay ? listeners : {})}
         >
@@ -86,7 +86,7 @@ export function SortableListItem({ item, onDelete, isDeleting = false, isDragOve
             {/* Content */}
             <div className="flex-1 flex flex-col justify-center min-w-0 h-[72px]">
               <div className="space-y-1">
-                <h3 className={`font-medium line-clamp-2 leading-tight text-sm transition-colors duration-200 ${isDragging && !isDragOverlay ? 'text-gray-400' : 'text-gray-900'}`}>
+                <h3 className={`font-medium line-clamp-2 leading-tight text-sm transition-colors duration-200 ${isDragging && !isDragOverlay ? 'text-gray-400' : 'text-gray-900'}`}> 
                   {item.title}
                 </h3>
                 <div 
@@ -137,4 +137,4 @@ export function SortableListItem({ item, onDelete, isDeleting = false, isDragOve
       </Card>
     </div>
   );
-} 
+}
