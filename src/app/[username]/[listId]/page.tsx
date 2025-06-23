@@ -180,7 +180,7 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
                       )}
                       
                       {/* Content */}
-                      <div className="flex-1 min-w-0 flex flex-col justify-center">
+                      <div className="flex-1 min-w-0 h-[72px] flex flex-col justify-center">
                         <div className="space-y-1">
                           <h3 className="font-medium line-clamp-2 leading-snug text-sm transition-colors duration-200 text-gray-900 group-hover:text-blue-600">
                             {item.title}
