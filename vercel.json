@@ -1,8 +1,5 @@
 {
-  "crons": [
-    {
-      "path": "/api/keep-alive",
-      "schedule": "0 */6 * * *"
-    }
+  "builds": [
+    { "src": "next.config.js", "use": "@vercel/next" }
   ]
 } 
