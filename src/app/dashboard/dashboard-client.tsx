@@ -22,6 +22,7 @@ interface List {
 
 interface DashboardClientProps {
   lists: List[];
+  showCreateButton?: boolean;
 }
 
 // LiveItemCount component
@@ -45,7 +46,7 @@ function LiveItemCount({ listId, initialCount }: { listId: string, initialCount?
   return <>{typeof count === 'number' ? `${count} item${count === 1 ? '' : 's'}` : ''}</>;
 }
 
-export function DashboardClient({ lists }: DashboardClientProps) {
+export function DashboardClient({ lists, showCreateButton = true }: DashboardClientProps) {
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
 
@@ -58,36 +59,51 @@ export function DashboardClient({ lists }: DashboardClientProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({}), // No data needed, API will use defaults
+        body: JSON.stringify({
+          title: 'Untitled List',
+          description: null,
+          emoji: '📝',
+        }),
       });
 
       if (response.ok) {
         const newList = await response.json();
-        // Navigate directly to the new list
-        router.push(`/dashboard/lists/${newList.publicId}`);
+        router.push(`/dashboard/lists/${newList.public_id}`);
       } else {
-        console.error('Failed to create list');
-        alert('Failed to create list. Please try again.');
+        const errorData = await response.json();
+        console.error('Failed to create list:', errorData);
+        alert(errorData.error || 'Failed to create list');
       }
     } catch (error) {
-      console.error('Error creating list:', error);
-      alert('Error creating list. Please try again.');
+      console.error('Failed to create list:', error);
+      alert('Failed to create list');
     } finally {
       setIsCreating(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Create New List Button */}
+    <div className="space-y-6 relative">
+      {/* Top-right Create a list + button (only show on Created tab) */}
+      {showCreateButton && (
+        <Button
+          onClick={handleCreateList}
+          disabled={isCreating}
+          className="absolute right-0 -top-16 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2 rounded-lg hidden sm:block cursor-pointer"
+        >
+          {isCreating ? 'Creating...' : 'Create a list +'}
+        </Button>
+      )}
+      {/* Create New List Button (mobile/under tabs) */}
+      {showCreateButton && (
       <Button 
-        className="w-full sm:w-auto" 
+          className="w-full sm:hidden mb-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold cursor-pointer"
         onClick={handleCreateList}
         disabled={isCreating}
       >
-        <Plus className="mr-2 h-4 w-4" />
-        {isCreating ? 'Creating...' : 'Create New List'}
+          {isCreating ? 'Creating...' : 'Create a list +'}
       </Button>
+      )}
 
       {/* Lists Grid */}
       {lists.length === 0 ? (
@@ -105,34 +121,18 @@ export function DashboardClient({ lists }: DashboardClientProps) {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-6" style={{ gap: '24px' }}>
           {lists.map((list) => (
             <Link key={list.id} href={`/dashboard/lists/${list.publicId}`}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer p-0 overflow-hidden border-2 border-gray-200">
-                {/* Image Stack */}
-                <div className="relative h-32 w-full flex items-end justify-center bg-gradient-to-tr from-orange-100 to-purple-100">
-                  {/* Simulate stack with colored divs */}
-                  <div className="absolute left-6 top-4 w-4/5 h-20 rounded-xl bg-purple-200 z-0" style={{ filter: 'blur(2px)' }} />
-                  <div className="absolute left-3 top-2 w-4/5 h-24 rounded-xl bg-orange-200 z-10" style={{ filter: 'blur(1px)' }} />
-                  <div className="relative w-11/12 h-28 rounded-xl bg-white z-20 flex items-center justify-center overflow-hidden shadow-md">
-                    {/* Main image or emoji fallback */}
-                    <span className="text-5xl">{list.emoji || '📝'}</span>
-                  </div>
-                </div>
-                {/* Info Section */}
-                <div className="flex items-center gap-4 px-6 py-5 border-t border-gray-100 bg-white">
-                  {/* Avatar */}
-                  <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-3xl border border-gray-200">
-                    <span>{list.emoji || '🌐'}</span>
+              <Card className="flex flex-col items-start justify-center p-4 border border-[#D1D5DB] rounded-lg bg-white min-h-[120px] hover:shadow-md transition-shadow cursor-pointer">
+                {/* Icon/Emoji */}
+                <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-white border border-[#E5E7EB] rounded-full text-[24px] font-bold mb-3">
+                    <span>{list.emoji || '📦'}</span>
                   </div>
                   {/* Text Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="font-bold text-xl leading-tight truncate">{list.title}</div>
-                    <div className="text-gray-500 text-base truncate">{list.username || ''}</div>
-                    <div className="text-gray-400 text-sm mt-1">
-                      <LiveItemCount listId={list.id} initialCount={list.itemCount} /> · 72K views
-                    </div>
-                  </div>
+                <div className="flex flex-col items-start justify-center min-w-0 text-left w-full">
+                  <div className="text-[16px] font-semibold text-[#111827] truncate w-full text-left">{list.title}</div>
+                  <div className="text-[14px] font-medium text-[#6B7280] truncate mt-1 w-full text-left">{list.username || ''} &#8226; <LiveItemCount listId={list.id} initialCount={list.itemCount} /></div>
                 </div>
               </Card>
             </Link>

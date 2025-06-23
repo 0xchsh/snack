@@ -30,35 +30,59 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const user = await currentUser();
 
+  console.log('🔍 Clerk user object:', user);
+
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const { title, description, emoji } = await request.json();
+    const body = await request.json();
+    const { title, description, emoji } = body;
+    console.log('📝 Received request body:', body);
 
     if (!title) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 });
     }
 
+    // Look up the internal user ID by Clerk ID
+    const { data: userRow, error: userLookupError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('clerk_id', user.id)
+      .single();
+
+    if (userLookupError || !userRow) {
+      console.error('User lookup error:', userLookupError);
+      return NextResponse.json({ error: 'User not found in database' }, { status: 404 });
+    }
+
+    const newId = nanoid();
+    const now = new Date().toISOString();
     const { data: list, error } = await supabase
       .from('lists')
       .insert({
+        id: newId,
         public_id: nanoid(),
         title,
         description,
         emoji,
-        user_id: user.id,
+        user_id: userRow.id, // use internal ID
         view_mode: 'LIST',
+        created_at: now,
+        updated_at: now,
       })
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase insert error:', error);
+      return NextResponse.json({ error: error.message || JSON.stringify(error) }, { status: 500 });
+    }
 
     return NextResponse.json(list);
   } catch (error) {
     console.error('Failed to create list:', error);
-    return NextResponse.json({ error: 'Failed to create list' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : JSON.stringify(error) }, { status: 500 });
   }
 } 

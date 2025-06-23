@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 
 interface UsernameInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string
-  helperText?: string
+  helperText?: React.ReactNode
   onValidationChange?: (isValid: boolean) => void
   available?: boolean
 }

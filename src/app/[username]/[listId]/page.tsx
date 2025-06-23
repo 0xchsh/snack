@@ -5,6 +5,9 @@ import { ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 import { Favicon } from '@/components/favicon';
 import { Metadata } from 'next';
+import Link from 'next/link';
+import { SaveListButton } from '@/components/SaveListButton';
+import { currentUser, clerkClient } from '@clerk/nextjs/server';
 
 interface PublicListPageProps {
   params: Promise<{
@@ -13,22 +16,45 @@ interface PublicListPageProps {
   }>;
 }
 
+// Function to get all necessary data for the page
+async function getPageData(username: string, listId: string) {
+  // 1. Fetch user from Clerk
+  const client = await clerkClient();
+  const response = await client.users.getUserList({ limit: 200 }); // Fetch a list of users
+  // Find the user by checking the publicMetadata
+  const clerkUser = response.data.find((u: { publicMetadata: { username?: string } }) => u.publicMetadata?.username === username);
+  
+  if (!clerkUser) return null;
+
+  // 2. Fetch list data, ensuring it belongs to the correct user (via join on clerk_id)
+  const { data: list, error } = await supabase
+    .from('lists')
+    .select('*, items(*), users!inner(clerk_id)')
+    .eq('public_id', listId)
+    .eq('users.clerk_id', clerkUser.id)
+    .single();
+
+  if (error || !list) return null;
+
+  return {
+    list: { ...list, users: { ...list.users, ...clerkUser } },
+    clerkUser,
+  };
+}
+
 // Generate metadata for SEO and social sharing
 export async function generateMetadata({ params }: PublicListPageProps): Promise<Metadata> {
   const { username, listId } = await params;
-  
-  const { data: list, error } = await supabase
-    .from('lists')
-    .select('*, items(*), users:users(username)')
-    .eq('public_id', listId)
-    .single();
+  const pageData = await getPageData(username, listId);
 
-  if (error || !list || list.users?.username !== username) {
+  if (!pageData) {
     return { title: 'List Not Found' };
   }
-
-  const title = `${list.emoji ? list.emoji + ' ' : ''}${list.title} by ${list.users.username}`;
-  const description = list.description || `A curated list of ${list.items.length} links by ${list.users.username}`;
+  const { list } = pageData;
+  const authorUsername = (list.users.publicMetadata as { username?: string })?.username || list.users.username || 'a user';
+  
+  const title = `${list.emoji ? list.emoji + ' ' : ''}${list.title} by @${authorUsername}`;
+  const description = list.description || `A curated list of ${list.items.length} links by @${authorUsername}`;
 
   return {
     title,
@@ -49,16 +75,36 @@ export async function generateMetadata({ params }: PublicListPageProps): Promise
 
 export default async function PublicListPage({ params }: PublicListPageProps) {
   const { username, listId } = await params;
+  const pageData = await getPageData(username, listId);
 
-  const { data: list, error } = await supabase
-    .from('lists')
-    .select('*, items(*), users:users(username, clerk_id)')
-    .eq('public_id', listId)
-    .single();
-
-  if (error || !list || list.users?.username !== username) {
+  if (!pageData) {
     notFound();
   }
+  const { list } = pageData;
+
+  // Determine if the current user has saved this list
+  let initialSaved = false;
+  const user = await currentUser();
+  const isOwner = user && list.users?.clerk_id === user.id;
+  if (user) {
+    // Get the user's DB id
+    const { data: dbUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('clerk_id', user.id)
+      .single();
+    if (dbUser) {
+      const { data: saved } = await supabase
+        .from('saved_lists')
+        .select('id')
+        .eq('user_id', dbUser.id)
+        .eq('list_id', list.id)
+        .maybeSingle();
+      initialSaved = !!saved;
+    }
+  }
+
+  const authorUsername = (list.users.publicMetadata as { username?: string })?.username || list.users.username;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -73,21 +119,28 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
               {list.title}
             </h1>
           </div>
-          
+          {/* Save and Share buttons */}
+          <div className="flex justify-center gap-3 mb-6">
+            {!isOwner && <SaveListButton listId={list.id} initialSaved={initialSaved} />}
+            {/* TODO: Add Share button here if not already present */}
+          </div>
           {list.description && (
             <p className="text-xl text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
               {list.description}
             </p>
           )}
-          
           <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200 shadow-sm">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">
-                {list.users.username.charAt(0).toUpperCase()}
-              </span>
-            </div>
+            <Image
+              src={list.users.imageUrl}
+              alt={authorUsername}
+              width={32}
+              height={32}
+              className="w-8 h-8 rounded-full"
+            />
             <span className="text-sm text-gray-600">Curated by</span>
-            <span className="font-semibold text-gray-900">{list.users.username}</span>
+            <Link href={`/${authorUsername}`}>
+              <span className="font-semibold text-gray-900 hover:underline">{authorUsername}</span>
+            </Link>
             <span className="text-gray-400">•</span>
             <span className="text-sm text-gray-600">
               {list.items.length} {list.items.length === 1 ? 'link' : 'links'}
@@ -127,7 +180,7 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
                       )}
                       
                       {/* Content */}
-                      <div className="flex-1 min-w-0 h-[72px] flex flex-col justify-center">
+                      <div className="flex-1 min-w-0 flex flex-col justify-center">
                         <div className="space-y-1">
                           <h3 className="font-medium line-clamp-2 leading-snug text-sm transition-colors duration-200 text-gray-900 group-hover:text-blue-600">
                             {item.title}

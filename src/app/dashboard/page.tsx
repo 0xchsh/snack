@@ -5,6 +5,7 @@ import { DashboardClient } from './dashboard-client';
 import { Button } from '@/components/ui/button';
 import { Settings, User } from 'lucide-react';
 import Link from 'next/link';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 export default async function DashboardPage() {
   const user = await currentUser();
@@ -60,37 +61,82 @@ export default async function DashboardPage() {
     username: l.users?.username || '',
   }));
 
+  // Fetch saved lists for this user (join with lists)
+  const { data: saved, error: savedErr } = await supabase
+    .from('saved_lists')
+    .select('list_id, lists(*, items(count), users:users(username))')
+    .eq('user_id', dbUser.id)
+    .order('created_at', { ascending: false });
+
+  if (savedErr) throw savedErr;
+
+  const mappedSavedLists = (saved || [])
+    .map((s: any) => {
+      const l = s.lists;
+      if (!l) return undefined;
+      return {
+        id: l.id,
+        publicId: l.public_id,
+        title: l.title,
+        description: l.description,
+        emoji: l.emoji,
+        createdAt: l.created_at ? new Date(l.created_at) : new Date(),
+        updatedAt: l.updated_at ? new Date(l.updated_at) : new Date(),
+        itemCount: Array.isArray(l.items) ? l.items.length : 0,
+        username: l.users?.username || '',
+      };
+    })
+    .filter((l: any): l is NonNullable<typeof l> => !!l);
+
+  // Placeholder stats
+  const stats = {
+    lists: mappedLists.length,
+    saves: mappedSavedLists.length,
+    views: 74, // placeholder
+    shares: 3, // placeholder
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">My Lists</h1>
-          <p className="text-muted-foreground">
-            Create and manage your curated lists
-          </p>
+        <h1 className="text-3xl font-bold">Your Snacks</h1>
+      </div>
+      {/* Stats Row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        <div className="bg-white rounded-xl border p-6 text-center">
+          <div className="text-sm text-gray-500 mb-1">Lists</div>
+          <div className="text-2xl font-bold">{stats.lists}</div>
         </div>
-        <div className="flex items-center space-x-3">
-          {user.imageUrl ? (
-            <img
-              src={user.imageUrl}
-              alt="Profile picture"
-              className="w-8 h-8 rounded-full object-cover border border-gray-200"
-            />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center border border-gray-200">
-              <User className="w-4 h-4 text-gray-500" />
+        <div className="bg-white rounded-xl border p-6 text-center">
+          <div className="text-sm text-gray-500 mb-1">Saves</div>
+          <div className="text-2xl font-bold">{stats.saves}</div>
+        </div>
+        <div className="bg-white rounded-xl border p-6 text-center">
+          <div className="text-sm text-gray-500 mb-1">Views</div>
+          <div className="text-2xl font-bold">{stats.views}</div>
             </div>
-          )}
-          <Link href="/dashboard/profile">
-            <Button variant="outline" size="sm">
-              <Settings className="w-4 h-4 mr-2" />
-              Profile
-            </Button>
-          </Link>
+        <div className="bg-white rounded-xl border p-6 text-center">
+          <div className="text-sm text-gray-500 mb-1">Shares</div>
+          <div className="text-2xl font-bold">{stats.shares}</div>
         </div>
       </div>
-      
+      {/* Tabs for Created, Saved, Stats */}
+      <Tabs defaultValue="created" className="mb-8">
+        <TabsList className="mb-4">
+          <TabsTrigger value="created">Created</TabsTrigger>
+          <TabsTrigger value="saved">Saved</TabsTrigger>
+          <TabsTrigger value="stats">Stats</TabsTrigger>
+        </TabsList>
+        <TabsContent value="created">
       <DashboardClient lists={mappedLists} />
+        </TabsContent>
+        <TabsContent value="saved">
+          <DashboardClient lists={mappedSavedLists} showCreateButton={false} />
+        </TabsContent>
+        <TabsContent value="stats">
+          <div className="text-center text-gray-500 py-12">Stats coming soon...</div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 } 

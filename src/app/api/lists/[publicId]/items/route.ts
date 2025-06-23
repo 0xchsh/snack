@@ -63,11 +63,12 @@ export async function POST(request: Request, { params }: RouteParams) {
         
         // Use improved favicon extraction
         favicon = extractFaviconFromOG(url, result);
+      } else if (error) {
+        return NextResponse.json({ error: `OG scraping failed: ${result?.error || 'Unknown error'}` }, { status: 400 });
       }
     } catch (ogError) {
       console.error('OG scraping error:', ogError);
-      // Continue with fallback values and get favicon anyway
-      favicon = extractFaviconFromOG(url);
+      return NextResponse.json({ error: 'Failed to fetch Open Graph data for this URL.' }, { status: 400 });
     }
 
     // Get the highest order number and add 1 to put new items at the top
@@ -86,20 +87,21 @@ export async function POST(request: Request, { params }: RouteParams) {
       .from('items')
       .insert([
         {
-          title,
-          url,
-          description,
-          image,
-          favicon,
-          order: nextOrder,
+        title,
+        url,
+        description,
+        image,
+        favicon,
+        order: nextOrder,
           list_id: list.id,
-        },
+      },
       ])
       .select()
       .single();
 
     if (createError) {
-      return NextResponse.json({ error: 'Failed to create list item' }, { status: 500 });
+      console.error('Supabase insert error:', createError);
+      return NextResponse.json({ error: `Failed to create list item: ${createError.message}` }, { status: 500 });
     }
 
     return NextResponse.json(newItem, { status: 201 });

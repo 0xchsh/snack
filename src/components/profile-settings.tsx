@@ -57,6 +57,10 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
   const [usernameTouched, setUsernameTouched] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
 
+  // Email update state
+  const [emailFeedback, setEmailFeedback] = useState<string | null>(null);
+  const [emailLoading, setEmailLoading] = useState(false);
+
   // Debounced username check
   useEffect(() => {
     if (!usernameTouched && username === user.username) {
@@ -120,11 +124,6 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
       if (username !== user.username) updates.username = username;
       if (firstName !== user.firstName) updates.firstName = firstName;
       if (lastName !== user.lastName) updates.lastName = lastName;
-      
-      // Only include email for non-social auth users and only if it's actually changed
-      if (!isSocialAuth && email && email !== clerkUser?.primaryEmailAddress?.emailAddress) {
-        updates.email = email;
-      }
 
       if (Object.keys(updates).length === 0) {
         toast.info('No changes to save');
@@ -247,6 +246,31 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
     }
   };
 
+  const handleUpdateEmail = async () => {
+    setEmailFeedback(null);
+    setEmailLoading(true);
+    try {
+      const response = await fetch('/api/user/update-email', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        setEmailFeedback(result.error || 'Failed to update email');
+        toast.error(result.error || 'Failed to update email');
+        return;
+      }
+      setEmailFeedback('Email updated! Please check your inbox to verify your new email if required.');
+      toast.success('Email updated! Please check your inbox to verify your new email if required.');
+    } catch (error) {
+      setEmailFeedback('Failed to update email');
+      toast.error('Failed to update email');
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
   return (
     <Tabs defaultValue="profile" className="space-y-6">
       <TabsList className="grid w-full grid-cols-2">
@@ -358,17 +382,26 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
             {/* Username */}
             <div className="space-y-2">
               <UsernameInput
-                id="username"
+                  id="username"
                 label="Username"
-                value={username}
+                  value={username}
                 onChange={e => {
                   setUsername(e.target.value);
-                  setUsernameTouched(false);
+                  setUsernameTouched(true);
                   setBackendError(null);
                 }}
-                onBlur={() => setUsernameTouched(true)}
+                onBlur={() => {}}
                 helperText={
                   backendError ? backendError :
+                  usernameCheckLoading ? (
+                    <span className="text-muted-foreground">Checking username…</span>
+                  ) : usernameCheck && usernameTouched ? (
+                    usernameCheck.available ? (
+                      <span className="text-green-600 flex items-center gap-1"><Check className="w-4 h-4" /> Username is available</span>
+                    ) : (
+                      <span className="text-destructive flex items-center gap-1"><X className="w-4 h-4" /> {usernameCheck.message || 'Username is already taken'}</span>
+                    )
+                  ) :
                   !/^[a-zA-Z0-9]*$/.test(username)
                     ? 'Username can only contain letters and numbers'
                     : username.length < 3
@@ -380,7 +413,7 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
                 onValidationChange={valid => {
                   // Only allow save if valid
                 }}
-                maxLength={16}
+                  maxLength={16}
                 className={`pr-8`}
                 available={usernameCheck?.available}
               />
@@ -419,13 +452,18 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter email address"
-                readOnly={isSocialAuth}
-                className={isSocialAuth ? 'bg-gray-50 cursor-not-allowed' : ''}
+                disabled={emailLoading}
               />
-              {isSocialAuth && (
-                <p className="text-sm text-muted-foreground">
-                  Email is managed by your Google account and cannot be changed here.
-                </p>
+              <Button
+                onClick={handleUpdateEmail}
+                disabled={emailLoading || !email || email === clerkUser?.primaryEmailAddress?.emailAddress}
+                className="w-full"
+                variant="outline"
+              >
+                {emailLoading ? 'Updating...' : 'Update Email'}
+              </Button>
+              {emailFeedback && (
+                <p className="text-sm mt-1 text-muted-foreground">{emailFeedback}</p>
               )}
             </div>
 

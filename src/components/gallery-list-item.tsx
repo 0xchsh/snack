@@ -98,7 +98,7 @@ export const GalleryListItem = ({ item, onDelete, isDeleting = false, isDragOver
           </a>
           {/* Delete button overlay */}
           {!isDragOverlay && (
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity md:opacity-100 md:group-hover:opacity-100">
               <Button
                 variant="ghost"
                 size="sm"
@@ -115,7 +115,7 @@ export const GalleryListItem = ({ item, onDelete, isDeleting = false, isDragOver
                 {isDeleting ? (
                   <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-500"></div>
                 ) : (
-                  <span>Delete<Trash2 className="h-4 w-4 ml-2" /></span>
+                  <Trash2 className="h-4 w-4" />
                 )}
               </Button>
             </div>

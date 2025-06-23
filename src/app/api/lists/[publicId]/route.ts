@@ -81,3 +81,50 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Failed to update list' }, { status: 500 });
   }
 } 
+
+export async function DELETE(request: Request, { params }: RouteParams) {
+  const { publicId } = await params;
+  const user = await currentUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    // Find the list and verify ownership
+    const { data: list, error: listError } = await supabase
+      .from('lists')
+      .select('*, user:users(clerk_id)')
+      .eq('public_id', publicId)
+      .single();
+
+    if (listError || !list) {
+      return NextResponse.json({ error: 'List not found' }, { status: 404 });
+    }
+
+    let userObj = null;
+    if (Array.isArray(list.user)) {
+      userObj = list.user[0] ?? null;
+    } else {
+      userObj = list.user ?? null;
+    }
+    if (!userObj || userObj.clerk_id !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Delete the list (cascades to items if FK is set up)
+    const { error: deleteError } = await supabase
+      .from('lists')
+      .delete()
+      .eq('public_id', publicId);
+
+    if (deleteError) {
+      return NextResponse.json({ error: 'Failed to delete list' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Failed to delete list:', error);
+    return NextResponse.json({ error: 'Failed to delete list' }, { status: 500 });
+  }
+} 
