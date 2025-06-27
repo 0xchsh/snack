@@ -41,6 +41,7 @@ export default function RootLayout({
           <div className="font-bold text-xl text-orange-600">Snack</div>
           <div className="flex items-center gap-6">
             <a href="/dashboard" className="text-gray-700 hover:text-orange-600 font-medium">Dashboard</a>
+            <a href="/explore" className="text-gray-700 hover:text-orange-600 font-medium">Explore</a>
             <a href="/dashboard/profile" className="text-gray-700 hover:text-orange-600 font-medium flex items-center gap-2">
               Profile
               <SignedIn>

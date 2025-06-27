@@ -280,15 +280,15 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
 
       <TabsContent value="profile" className="space-y-6">
         {/* Profile Picture */}
-        <Card>
-          <CardHeader>
+        <Card className="mt-8 mb-6 rounded-2xl shadow-md bg-white/95 border border-gray-100">
+          <CardHeader className="py-3 px-6">
             <CardTitle>Profile Picture</CardTitle>
             <CardDescription>
               Update your profile picture and appearance settings.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-4">
+          <CardContent className="py-4 px-6">
+            <div className="flex items-center gap-6">
               <div className="relative">
                 {clerkUser?.imageUrl ? (
                   <img
@@ -371,123 +371,125 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
         </Card>
 
         {/* Profile Information */}
-        <Card>
-          <CardHeader>
+        <Card className="mb-6 rounded-2xl shadow-md bg-white/95 border border-gray-100">
+          <CardHeader className="py-3 px-6">
             <CardTitle>Profile Information</CardTitle>
             <CardDescription>
               Update your profile details and username.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Username */}
-            <div className="space-y-2">
-              <UsernameInput
-                  id="username"
-                label="Username"
-                  value={username}
-                onChange={e => {
-                  setUsername(e.target.value);
-                  setUsernameTouched(true);
-                  setBackendError(null);
-                }}
-                onBlur={() => {}}
-                helperText={
-                  backendError ? backendError :
-                  usernameCheckLoading ? (
-                    <span className="text-muted-foreground">Checking username…</span>
-                  ) : usernameCheck && usernameTouched ? (
-                    usernameCheck.available ? (
-                      <span className="text-green-600 flex items-center gap-1"><Check className="w-4 h-4" /> Username is available</span>
-                    ) : (
-                      <span className="text-destructive flex items-center gap-1"><X className="w-4 h-4" /> {usernameCheck.message || 'Username is already taken'}</span>
-                    )
-                  ) :
-                  !/^[a-zA-Z0-9]*$/.test(username)
-                    ? 'Username can only contain letters and numbers'
-                    : username.length < 3
-                      ? 'Username must be at least 3 characters'
-                      : username.length > 15
-                        ? 'Username must be 15 characters or less'
-                        : 'Choose a unique username for your profile'
-                }
-                onValidationChange={valid => {
-                  // Only allow save if valid
-                }}
-                  maxLength={16}
-                className={`pr-8`}
-                available={usernameCheck?.available}
-              />
-            </div>
+          <CardContent className="py-4 px-6">
+            <div className="flex flex-col gap-5">
+              {/* Username */}
+              <div className="space-y-2">
+                <UsernameInput
+                    id="username"
+                  label="Username"
+                    value={username}
+                  onChange={e => {
+                    setUsername(e.target.value);
+                    setUsernameTouched(true);
+                    setBackendError(null);
+                  }}
+                  onBlur={() => {}}
+                  helperText={
+                    backendError ? backendError :
+                    usernameCheckLoading ? (
+                      <span className="text-muted-foreground">Checking username…</span>
+                    ) : usernameCheck && usernameTouched ? (
+                      usernameCheck.available ? (
+                        <span className="text-green-600 flex items-center gap-1"><Check className="w-4 h-4" /> Username is available</span>
+                      ) : (
+                        <span className="text-destructive flex items-center gap-1"><X className="w-4 h-4" /> {usernameCheck.message || 'Username is already taken'}</span>
+                      )
+                    ) :
+                    !/^[a-zA-Z0-9]*$/.test(username)
+                      ? 'Username can only contain letters and numbers'
+                      : username.length < 3
+                        ? 'Username must be at least 3 characters'
+                        : username.length > 15
+                          ? 'Username must be 15 characters or less'
+                          : 'Choose a unique username for your profile'
+                  }
+                  onValidationChange={valid => {
+                    // Only allow save if valid
+                  }}
+                    maxLength={16}
+                  className={`pr-8`}
+                  available={usernameCheck?.available}
+                />
+              </div>
 
-            {/* First Name */}
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="Enter first name"
-                maxLength={50}
-              />
-            </div>
+              {/* First Name */}
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Enter first name"
+                  maxLength={50}
+                />
+              </div>
 
-            {/* Last Name */}
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Enter last name"
-                maxLength={50}
-              />
-            </div>
+              {/* Last Name */}
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Enter last name"
+                  maxLength={50}
+                />
+              </div>
 
-            {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter email address"
-                disabled={emailLoading}
-              />
-              <Button
-                onClick={handleUpdateEmail}
-                disabled={emailLoading || !email || email === clerkUser?.primaryEmailAddress?.emailAddress}
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter email address"
+                  disabled={emailLoading}
+                />
+                <Button
+                  onClick={handleUpdateEmail}
+                  disabled={emailLoading || !email || email === clerkUser?.primaryEmailAddress?.emailAddress}
+                  className="w-full"
+                  variant="outline"
+                >
+                  {emailLoading ? 'Updating...' : 'Update Email'}
+                </Button>
+                {emailFeedback && (
+                  <p className="text-sm mt-1 text-muted-foreground">{emailFeedback}</p>
+                )}
+              </div>
+
+              <Button 
+                onClick={handleUpdateProfile}
+                disabled={!canSave}
                 className="w-full"
-                variant="outline"
               >
-                {emailLoading ? 'Updating...' : 'Update Email'}
+                {isLoading ? 'Saving...' : 'Save Changes'}
               </Button>
-              {emailFeedback && (
-                <p className="text-sm mt-1 text-muted-foreground">{emailFeedback}</p>
-              )}
             </div>
-
-            <Button 
-              onClick={handleUpdateProfile}
-              disabled={!canSave}
-              className="w-full"
-            >
-              {isLoading ? 'Saving...' : 'Save Changes'}
-            </Button>
           </CardContent>
         </Card>
       </TabsContent>
 
       <TabsContent value="settings" className="space-y-6">
         {/* Logout */}
-        <Card>
-          <CardHeader>
+        <Card className="mb-6 rounded-2xl shadow-md bg-white/95 border border-gray-100">
+          <CardHeader className="py-3 px-6">
             <CardTitle>Sign Out</CardTitle>
             <CardDescription>
               Sign out of your account on this device.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="py-4 px-6">
             <Button 
               onClick={handleLogout}
               variant="outline"
@@ -503,8 +505,8 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
         <Separator />
 
         {/* Danger Zone */}
-        <Card className="border-red-200">
-          <CardHeader>
+        <Card className="mb-6 rounded-2xl shadow-md bg-white/95 border border-red-200">
+          <CardHeader className="py-3 px-6">
             <CardTitle className="text-red-600 flex items-center gap-2">
               <AlertTriangle className="w-5 h-5" />
               Danger Zone
@@ -513,7 +515,7 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
               Permanently delete your account and all associated data.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="py-4 px-6">
             <div className="space-y-2">
               <Label htmlFor="deleteConfirmation">
                 Type "DELETE MY ACCOUNT" to confirm deletion

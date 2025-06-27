@@ -97,46 +97,10 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Your Snacks</h1>
-      </div>
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-xl border p-6 text-center">
-          <div className="text-sm text-gray-500 mb-1">Lists</div>
-          <div className="text-2xl font-bold">{stats.lists}</div>
-        </div>
-        <div className="bg-white rounded-xl border p-6 text-center">
-          <div className="text-sm text-gray-500 mb-1">Saves</div>
-          <div className="text-2xl font-bold">{stats.saves}</div>
-        </div>
-        <div className="bg-white rounded-xl border p-6 text-center">
-          <div className="text-sm text-gray-500 mb-1">Views</div>
-          <div className="text-2xl font-bold">{stats.views}</div>
-            </div>
-        <div className="bg-white rounded-xl border p-6 text-center">
-          <div className="text-sm text-gray-500 mb-1">Shares</div>
-          <div className="text-2xl font-bold">{stats.shares}</div>
-        </div>
-      </div>
-      {/* Tabs for Created, Saved, Stats */}
-      <Tabs defaultValue="created" className="mb-8">
-        <TabsList className="mb-4">
-          <TabsTrigger value="created">Created</TabsTrigger>
-          <TabsTrigger value="saved">Saved</TabsTrigger>
-          <TabsTrigger value="stats">Stats</TabsTrigger>
-        </TabsList>
-        <TabsContent value="created">
-      <DashboardClient lists={mappedLists} />
-        </TabsContent>
-        <TabsContent value="saved">
-          <DashboardClient lists={mappedSavedLists} showCreateButton={false} />
-        </TabsContent>
-        <TabsContent value="stats">
-          <div className="text-center text-gray-500 py-12">Stats coming soon...</div>
-        </TabsContent>
-      </Tabs>
-    </div>
+    <DashboardClient
+      lists={mappedLists}
+      savedLists={mappedSavedLists}
+      stats={stats}
+    />
   );
 } 
