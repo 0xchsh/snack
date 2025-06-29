@@ -6987,3 +6987,192 @@ See https://react.dev/link/invalid-hook-call for tips about how to debug and fix
  ✓ Compiled in 169ms
  ✓ Compiled in 85ms
  ✓ Compiled in 164ms
+ ✓ Compiled in 107ms
+ ✓ Compiled in 109ms
+ ✓ Compiled /api/lists in 441ms
+🔍 Clerk user object: _User {
+  id: 'user_2xfGYYFARh30Jr38yjoxCBJB5UE',
+  passwordEnabled: false,
+  totpEnabled: false,
+  backupCodeEnabled: false,
+  twoFactorEnabled: false,
+  banned: false,
+  locked: false,
+  createdAt: 1748321762751,
+  updatedAt: 1751169223251,
+  imageUrl: 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvdXBsb2FkZWQvaW1nXzJ4bVpRWG0wUWUyYU05NkZHMXR4TDVPRHNzZiJ9',
+  hasImage: true,
+  primaryEmailAddressId: 'idn_2xfGYabQUApGLFmYzNGRn9SzC7R',
+  primaryPhoneNumberId: null,
+  primaryWeb3WalletId: null,
+  lastSignInAt: 1751169223225,
+  externalId: null,
+  username: null,
+  firstName: 'Charles',
+  lastName: 'Shin',
+  publicMetadata: { username: 'charles' },
+  privateMetadata: {},
+  unsafeMetadata: {},
+  emailAddresses: [
+    _EmailAddress {
+      id: 'idn_2yT1i2eNO93nQzHZNjJkxXkASip',
+      emailAddress: 'hellocbshin@gmail.com',
+      verification: null,
+      linkedTo: []
+    },
+    _EmailAddress {
+      id: 'idn_2yT1doxadP0L7TKnnrEU2LvTfZy',
+      emailAddress: 'hellobcshin@gmail.com',
+      verification: null,
+      linkedTo: []
+    },
+    _EmailAddress {
+      id: 'idn_2yT1ZeTWtxoWM4llKHDWU1bvZwr',
+      emailAddress: 'hi@ch.sh',
+      verification: null,
+      linkedTo: []
+    },
+    _EmailAddress {
+      id: 'idn_2xfGYabQUApGLFmYzNGRn9SzC7R',
+      emailAddress: 'charles@ratlabs.xyz',
+      verification: [_Verification],
+      linkedTo: [Array]
+    }
+  ],
+  phoneNumbers: [],
+  web3Wallets: [],
+  externalAccounts: [
+    _ExternalAccount {
+      id: 'idn_2xfGYbQsUWjJlMCUk72BeD3z5wk',
+      provider: 'oauth_google',
+      identificationId: 'idn_2xfGYbQsUWjJlMCUk72BeD3z5wk',
+      externalId: '110341715174593280356',
+      approvedScopes: 'email https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid profile',
+      emailAddress: 'charles@ratlabs.xyz',
+      firstName: 'Charles',
+      lastName: 'Shin',
+      imageUrl: '',
+      username: '',
+      phoneNumber: undefined,
+      publicMetadata: {},
+      label: null,
+      verification: [_Verification]
+    }
+  ],
+  samlAccounts: [],
+  lastActiveAt: 1751216957026,
+  createOrganizationEnabled: true,
+  createOrganizationsLimit: null,
+  deleteSelfEnabled: true,
+  legalAcceptedAt: null,
+  _raw: {
+    id: 'user_2xfGYYFARh30Jr38yjoxCBJB5UE',
+    object: 'user',
+    username: null,
+    first_name: 'Charles',
+    last_name: 'Shin',
+    image_url: 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvdXBsb2FkZWQvaW1nXzJ4bVpRWG0wUWUyYU05NkZHMXR4TDVPRHNzZiJ9',
+    has_image: true,
+    primary_email_address_id: 'idn_2xfGYabQUApGLFmYzNGRn9SzC7R',
+    primary_phone_number_id: null,
+    primary_web3_wallet_id: null,
+    password_enabled: false,
+    two_factor_enabled: false,
+    totp_enabled: false,
+    backup_code_enabled: false,
+    email_addresses: [ [Object], [Object], [Object], [Object] ],
+    phone_numbers: [],
+    web3_wallets: [],
+    passkeys: [],
+    external_accounts: [ [Object] ],
+    saml_accounts: [],
+    enterprise_accounts: [],
+    public_metadata: { username: 'charles' },
+    private_metadata: {},
+    unsafe_metadata: {},
+    external_id: null,
+    last_sign_in_at: 1751169223225,
+    banned: false,
+    locked: false,
+    lockout_expires_in_seconds: null,
+    verification_attempts_remaining: 100,
+    created_at: 1748321762751,
+    updated_at: 1751169223251,
+    delete_self_enabled: true,
+    create_organization_enabled: true,
+    last_active_at: 1751216957026,
+    mfa_enabled_at: null,
+    mfa_disabled_at: null,
+    legal_accepted_at: null,
+    profile_image_url: 'https://images.clerk.dev/uploaded/img_2xmZQXm0Qe2aM96FG1txL5ODssf'
+  }
+}
+📝 Received request body: { title: 'Untitled List', description: null, emoji: '📝' }
+ POST /api/lists 200 in 1072ms
+ ✓ Compiled /dashboard/lists/[publicId] in 31ms
+ GET /dashboard/lists/kNH_Ao1UAUX9wDXrsrpHG 200 in 507ms
+Fetched list: {
+  id: 'ZklTwGuXXyt6J5TeIL98w',
+  public_id: 'kNH_Ao1UAUX9wDXrsrpHG',
+  title: 'Untitled List',
+  description: null,
+  emoji: '📝',
+  created_at: '2025-06-29T17:12:27.09',
+  updated_at: '2025-06-29T17:12:27.09',
+  user_id: 'cmb626bm9000064q38gzqulc4',
+  view_mode: 'LIST',
+  is_public: true,
+  user: { clerk_id: 'user_2xfGYYFARh30Jr38yjoxCBJB5UE' }
+}
+Fetched list.user: { clerk_id: 'user_2xfGYYFARh30Jr38yjoxCBJB5UE' }
+ PATCH /api/lists/kNH_Ao1UAUX9wDXrsrpHG 200 in 573ms
+ GET /dashboard/lists/kNH_Ao1UAUX9wDXrsrpHG 200 in 295ms
+ ○ Compiling /api/lists/[publicId]/items ...
+Fetched list: {
+  id: 'ZklTwGuXXyt6J5TeIL98w',
+  public_id: 'kNH_Ao1UAUX9wDXrsrpHG',
+  title: 'Best AI Tools',
+  description: null,
+  emoji: '📝',
+  created_at: '2025-06-29T17:12:27.09',
+  updated_at: '2025-06-29T17:12:27.09',
+  user_id: 'cmb626bm9000064q38gzqulc4',
+  view_mode: 'LIST',
+  is_public: true,
+  user: { clerk_id: 'user_2xfGYYFARh30Jr38yjoxCBJB5UE' }
+}
+Fetched list.user: { clerk_id: 'user_2xfGYYFARh30Jr38yjoxCBJB5UE' }
+ PATCH /api/lists/kNH_Ao1UAUX9wDXrsrpHG 200 in 650ms
+ GET /dashboard/lists/kNH_Ao1UAUX9wDXrsrpHG 200 in 294ms
+Fetched list: {
+  id: 'ZklTwGuXXyt6J5TeIL98w',
+  public_id: 'kNH_Ao1UAUX9wDXrsrpHG',
+  title: 'Best AI Tools',
+  description: null,
+  emoji: '🤖',
+  created_at: '2025-06-29T17:12:27.09',
+  updated_at: '2025-06-29T17:12:27.09',
+  user_id: 'cmb626bm9000064q38gzqulc4',
+  view_mode: 'LIST',
+  is_public: true,
+  user: { clerk_id: 'user_2xfGYYFARh30Jr38yjoxCBJB5UE' }
+}
+Fetched list.user: { clerk_id: 'user_2xfGYYFARh30Jr38yjoxCBJB5UE' }
+ PATCH /api/lists/kNH_Ao1UAUX9wDXrsrpHG 200 in 496ms
+ GET /dashboard/lists/kNH_Ao1UAUX9wDXrsrpHG 200 in 315ms
+ GET /dashboard/lists/kNH_Ao1UAUX9wDXrsrpHG 200 in 474ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 245ms
+ ✓ Compiled /api/lists/[publicId]/items in 24.6s
+Failed to create list item: SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at POST (src/app/api/lists/[publicId]/items/route.ts:22:34)
+  20 |
+  21 |   try {
+> 22 |     const { url } = await request.json();
+     |                                  ^
+  23 |
+  24 |     if (!url) {
+  25 |       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+ POST /api/lists/kNH_Ao1UAUX9wDXrsrpHG/items 201 in 3295ms
+ GET /favicon.ico 200 in 243ms
+ GET /dashboard 200 in 802ms

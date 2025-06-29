@@ -61,6 +61,7 @@ export default async function ListPage({ params }: ListPageProps) {
         listTitle={list.title}
         publicId={publicId}
         username={list.users?.username || ''}
+        mode="edit"
       />
       <div className="py-8">
         <ListViewClient list={mappedList} />

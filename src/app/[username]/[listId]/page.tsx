@@ -116,6 +116,7 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
           listTitle={list.title}
           publicId={listId}
           username={authorUsername}
+          mode="view"
         />
       <div className="max-w-[960px] mx-auto px-4 py-12">
         {/* Header */}
