@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Plus, ExternalLink, Edit, Trash2, Copy } from 'lucide-react';
+import { Plus, ExternalLink, Edit, Trash2, Copy } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { EmojiPickerComponent } from '@/components/emoji-picker';
@@ -79,8 +79,6 @@ export function ListViewClient({ list }: ListViewClientProps) {
   const [viewMode, setViewMode] = useState<'LIST' | 'GALLERY'>(list.viewMode);
   const [isUpdatingViewMode, setIsUpdatingViewMode] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [isDeletingList, setIsDeletingList] = useState(false);
   const router = useRouter();
 
   const sensors = useSensors(
@@ -575,255 +573,210 @@ export function ListViewClient({ list }: ListViewClientProps) {
     }
   };
 
-  const handleDeleteList = async () => {
-    setIsDeletingList(true);
-    try {
-      const response = await fetch(`/api/lists/${list.publicId}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        router.push('/dashboard');
-      } else {
-        const errorData = await response.json();
-        alert(errorData.error || 'Failed to delete list');
-      }
-    } catch (error) {
-      alert('Failed to delete list');
-    } finally {
-      setIsDeletingList(false);
-      setShowDeleteDialog(false);
-    }
-  };
 
   // Find the active item for drag overlay
   const activeItem = activeId ? items.find(item => item.id === activeId) : null;
 
   return (
-    <div className="max-w-[960px] mx-auto space-y-8">
-      {/* Header */}
-      <div className="space-y-6">
-        <Link href="/dashboard">
-          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground cursor-pointer">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-        </Link>
-        
-        {/* Delete List Button */}
-        <div className="flex justify-end">
-          <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-            <DialogTrigger asChild>
-              <Button variant="destructive" size="sm" className="flex items-center gap-2">
-                <Trash2 className="w-4 h-4" /> Delete List
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Delete List?</DialogTitle>
-                <DialogDescription>
-                  Are you sure you want to delete this list? This action cannot be undone.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex gap-2 mt-4">
-                <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={isDeletingList}>
-                  Cancel
-                </Button>
-                <Button variant="destructive" onClick={handleDeleteList} disabled={isDeletingList}>
-                  {isDeletingList ? 'Deleting...' : 'Delete'}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-        
-        <div className="text-left space-y-4 max-w-[672px] mx-auto">
-          <div className="flex items-center gap-2">
-            <EmojiPickerComponent
-              currentEmoji={list.emoji || '📝'}
-              onEmojiSelect={handleEmojiUpdate}
-              disabled={isUpdatingEmoji}
-              size="lg"
-            />
-          </div>
-          <div className="space-y-2">
-            <InlineEdit
-              value={list.title}
-              onSave={handleTitleUpdate}
-              placeholder="Enter list title"
-              className="text-4xl font-bold text-left"
-              emptyText="Untitled List"
-            />
-            <InlineEdit
-              value={list.description || ''}
-              onSave={handleDescriptionUpdate}
-              placeholder="Add a description for your list"
-              multiline
-              className="text-xl text-muted-foreground text-left"
-              emptyText="Description"
-            />
-          </div>
-        </div>
-
-        {/* Compact Action Bar */}
-        <div className="max-w-[672px] mx-auto">
-          <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
-            <div className="flex gap-3 items-center">
-              {/* Add Links Input */}
-              <div className="flex-1">
-                <Input
-                  placeholder="Type or paste a link or multiple links"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  className="border-0 bg-transparent text-base placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
-                  onKeyDown={(e) => {
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && url.trim()) {
-                      handleAddLink(e);
-                    }
-                  }}
-                />
-              </div>
-              
-              {/* Add Button */}
-              <Button 
-                onClick={url.trim() ? handleAddLink : handlePasteFromClipboard} 
-                disabled={isAdding}
-                className="px-6 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-medium cursor-pointer"
-              >
-                {isAdding ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Adding...
-                  </>
-                ) : url.trim() ? (
-                  '⌘↵ Add link'
-                ) : (
-                  '⌘V Paste link'
-                )}
-              </Button>
-            </div>
-            
-            {/* Bottom Row - View Toggle and Share Buttons */}
-            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
-              <ViewModeToggle
-                viewMode={viewMode}
-                onViewModeChange={handleViewModeChange}
-                disabled={isUpdatingViewMode}
+    <>
+      <div className="max-w-[960px] mx-auto space-y-8">
+        {/* Header */}
+        <div className="space-y-6">
+          
+          <div className="text-left space-y-4 max-w-[672px] mx-auto">
+            <div className="flex items-center gap-2">
+              <EmojiPickerComponent
+                currentEmoji={list.emoji || '📝'}
+                onEmojiSelect={handleEmojiUpdate}
+                disabled={isUpdatingEmoji}
+                size="lg"
               />
+            </div>
+            <div className="space-y-2">
+              <InlineEdit
+                value={list.title}
+                onSave={handleTitleUpdate}
+                placeholder="Enter list title"
+                className="text-4xl font-bold text-left"
+                emptyText="Untitled List"
+              />
+              <InlineEdit
+                value={list.description || ''}
+                onSave={handleDescriptionUpdate}
+                placeholder="Add a description for your list"
+                multiline
+                className="text-xl text-muted-foreground text-left"
+                emptyText="Description"
+              />
+            </div>
+          </div>
+
+          {/* Compact Action Bar */}
+          <div className="max-w-[672px] mx-auto">
+            <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex gap-3 items-center">
+                {/* Add Links Input */}
+                <div className="flex-1">
+                  <Input
+                    placeholder="Type or paste a link or multiple links"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    className="border-0 bg-transparent text-base placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
+                    onKeyDown={(e) => {
+                      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && url.trim()) {
+                        handleAddLink(e);
+                      }
+                    }}
+                  />
+                </div>
+                
+                {/* Add Button */}
+                <Button 
+                  onClick={url.trim() ? handleAddLink : handlePasteFromClipboard} 
+                  disabled={isAdding}
+                  className="px-6 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-medium cursor-pointer"
+                >
+                  {isAdding ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Adding...
+                    </>
+                  ) : url.trim() ? (
+                    '⌘↵ Add link'
+                  ) : (
+                    '⌘V Paste link'
+                  )}
+                </Button>
+              </div>
               
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={viewPublicList}
-                  className="border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg cursor-pointer"
-                >
-                  View
-                  <ExternalLink className="h-4 w-4 ml-2" />
-                </Button>
-                <Button 
-                  size="sm"
-                  onClick={copySnackLink}
-                  className="bg-orange-500 text-white hover:bg-orange-600 border-orange-500 rounded-lg font-medium cursor-pointer"
-                >
-                  Copy Snack Link
-                  <Copy className="h-4 w-4 ml-2" />
-                </Button>
+              {/* Bottom Row - View Toggle and Share Buttons */}
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                <ViewModeToggle
+                  viewMode={viewMode}
+                  onViewModeChange={handleViewModeChange}
+                  disabled={isUpdatingViewMode}
+                />
+                
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={viewPublicList}
+                    className="border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg cursor-pointer"
+                  >
+                    View
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                  </Button>
+                  <Button 
+                    size="sm"
+                    onClick={copySnackLink}
+                    className="bg-orange-500 text-white hover:bg-orange-600 border-orange-500 rounded-lg font-medium cursor-pointer"
+                  >
+                    Copy Snack Link
+                    <Copy className="h-4 w-4 ml-2" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Links */}
-      {items.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-            <span className="text-3xl">🔗</span>
+      {/* Divider */}
+      <div className="border-t border-gray-200 my-8"></div>
+
+      <div className="space-y-4">
+        {/* Links */}
+        {items.length === 0 ? (
+          <div className="text-center py-20 max-w-[960px] mx-auto">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+              <span className="text-3xl">🔗</span>
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-xl font-semibold text-gray-900">Ready to curate?</h3>
+              <p className="text-gray-600 max-w-md mx-auto">
+                Add your first link above to start building your curated list. You can add multiple links at once!
+              </p>
+            </div>
           </div>
-          <div className="space-y-3">
-            <h3 className="text-xl font-semibold text-gray-900">Ready to curate?</h3>
-            <p className="text-gray-600 max-w-md mx-auto">
-              Add your first link above to start building your curated list. You can add multiple links at once!
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <div className={`flex items-center justify-between ${viewMode === 'LIST' ? 'max-w-[672px] mx-auto' : 'max-w-[960px] mx-auto'}`}>
-            <p className="text-sm text-gray-600">
-              {items.length} {items.length === 1 ? 'link' : 'links'} • Drag to reorder
-            </p>
-          </div>
-          
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
-              {viewMode === 'LIST' ? (
-                <div className="max-w-[672px] mx-auto">
-                  <div className="space-y-3">
+        ) : (
+          <div className="space-y-4">
+            <div className={`flex items-center justify-between ${viewMode === 'LIST' ? 'max-w-[672px] mx-auto' : 'max-w-[1296px] mx-auto'}`}>
+              <p className="text-sm text-gray-600">
+                {items.length} {items.length === 1 ? 'link' : 'links'} • Drag to reorder
+              </p>
+            </div>
+            
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
+                {viewMode === 'LIST' ? (
+                  <div className="max-w-[672px] mx-auto">
+                    <div className="space-y-3">
+                      {items.map((item) => (
+                        <SortableListItem 
+                          key={item.id} 
+                          item={item} 
+                          onDelete={handleDeleteItem}
+                          isDeleting={isDeleting === item.id}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-[1296px] mx-auto">
                     {items.map((item) => (
-                      <SortableListItem 
-                        key={item.id} 
+                      <GalleryListItem 
+                        key={item.id}
                         item={item} 
                         onDelete={handleDeleteItem}
                         isDeleting={isDeleting === item.id}
                       />
                     ))}
                   </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {items.map((item) => (
-                    <GalleryListItem 
-                      key={item.id}
-                      item={item} 
-                      onDelete={handleDeleteItem}
-                      isDeleting={isDeleting === item.id}
-                    />
-                  ))}
-                </div>
-              )}
-            </SortableContext>
-            
-            <DragOverlay>
-              {activeItem ? (
-                viewMode === 'LIST' ? (
-                  <div className="opacity-95 scale-105 shadow-xl">
-                    <SortableListItem 
-                      item={activeItem} 
-                      onDelete={() => {}} 
-                      isDeleting={false}
-                      isDragOverlay={true}
-                    />
-                  </div>
-                ) : (
-                  <div className="opacity-95 scale-105 shadow-xl">
-                    <GalleryListItem 
-                      item={activeItem} 
-                      onDelete={() => {}} 
-                      isDeleting={false}
-                      isDragOverlay={true}
-                    />
-                  </div>
-                )
-              ) : null}
-            </DragOverlay>
-          </DndContext>
-        </div>
-      )}
-      
-      {isReordering && (
-        <div className="fixed bottom-6 right-6 bg-white border border-gray-200 rounded-lg p-4 shadow-lg">
-          <div className="flex items-center space-x-3">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-            <span className="text-sm font-medium text-gray-700">Saving order...</span>
+                )}
+              </SortableContext>
+              
+              <DragOverlay>
+                {activeItem ? (
+                  viewMode === 'LIST' ? (
+                    <div className="opacity-95 scale-105 shadow-xl">
+                      <SortableListItem 
+                        item={activeItem} 
+                        onDelete={() => {}} 
+                        isDeleting={false}
+                        isDragOverlay={true}
+                      />
+                    </div>
+                  ) : (
+                    <div className="opacity-95 scale-105 shadow-xl">
+                      <GalleryListItem 
+                        item={activeItem} 
+                        onDelete={() => {}} 
+                        isDeleting={false}
+                        isDragOverlay={true}
+                      />
+                    </div>
+                  )
+                ) : null}
+              </DragOverlay>
+            </DndContext>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+        
+        {isReordering && (
+          <div className="fixed bottom-6 right-6 bg-white border border-gray-200 rounded-lg p-4 shadow-lg">
+            <div className="flex items-center space-x-3">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <span className="text-sm font-medium text-gray-700">Saving order...</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 } 

@@ -108,30 +108,31 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
   const authorUsername = (list.users.publicMetadata as { username?: string })?.username || list.users.username;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <ListViewNavbar
-        listId={list.id}
-        listOwnerId={list.users?.clerk_id || ''}
-        listTitle={list.title}
-        publicId={listId}
-        username={authorUsername}
-      />
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <ListViewNavbar
+          listId={list.id}
+          listOwnerId={list.users?.clerk_id || ''}
+          listTitle={list.title}
+          publicId={listId}
+          username={authorUsername}
+        />
       <div className="max-w-[960px] mx-auto px-4 py-12">
         {/* Header */}
-        <div className="text-left mb-12">
+        <div className="text-left mb-12 max-w-[672px] mx-auto">
           {/* Emoji */}
           {list.emoji && (
             <div className="text-6xl mb-4">{list.emoji}</div>
           )}
           
           {/* Title */}
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4 max-w-[720px]">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
             {list.title}
           </h1>
           
           {/* Description */}
           {list.description && (
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl leading-relaxed">
+            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
               {list.description}
             </p>
           )}
@@ -169,8 +170,12 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
           </div>
         </div>
 
-        {/* List Items */}
-        {list.view_mode === 'LIST' ? (
+        {/* Divider */}
+        <div className="border-t border-gray-200 mb-8"></div>
+
+      {/* List Items */}
+      {list.view_mode === 'LIST' ? (
+        <div className="max-w-[960px] mx-auto px-4">
           <div className="space-y-4">
             {list.items.map((item: any) => (
               <Card key={item.id} className="overflow-hidden hover:shadow-sm transition-all duration-200 group border border-gray-200 bg-white rounded-lg">
@@ -216,7 +221,9 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
               </Card>
             ))}
           </div>
-        ) : (
+        </div>
+      ) : (
+        <div className="max-w-[1296px] mx-auto px-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {list.items.map((item: any) => (
               <Card key={item.id} className="group hover:shadow-sm transition-all duration-200 border border-gray-200 bg-white overflow-hidden rounded-lg">
@@ -261,35 +268,37 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
               </Card>
             ))}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Empty state */}
-        {list.items.length === 0 && (
-          <div className="text-center py-20">
-            <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center">
-              <span className="text-3xl text-gray-400">🔗</span>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No links yet</h3>
-            <p className="text-gray-500 max-w-md mx-auto">
-              This list is still being curated. Check back soon for amazing links!
-            </p>
+      {/* Empty state */}
+      {list.items.length === 0 && (
+        <div className="text-center py-20">
+          <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center">
+            <span className="text-3xl text-gray-400">🔗</span>
           </div>
-        )}
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No links yet</h3>
+          <p className="text-gray-500 max-w-md mx-auto">
+            This list is still being curated. Check back soon for amazing links!
+          </p>
+        </div>
+      )}
 
-        {/* Footer */}
-        <div className="text-center mt-16 pt-8 border-t border-gray-200/60">
-          <div className="inline-flex items-center gap-2 text-sm text-gray-500">
-            <span>Create your own curated lists at</span>
-            <a 
-              href="/" 
-              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-semibold transition-colors"
-            >
-              <span className="text-lg">🍿</span>
-              <span>Snack</span>
-            </a>
-          </div>
+      {/* Footer */}
+      <div className="text-center mt-16 pt-8 border-t border-gray-200/60">
+        <div className="inline-flex items-center gap-2 text-sm text-gray-500">
+          <span>Create your own curated lists at</span>
+          <a 
+            href="/" 
+            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+          >
+            <span className="text-lg">🍿</span>
+            <span>Snack</span>
+          </a>
         </div>
       </div>
     </div>
+    </div>
+    </>
   );
 } 

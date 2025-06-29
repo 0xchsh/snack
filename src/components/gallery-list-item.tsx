@@ -50,12 +50,14 @@ export const GalleryListItem = ({ item, onDelete, isDeleting = false, isDragOver
     <div
       ref={isDragOverlay ? undefined : setNodeRef}
       style={isDragOverlay ? undefined : style}
-      className={`group hover:shadow-md transition-all duration-200 border border-gray-200 bg-white h-full gap-0 rounded-xl ${isDragOverlay ? 'opacity-80' : ''} ${isDragging && !isDragOverlay ? 'opacity-50 cursor-grabbing' : (!isDeleting ? 'cursor-grab' : '')} ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}
-      {...(!isDragOverlay ? attributes : {})}
-      {...(!isDragOverlay ? listeners : {})}
+      className={`group hover:shadow-md transition-all duration-200 border border-gray-200 bg-white h-full gap-0 rounded-xl ${isDragOverlay ? 'opacity-80' : ''} ${isDragging && !isDragOverlay ? 'opacity-50' : ''} ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}
     >
       <Card className="h-full bg-transparent shadow-none border-0 p-0 m-0">
-        <CardContent className="p-0 h-full flex flex-col m-0">
+        <CardContent 
+          className={`p-0 h-full flex flex-col m-0 ${!isDragOverlay ? 'cursor-grab active:cursor-grabbing' : ''}`}
+          {...(!isDragOverlay ? attributes : {})}
+          {...(!isDragOverlay ? listeners : {})}
+        >
           <a 
             href={item.url}
             target="_blank"
