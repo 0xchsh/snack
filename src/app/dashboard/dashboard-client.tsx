@@ -1,25 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
-import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { ListCard, type DashboardListData } from '@/components/ui/list-card';
 
-interface List {
-  id: string;
-  publicId: string;
-  title: string;
+type List = DashboardListData & {
   description: string | null;
-  emoji: string | null;
   createdAt: Date;
   updatedAt: Date;
-  itemCount?: number;
-  username?: string;
-}
+};
 
 interface DashboardClientProps {
   lists: List[];
@@ -33,26 +26,6 @@ interface DashboardClientProps {
   showCreateButton?: boolean;
 }
 
-// LiveItemCount component
-function LiveItemCount({ listId, initialCount }: { listId: string, initialCount?: number }) {
-  const [count, setCount] = useState<number | undefined>(initialCount);
-  useEffect(() => {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-    let isMounted = true;
-    supabase
-      .from('items')
-      .select('id', { count: 'exact', head: true })
-      .eq('list_id', listId)
-      .then(({ count }) => {
-        if (isMounted) setCount(count ?? 0);
-      });
-    return () => { isMounted = false; };
-  }, [listId]);
-  return <>{typeof count === 'number' ? `${count} item${count === 1 ? '' : 's'}` : ''}</>;
-}
 
 export function DashboardClient({ lists, savedLists, stats, showCreateButton = true }: DashboardClientProps) {
   const [isCreating, setIsCreating] = useState(false);
@@ -92,7 +65,7 @@ export function DashboardClient({ lists, savedLists, stats, showCreateButton = t
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="max-w-[960px] mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Your Snacks</h1>
       </div>
@@ -163,19 +136,12 @@ export function DashboardClient({ lists, savedLists, stats, showCreateButton = t
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-6" style={{ gap: '24px' }}>
               {lists.map((list) => (
-                <Link key={list.id} href={`/dashboard/lists/${list.publicId}`}>
-                  <Card className="flex flex-col items-start justify-center p-4 border border-[#D1D5DB] rounded-lg bg-white min-h-[120px] hover:shadow-md transition-shadow cursor-pointer">
-                    {/* Icon/Emoji */}
-                    <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-white border border-[#E5E7EB] rounded-full text-[24px] font-bold mb-3">
-                        <span>{list.emoji || '📦'}</span>
-                      </div>
-                      {/* Text Info */}
-                    <div className="flex flex-col items-start justify-center min-w-0 text-left w-full">
-                      <div className="text-[16px] font-semibold text-[#111827] truncate w-full text-left">{list.title}</div>
-                      <div className="text-[14px] font-medium text-[#6B7280] truncate mt-1 w-full text-left">{list.username || ''} &#8226; <LiveItemCount listId={list.id} initialCount={list.itemCount} /></div>
-                    </div>
-                  </Card>
-                </Link>
+                <ListCard 
+                  key={list.id} 
+                  list={list} 
+                  variant="dashboard"
+                  showLiveCount={true}
+                />
               ))}
             </div>
           )}
@@ -195,19 +161,12 @@ export function DashboardClient({ lists, savedLists, stats, showCreateButton = t
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-6" style={{ gap: '24px' }}>
               {savedLists.map((list) => (
-                <Link key={list.id} href={`/dashboard/lists/${list.publicId}`}>
-                  <Card className="flex flex-col items-start justify-center p-4 border border-[#D1D5DB] rounded-lg bg-white min-h-[120px] hover:shadow-md transition-shadow cursor-pointer">
-                    {/* Icon/Emoji */}
-                    <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-white border border-[#E5E7EB] rounded-full text-[24px] font-bold mb-3">
-                        <span>{list.emoji || '📦'}</span>
-                      </div>
-                      {/* Text Info */}
-                    <div className="flex flex-col items-start justify-center min-w-0 text-left w-full">
-                      <div className="text-[16px] font-semibold text-[#111827] truncate w-full text-left">{list.title}</div>
-                      <div className="text-[14px] font-medium text-[#6B7280] truncate mt-1 w-full text-left">{list.username || ''} &#8226; <LiveItemCount listId={list.id} initialCount={list.itemCount} /></div>
-                    </div>
-                  </Card>
-                </Link>
+                <ListCard 
+                  key={list.id} 
+                  list={list} 
+                  variant="dashboard"
+                  showLiveCount={true}
+                />
               ))}
             </div>
           )}

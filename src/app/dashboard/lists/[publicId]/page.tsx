@@ -2,6 +2,7 @@ import { currentUser } from '@clerk/nextjs/server';
 import { redirect, notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { ListViewClient } from './list-view-client';
+import { ListViewNavbar } from '@/components/list-view-navbar';
 
 interface ListPageProps {
   params: Promise<{
@@ -53,8 +54,17 @@ export default async function ListPage({ params }: ListPageProps) {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <ListViewClient list={mappedList} />
-    </div>
+    <>
+      <ListViewNavbar
+        listId={list.id}
+        listOwnerId={user.id}
+        listTitle={list.title}
+        publicId={publicId}
+        username={list.users?.username || ''}
+      />
+      <div className="container mx-auto py-8 px-4">
+        <ListViewClient list={mappedList} />
+      </div>
+    </>
   );
 } 

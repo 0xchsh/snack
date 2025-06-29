@@ -14,6 +14,9 @@ export async function GET(req: Request) {
     const result = await getExploreLists({ limit, offset, sort, order, search });
     return NextResponse.json(result);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Explore API error:', error);
+    return NextResponse.json({ 
+      error: error.message || 'Failed to fetch explore lists'
+    }, { status: 500 });
   }
 } 

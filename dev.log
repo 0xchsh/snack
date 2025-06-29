@@ -1,0 +1,605 @@
+
+> snack-app@0.1.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.3.2 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.86.22:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Compiled middleware in 203ms
+ ✓ Ready in 940ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1381ms
+ GET / 200 in 1654ms
+ ○ Compiling /[username]/[listId] ...
+ ✓ Compiled /[username]/[listId] in 692ms
+ GET /charles/VEUBCfrx1_Ak_u7qpGXD8 200 in 1803ms
+ GET / 307 in 202ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 830ms
+ GET /dashboard 200 in 1546ms
+ ✓ Compiled /favicon.ico in 259ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 503ms
+ GET /dashboard 200 in 591ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 227ms
+ ○ Compiling /explore ...
+ ✓ Compiled /explore in 669ms
+ ✓ Compiled /api/explore in 354ms
+ GET /api/explore?limit=20&offset=0 200 in 494ms
+ GET /explore 200 in 1198ms
+ GET /dashboard 200 in 498ms
+ GET /api/explore?limit=20&offset=0 200 in 109ms
+ GET /explore 200 in 164ms
+ GET /dashboard 200 in 403ms
+ ○ Compiling /dashboard/profile ...
+ ✓ Compiled /dashboard/profile in 750ms
+ GET /dashboard/profile 200 in 988ms
+ GET /dashboard 200 in 638ms
+ ○ Compiling /_not-found/page ...
+ ✓ Compiled /_not-found/page in 738ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 794ms
+ GET /api/explore?limit=20&offset=0 200 in 157ms
+ GET /explore 200 in 200ms
+ ✓ Compiled /explore in 16ms
+ GET /explore 200 in 192ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 926ms
+ ○ Compiling /[username] ...
+ ✓ Compiled /[username] in 3.3s
+ GET /charles/favicon.ico?v=2 404 in 3349ms
+ GET /images/favicon_hu_b0aeb9b14d220fe1.png 404 in 317ms
+[PublicProfile] Clerk user with public metadata username "favicon.svg" not found.
+[PublicProfile] Clerk user with public metadata username "icon.png" not found.
+ ○ Compiling /dashboard/lists/[publicId] ...
+ GET /favicon.svg 404 in 3896ms
+ GET /icon.png?d947e0f888b5f2d2 404 in 3881ms
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+ GET /charles/turtle.svg 404 in 846ms
+ ✓ Compiled /dashboard/lists/[publicId] in 1284ms
+ GET /dashboard/lists/fF2WXS48j2NvLC0SdV-ee 200 in 1883ms
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+ ⨯ [TypeError: Cannot read properties of null (reading 'useContext')] {
+  digest: '879271686'
+}
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+[PublicProfile] Clerk user with public metadata username "icon.png" not found.
+ ⨯ Error: Clerk: auth() was called but Clerk can't detect usage of clerkMiddleware(). Please ensure the following:
+- Your Middleware exists at ./src/middleware.(ts|js)
+- clerkMiddleware() is used in your Next.js Middleware.
+- Your Middleware matcher is configured to match this route or page.
+- If you are using the src directory, make sure the Middleware file is inside of it.
+
+For more details, see https://clerk.com/err/auth-middleware
+
+    at async ListPage (src/app/dashboard/lists/[publicId]/page.tsx:15:15)
+  13 | export default async function ListPage({ params }: ListPageProps) {
+  14 |   const { publicId } = await params;
+> 15 |   const user = await currentUser();
+     |               ^
+  16 |   
+  17 |   if (!user) {
+  18 |     redirect('/sign-in'); {
+  digest: '3779373884'
+}
+ GET /images/favicon_hu_b0aeb9b14d220fe1.png 500 in 777ms
+[PublicProfile] Clerk user with public metadata username "favicon.svg" not found.
+ GET /icon.png?d947e0f888b5f2d2 404 in 819ms
+ GET /dashboard/lists/favicon.ico?v=2 500 in 819ms
+ ⨯ Error: Clerk: auth() was called but Clerk can't detect usage of clerkMiddleware(). Please ensure the following:
+- Your Middleware exists at ./src/middleware.(ts|js)
+- clerkMiddleware() is used in your Next.js Middleware.
+- Your Middleware matcher is configured to match this route or page.
+- If you are using the src directory, make sure the Middleware file is inside of it.
+
+For more details, see https://clerk.com/err/auth-middleware
+
+    at async ListPage (src/app/dashboard/lists/[publicId]/page.tsx:15:15)
+  13 | export default async function ListPage({ params }: ListPageProps) {
+  14 |   const { publicId } = await params;
+> 15 |   const user = await currentUser();
+     |               ^
+  16 |   
+  17 |   if (!user) {
+  18 |     redirect('/sign-in'); {
+  digest: '3779373884'
+}
+ GET /favicon.svg 404 in 834ms
+ GET /dashboard/lists/turtle.svg 500 in 838ms
+ ✓ Compiled /api/lists/[publicId] in 398ms
+Fetched list: {
+  id: 'jnul_5O4xVF2M3O8A12v3',
+  public_id: 'fF2WXS48j2NvLC0SdV-ee',
+  title: 'adasdasd',
+  description: 'asdasdasd',
+  emoji: '🥦',
+  created_at: '2025-06-13T18:58:42.627',
+  updated_at: '2025-06-13T18:58:42.627',
+  user_id: 'cmb626bm9000064q38gzqulc4',
+  view_mode: 'GALLERY',
+  is_public: true,
+  user: { clerk_id: 'user_2xfGYYFARh30Jr38yjoxCBJB5UE' }
+}
+Fetched list.user: { clerk_id: 'user_2xfGYYFARh30Jr38yjoxCBJB5UE' }
+ PATCH /api/lists/fF2WXS48j2NvLC0SdV-ee 200 in 1341ms
+ GET /dashboard/lists/fF2WXS48j2NvLC0SdV-ee 200 in 272ms
+ GET /api/explore?limit=20&offset=0 200 in 292ms
+ GET /explore 200 in 352ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 774ms
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+ ⨯ [TypeError: Cannot read properties of null (reading 'useContext')] {
+  digest: '879271686'
+}
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+[PublicProfile] Clerk user with public metadata username "icon.png" not found.
+ GET /icon.png?d947e0f888b5f2d2 500 in 692ms
+[PublicProfile] Clerk user with public metadata username "favicon.svg" not found.
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+ GET /favicon.svg 404 in 1004ms
+ GET /images/favicon_hu_b0aeb9b14d220fe1.png 404 in 1023ms
+ GET /charles/favicon.ico?v=2 404 in 1265ms
+ GET /charles/turtle.svg 404 in 1334ms
+ ✓ Compiled in 97ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 1103ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 134ms
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+ ⨯ [TypeError: Cannot read properties of null (reading 'useContext')] {
+  digest: '879271686'
+}
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+ GET /charles/favicon.ico?v=2 500 in 1005ms
+[PublicProfile] Clerk user with public metadata username "icon.png" not found.
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+[PublicProfile] Clerk user with public metadata username "favicon.svg" not found.
+ GET /images/favicon_hu_b0aeb9b14d220fe1.png 404 in 1504ms
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 809ms
+ GET /icon.png?d947e0f888b5f2d2 404 in 1867ms
+ GET /favicon.svg 404 in 1877ms
+ GET /charles/turtle.svg 404 in 2030ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 1454ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 47ms
+[PublicProfile] Clerk user with public metadata username "favicon.svg" not found.
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+[PublicProfile] Clerk user with public metadata username "icon.png" not found.
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+ GET /favicon.svg 404 in 1059ms
+ GET /icon.png?d947e0f888b5f2d2 404 in 1071ms
+ GET /images/favicon_hu_b0aeb9b14d220fe1.png 404 in 1070ms
+ GET /charles/favicon.ico?v=2 404 in 1167ms
+ GET /charles/turtle.svg 404 in 1348ms
+ GET /api/explore?limit=20&offset=0 200 in 181ms
+ GET /explore 200 in 339ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 735ms
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+ ⨯ [TypeError: Cannot read properties of null (reading 'useContext')] {
+  digest: '879271686'
+}
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+ ⨯ [TypeError: Cannot read properties of null (reading 'useContext')] {
+  digest: '879271686'
+}
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+ GET /favicon.svg 500 in 1169ms
+ GET /icon.png?d947e0f888b5f2d2 500 in 1170ms
+[PublicProfile] Clerk user with public metadata username "favicon.svg" not found.
+[PublicProfile] Clerk user with public metadata username "icon.png" not found.
+ GET /charles/favicon.ico?v=2 404 in 1344ms
+ GET /images/favicon_hu_b0aeb9b14d220fe1.png 404 in 1364ms
+ GET /charles/turtle.svg 404 in 1457ms
+ ✓ Compiled /[username]/[listId] in 17ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 1432ms
+ GET /dashboard/lists/fF2WXS48j2NvLC0SdV-ee 200 in 382ms
+ ⨯ [Error: Module [project]/node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/[username]/[listId]/page { METADATA_0 => "[project]/src/app/favicon.ico.mjs { IMAGE => \"[project]/src/app/favicon.ico (static in ecmascript)\" } [app-rsc] (structured image object, ecmascript, Next.js server component)", MODULE_1 => "[project]/src/app/layout.tsx [app-rsc] (ecmascript, Next.js server component)", MODULE_2 => "[project]/node_modules/next/dist/client/components/not-found-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/forbidden-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/unauthorized-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_5 => "[project]/src/app/[username]/[listId]/not-found.tsx [app-rsc] (ecmascript, Next.js server component)", MODULE_6 => "[project]/src/app/[username]/[listId]/page.tsx [app-rsc] (ecmascript, Next.js server component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available. It might have been deleted in an HMR update.] {
+  digest: '2466035193'
+}
+Error: Module [project]/node_modules/next/dist/client/components/error-boundary.js [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/[username]/[listId]/page { METADATA_0 => "[project]/src/app/favicon.ico.mjs { IMAGE => \"[project]/src/app/favicon.ico (static in ecmascript)\" } [app-rsc] (structured image object, ecmascript, Next.js server component)", MODULE_1 => "[project]/src/app/layout.tsx [app-rsc] (ecmascript, Next.js server component)", MODULE_2 => "[project]/node_modules/next/dist/client/components/not-found-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/forbidden-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/unauthorized-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_5 => "[project]/src/app/[username]/[listId]/not-found.tsx [app-rsc] (ecmascript, Next.js server component)", MODULE_6 => "[project]/src/app/[username]/[listId]/page.tsx [app-rsc] (ecmascript, Next.js server component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available. It might have been deleted in an HMR update.
+    at JSON.parse (<anonymous>)
+ ⨯ Error: Module [project]/node_modules/next/dist/client/components/error-boundary.js [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/[username]/[listId]/page { METADATA_0 => "[project]/src/app/favicon.ico.mjs { IMAGE => \"[project]/src/app/favicon.ico (static in ecmascript)\" } [app-rsc] (structured image object, ecmascript, Next.js server component)", MODULE_1 => "[project]/src/app/layout.tsx [app-rsc] (ecmascript, Next.js server component)", MODULE_2 => "[project]/node_modules/next/dist/client/components/not-found-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/forbidden-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/unauthorized-error.js [app-rsc] (ecmascript, Next.js server component)", MODULE_5 => "[project]/src/app/[username]/[listId]/not-found.tsx [app-rsc] (ecmascript, Next.js server component)", MODULE_6 => "[project]/src/app/[username]/[listId]/page.tsx [app-rsc] (ecmascript, Next.js server component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available. It might have been deleted in an HMR update.
+    at JSON.parse (<anonymous>) {
+  page: '/dashboard/lists/turtle.svg'
+}
+ ⨯ Error: Clerk: auth() was called but Clerk can't detect usage of clerkMiddleware(). Please ensure the following:
+- Your Middleware exists at ./src/middleware.(ts|js)
+- clerkMiddleware() is used in your Next.js Middleware.
+- Your Middleware matcher is configured to match this route or page.
+- If you are using the src directory, make sure the Middleware file is inside of it.
+
+For more details, see https://clerk.com/err/auth-middleware
+
+    at async ListPage (src/app/dashboard/lists/[publicId]/page.tsx:15:15)
+  13 | export default async function ListPage({ params }: ListPageProps) {
+  14 |   const { publicId } = await params;
+> 15 |   const user = await currentUser();
+     |               ^
+  16 |   
+  17 |   if (!user) {
+  18 |     redirect('/sign-in'); {
+  digest: '3779373884'
+}
+[PublicProfile] Clerk user with public metadata username "favicon.svg" not found.
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+ ⨯ [TypeError: Cannot read properties of null (reading 'useContext')] {
+  digest: '879271686'
+}
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+ ○ Compiling /_error ...
+ ⨯ Error: Clerk: auth() was called but Clerk can't detect usage of clerkMiddleware(). Please ensure the following:
+- Your Middleware exists at ./src/middleware.(ts|js)
+- clerkMiddleware() is used in your Next.js Middleware.
+- Your Middleware matcher is configured to match this route or page.
+- If you are using the src directory, make sure the Middleware file is inside of it.
+
+For more details, see https://clerk.com/err/auth-middleware
+
+    at async ListPage (src/app/dashboard/lists/[publicId]/page.tsx:15:15)
+  13 | export default async function ListPage({ params }: ListPageProps) {
+  14 |   const { publicId } = await params;
+> 15 |   const user = await currentUser();
+     |               ^
+  16 |   
+  17 |   if (!user) {
+  18 |     redirect('/sign-in'); {
+  digest: '3779373884'
+}
+[PublicProfile] Clerk user with public metadata username "icon.png" not found.
+ GET /favicon.svg 404 in 1607ms
+ GET /images/favicon_hu_b0aeb9b14d220fe1.png 500 in 1577ms
+ GET /dashboard/lists/favicon.ico?v=2 500 in 1611ms
+ GET /icon.png?d947e0f888b5f2d2 404 in 1624ms
+ ✓ Compiled /_error in 892ms
+ GET /dashboard/lists/turtle.svg 500 in 1987ms
+Fetched list: {
+  id: 'jnul_5O4xVF2M3O8A12v3',
+  public_id: 'fF2WXS48j2NvLC0SdV-ee',
+  title: 'adasdasdadasdasdadasdasdadasdasdadasdasd',
+  description: 'asdasdasd',
+  emoji: '🥦',
+  created_at: '2025-06-13T18:58:42.627',
+  updated_at: '2025-06-13T18:58:42.627',
+  user_id: 'cmb626bm9000064q38gzqulc4',
+  view_mode: 'GALLERY',
+  is_public: true,
+  user: { clerk_id: 'user_2xfGYYFARh30Jr38yjoxCBJB5UE' }
+}
+Fetched list.user: { clerk_id: 'user_2xfGYYFARh30Jr38yjoxCBJB5UE' }
+ PATCH /api/lists/fF2WXS48j2NvLC0SdV-ee 200 in 641ms
+ GET /dashboard/lists/fF2WXS48j2NvLC0SdV-ee 200 in 318ms
+ GET /dashboard/lists/fF2WXS48j2NvLC0SdV-ee 200 in 443ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 768ms
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+ ⨯ [TypeError: Cannot read properties of null (reading 'useContext')] {
+  digest: '879271686'
+}
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+ ⨯ [TypeError: Cannot read properties of null (reading 'useContext')] {
+  digest: '879271686'
+}
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+ GET /icon.png?d947e0f888b5f2d2 500 in 1079ms
+[PublicProfile] Clerk user with public metadata username "favicon.svg" not found.
+[PublicProfile] Clerk user with public metadata username "icon.png" not found.
+ GET /favicon.svg 500 in 1102ms
+ GET /images/favicon_hu_b0aeb9b14d220fe1.png 404 in 1222ms
+ GET /charles/favicon.ico?v=2 404 in 1360ms
+ GET /charles/turtle.svg 404 in 1541ms
+ ✓ Compiled in 106ms
+ ✓ Compiled /[username]/[listId] in 22ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 1426ms
+ ✓ Compiled /[username]/[listId] in 14ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 1773ms
+ ✓ Compiled /[username]/[listId] in 20ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 1922ms
+ ✓ Compiled in 92ms
+ ✓ Compiled /[username]/[listId] in 15ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 2270ms
+ GET /api/explore?limit=20&offset=0 200 in 244ms
+ GET /explore 200 in 305ms
+ GET /charles/ZCUFylsrwsVmQLOz6YktS 200 in 705ms
+ GET /charles/ZCUFylsrwsVmQLOz6YktS 200 in 964ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 232ms
+ GET /api/explore?limit=20&offset=0 200 in 197ms
+ GET /explore 200 in 240ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 991ms
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+ ⨯ [TypeError: Cannot read properties of null (reading 'useContext')] {
+  digest: '879271686'
+}
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+ ⨯ [TypeError: Cannot read properties of null (reading 'useContext')] {
+  digest: '879271686'
+}
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+[PublicProfile] Clerk user with public metadata username "icon.png" not found.
+ GET /favicon.svg 500 in 1051ms
+ GET /icon.png?d947e0f888b5f2d2 500 in 1052ms
+[PublicProfile] Clerk user with public metadata username "favicon.svg" not found.
+ GET /images/favicon_hu_b0aeb9b14d220fe1.png 404 in 1168ms
+ GET /charles/favicon.ico?v=2 404 in 1348ms
+ GET /charles/turtle.svg 404 in 1457ms
+ ✓ Compiled in 117ms
+ ✓ Compiled /[username]/[listId] in 24ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 2169ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 1154ms
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+ ⨯ [TypeError: Cannot read properties of null (reading 'useContext')] {
+  digest: '879271686'
+}
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+ GET /charles/turtle.svg 500 in 653ms
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+ ⨯ [TypeError: Cannot read properties of null (reading 'useContext')] {
+  digest: '879271686'
+}
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+ GET /icon.png?d947e0f888b5f2d2 500 in 1073ms
+[PublicProfile] Clerk user with public metadata username "favicon.svg" not found.
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[TypeError: Cannot read properties of null (reading 'use')]
+ GET /images/favicon_hu_b0aeb9b14d220fe1.png 404 in 1376ms
+ GET /favicon.svg 404 in 1377ms
+[PublicProfile] Clerk user with public metadata username "icon.png" not found.
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 250ms
+ GET /charles/favicon.ico?v=2 404 in 1616ms
+ ✓ Compiled /[username]/[listId] in 20ms
+ GET /charles/fF2WXS48j2NvLC0SdV-ee 200 in 2338ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 229ms

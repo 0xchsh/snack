@@ -8,6 +8,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { SaveListButton } from '@/components/SaveListButton';
 import { currentUser, clerkClient } from '@clerk/nextjs/server';
+import { ListViewNavbar } from '@/components/list-view-navbar';
 
 interface PublicListPageProps {
   params: Promise<{
@@ -108,117 +109,133 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <ListViewNavbar
+        listId={list.id}
+        listOwnerId={list.users?.clerk_id || ''}
+        listTitle={list.title}
+        publicId={listId}
+        username={authorUsername}
+      />
       <div className="max-w-[960px] mx-auto px-4 py-12">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-4 mb-6">
-            {list.emoji && (
-              <span className="text-5xl drop-shadow-sm">{list.emoji}</span>
-            )}
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-              {list.title}
-            </h1>
-          </div>
-          {/* Save and Share buttons */}
-          <div className="flex justify-center gap-3 mb-6">
-            {!isOwner && <SaveListButton listId={list.id} initialSaved={initialSaved} />}
-            {/* TODO: Add Share button here if not already present */}
-          </div>
+        <div className="text-left mb-12">
+          {/* Emoji */}
+          {list.emoji && (
+            <div className="text-6xl mb-4">{list.emoji}</div>
+          )}
+          
+          {/* Title */}
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4 max-w-[720px]">
+            {list.title}
+          </h1>
+          
+          {/* Description */}
           {list.description && (
-            <p className="text-xl text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl leading-relaxed">
               {list.description}
             </p>
           )}
-          <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200 shadow-sm">
+          
+          {/* Creator Info */}
+          <div className="flex items-center gap-3 mb-8">
             <Image
               src={list.users.imageUrl}
               alt={authorUsername}
-              width={32}
-              height={32}
-              className="w-8 h-8 rounded-full"
+              width={48}
+              height={48}
+              className="w-12 h-12 rounded-full"
             />
-            <span className="text-sm text-gray-600">Curated by</span>
-            <Link href={`/${authorUsername}`}>
-              <span className="font-semibold text-gray-900 hover:underline">{authorUsername}</span>
-            </Link>
-            <span className="text-gray-400">•</span>
-            <span className="text-sm text-gray-600">
-              {list.items.length} {list.items.length === 1 ? 'link' : 'links'}
-            </span>
+            <div className="text-left">
+              <div className="font-semibold text-gray-900 text-lg">
+                {authorUsername}
+              </div>
+              <div className="text-sm text-gray-500">
+                {(() => {
+                  // Get user count from database or default
+                  const userCount = 24; // This would come from database
+                  const joinDate = new Date(list.users.createdAt);
+                  const joinMonth = joinDate.toLocaleString('default', { month: 'short' });
+                  const joinYear = joinDate.getFullYear();
+                  return `${userCount} lists • Joined ${joinMonth} ${joinYear}`;
+                })()}
+              </div>
+            </div>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3">
+            {!isOwner && <SaveListButton listId={list.id} initialSaved={initialSaved} />}
+            {/* Share button would go here */}
           </div>
         </div>
 
         {/* List Items */}
         {list.view_mode === 'LIST' ? (
-          <div className="max-w-[672px] mx-auto">
-            <div className="space-y-3">
-              {list.items.map((item: any) => (
-                <Card key={item.id} className="overflow-hidden hover:shadow-md transition-all duration-200 group border border-gray-200 bg-white h-full rounded-xl gap-0">
-                  <CardContent className="p-2 py-3 h-full flex flex-col">
-                    <a 
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 h-[72px] hover:cursor-pointer"
-                    >
-                      {/* Image */}
-                      {item.image ? (
-                        <div className="w-[137px] h-[72px] flex-shrink-0 relative overflow-hidden rounded-lg bg-gray-50">
-                          <Image
-                            src={item.image}
-                            alt={item.title}
-                            fill
-                            className="object-cover group-hover:scale-110 transition-transform duration-200"
-                            sizes="137px"
-                            unoptimized
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-[137px] h-[72px] flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg flex items-center justify-center">
-                          <ExternalLink className="h-6 w-6 text-gray-400" />
-                        </div>
-                      )}
-                      
-                      {/* Content */}
-                      <div className="flex-1 min-w-0 h-[72px] flex flex-col justify-center">
-                        <div className="space-y-1">
-                          <h3 className="font-medium line-clamp-2 leading-snug text-sm transition-colors duration-200 text-gray-900 group-hover:text-blue-600">
-                            {item.title}
-                          </h3>
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <Favicon src={item.favicon} size={12} />
-                            <span className="truncate hover:text-blue-600 transition-colors duration-200">
-                              {new URL(item.url).hostname}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </a>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-4">
             {list.items.map((item: any) => (
-              <Card key={item.id} className="group hover:shadow-md transition-all duration-200 border border-gray-200 bg-white h-full gap-0 py-0 cursor-pointer rounded-xl">
-                <CardContent className="p-0 h-full flex flex-col">
+              <Card key={item.id} className="overflow-hidden hover:shadow-sm transition-all duration-200 group border border-gray-200 bg-white rounded-lg">
+                <CardContent className="p-6">
                   <a 
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-col h-full hover:cursor-pointer"
+                    className="flex items-center gap-6 hover:cursor-pointer"
                   >
                     {/* Image */}
-                    <div className="w-full aspect-[1.91/1] relative bg-gray-100 overflow-hidden rounded-t-lg">
+                    {item.image ? (
+                      <div className="w-[120px] h-[120px] flex-shrink-0 relative overflow-hidden rounded-lg bg-gray-50">
+                        <Image
+                          src={item.image}
+                          alt={item.title}
+                          fill
+                          className="object-cover"
+                          sizes="120px"
+                          unoptimized
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-[120px] h-[120px] flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
+                        <ExternalLink className="h-8 w-8 text-gray-400" />
+                      </div>
+                    )}
+                    
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-lg text-gray-900 line-clamp-1 mb-2">
+                        {item.title}
+                      </h3>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Favicon src={item.favicon} size={16} />
+                        <span className="truncate">
+                          {new URL(item.url).hostname}
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {list.items.map((item: any) => (
+              <Card key={item.id} className="group hover:shadow-sm transition-all duration-200 border border-gray-200 bg-white overflow-hidden rounded-lg">
+                <CardContent className="p-0">
+                  <a 
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block hover:cursor-pointer"
+                  >
+                    {/* Image */}
+                    <div className="w-full aspect-[16/10] relative bg-gray-100 overflow-hidden">
                       {item.image ? (
                         <Image
                           src={item.image}
                           alt={item.title}
                           fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-200"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover"
+                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-50 to-gray-100">
@@ -228,15 +245,12 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
                     </div>
                     
                     {/* Content */}
-                    <div className="flex-1 p-3 flex flex-col justify-between">
-                      <div className="space-y-1">
-                        <h3 className="font-medium line-clamp-2 leading-snug text-sm transition-colors duration-200 text-gray-900 group-hover:text-blue-600">
-                          {item.title}
-                        </h3>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-xs mt-2 text-gray-500">
-                        <Favicon src={item.favicon} size={12} />
+                    <div className="p-4">
+                      <h3 className="font-semibold text-base text-gray-900 line-clamp-1 mb-2">
+                        {item.title}
+                      </h3>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Favicon src={item.favicon} size={14} />
                         <span className="truncate">
                           {new URL(item.url).hostname}
                         </span>

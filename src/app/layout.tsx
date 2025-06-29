@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
+import { Navbar } from "@/components/navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,25 +31,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <nav className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm flex items-center justify-between px-6 h-14">
-          <div className="font-bold text-xl text-orange-600">Snack</div>
-          <div className="flex items-center gap-6">
-            <a href="/dashboard" className="text-gray-700 hover:text-orange-600 font-medium">Dashboard</a>
-            <a href="/explore" className="text-gray-700 hover:text-orange-600 font-medium">Explore</a>
-            <a href="/dashboard/profile" className="text-gray-700 hover:text-orange-600 font-medium flex items-center gap-2">
-              Profile
-              <SignedIn>
-                <span className="ml-1"><UserButton afterSignOutUrl="/" /></span>
-              </SignedIn>
-            </a>
-          </div>
-        </nav>
-          <header>
-            <SignedOut>
-              <SignInButton />
-              <SignUpButton />
-            </SignedOut>
-          </header>
+        <Navbar />
         {children}
         <Toaster position="top-right" richColors />
       </body>

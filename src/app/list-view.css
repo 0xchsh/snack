@@ -1,0 +1,4 @@
+/* Hide layout navbar on list view pages */
+.list-view-page body > div > nav {
+  display: none !important;
+}
