@@ -1,10 +1,11 @@
-import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { SignInButton } from '@clerk/nextjs';
+import { createServerAuth } from '@/lib/auth-server';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default async function Home() {
-  const user = await currentUser();
+  const serverAuth = createServerAuth();
+  const user = await serverAuth.getUser();
   
   // If user is authenticated, redirect to dashboard
   if (user) {
@@ -25,13 +26,13 @@ export default async function Home() {
         </div>
         
         <div className="space-y-4">
-          <SignInButton mode="modal">
+          <Link href="/auth/sign-up">
             <Button size="lg" className="text-lg px-8 py-6">
               Get Started
             </Button>
-          </SignInButton>
+          </Link>
           <p className="text-sm text-muted-foreground">
-            Sign in to start creating your first list
+            Sign up to start creating your first list
           </p>
         </div>
         

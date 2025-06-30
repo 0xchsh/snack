@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { UserButton, SignUpButton, useUser } from '@clerk/nextjs';
+import { UserButton } from '@/components/UserButton';
+import { useAuth } from '@/hooks/useAuth';
 import { Home, Search } from 'lucide-react';
 
 interface NavbarProps {
@@ -9,7 +10,20 @@ interface NavbarProps {
 }
 
 export function Navbar({ variant = 'global' }: NavbarProps) {
-  const { isSignedIn, user } = useUser();
+  const { user, loading } = useAuth();
+  const isSignedIn = !!user;
+
+  // Show loading state
+  if (loading) {
+    return (
+      <nav className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm flex items-center justify-between px-6 h-14">
+        <Link href="/" className="font-bold text-xl text-orange-600">
+          Snack
+        </Link>
+        <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+      </nav>
+    );
+  }
 
   if (isSignedIn) {
     return (
@@ -67,11 +81,11 @@ export function Navbar({ variant = 'global' }: NavbarProps) {
             >
               <Search size={20} />
             </Link>
-            {user?.imageUrl ? (
+            {user?.user_metadata?.avatar_url ? (
               <Link href="/dashboard/profile" title="Profile">
                 <img 
-                  src={user.imageUrl} 
-                  alt={user.firstName || 'Profile'} 
+                  src={user.user_metadata.avatar_url} 
+                  alt={user.user_metadata?.first_name || 'Profile'} 
                   className="w-8 h-8 rounded-full object-cover border border-gray-200 hover:border-orange-300 transition-colors"
                 />
               </Link>
@@ -82,7 +96,7 @@ export function Navbar({ variant = 'global' }: NavbarProps) {
                 title="Profile"
               >
                 <span className="text-sm font-medium">
-                  {user?.firstName?.[0] || user?.username?.[0] || 'U'}
+                  {user?.user_metadata?.first_name?.[0] || user?.user_metadata?.username?.[0] || 'U'}
                 </span>
               </Link>
             )}
@@ -110,11 +124,12 @@ export function Navbar({ variant = 'global' }: NavbarProps) {
           >
             Explore
           </Link>
-          <SignUpButton mode="modal">
-            <button className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-4 py-2 rounded-lg transition-colors">
-              Sign Up
-            </button>
-          </SignUpButton>
+          <Link
+            href="/auth/sign-up"
+            className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            Sign Up
+          </Link>
         </div>
         
         {/* Mobile Navigation */}
@@ -126,11 +141,12 @@ export function Navbar({ variant = 'global' }: NavbarProps) {
           >
             <Search size={20} />
           </Link>
-          <SignUpButton mode="modal">
-            <button className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-3 py-2 rounded-lg text-sm transition-colors">
-              Sign Up
-            </button>
-          </SignUpButton>
+          <Link
+            href="/auth/sign-up"
+            className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-3 py-2 rounded-lg text-sm transition-colors"
+          >
+            Sign Up
+          </Link>
         </div>
       </div>
     </nav>

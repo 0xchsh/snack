@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Plus, ExternalLink, Edit, Trash2, Copy } from 'lucide-react';
+import { Plus, ExternalLink, Edit, Trash2, Copy, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { EmojiPickerComponent } from '@/components/emoji-picker';
@@ -31,10 +31,12 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
+  rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { ViewModeToggle } from '@/components/view-mode-toggle';
 import { GalleryListItem } from '@/components/gallery-list-item';
 import { SortableDropIndicator } from '@/components/sortable-drop-indicator';
+import { toast } from 'sonner';
 
 interface ListItem {
   id: string;
@@ -82,7 +84,11 @@ export function ListViewClient({ list }: ListViewClientProps) {
   const router = useRouter();
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement to start drag (better for touch)
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -190,13 +196,17 @@ export function ListViewClient({ list }: ListViewClientProps) {
     try {
       // Check if clipboard API is available
       if (!navigator.clipboard || !navigator.clipboard.readText) {
-        alert('Clipboard API not available. Please paste the URL manually in the input field.');
+        toast.error('Clipboard not available', {
+          description: 'Please paste the URL manually in the input field.'
+        });
         return;
       }
 
       const clipboardText = await navigator.clipboard.readText();
       if (!clipboardText.trim()) {
-        alert('Clipboard is empty. Copy a URL first, then try again.');
+        toast.error('Clipboard is empty', {
+          description: 'Copy a URL first, then try again.'
+        });
         return;
       }
 
@@ -225,7 +235,9 @@ export function ListViewClient({ list }: ListViewClientProps) {
       });
 
       if (urls.length === 0) {
-        alert('No valid URLs found in clipboard. Make sure you have copied a valid URL (starting with http:// or https://).');
+        toast.error('No valid URLs found in clipboard', {
+          description: 'Make sure you have copied a valid URL starting with http:// or https://'
+        });
         setIsAdding(false);
         return;
       }
@@ -267,21 +279,29 @@ export function ListViewClient({ list }: ListViewClientProps) {
       // Show feedback
       if (failed.length === 0) {
         if (urls.length > 1) {
-          console.log(`Successfully added ${urls.length} links from clipboard!`);
+          toast.success(`Successfully added ${urls.length} links from clipboard!`);
         } else {
-          console.log('Successfully added link from clipboard!');
+          toast.success('Successfully added link from clipboard!');
         }
       } else if (successful.length === 0) {
-        alert(`Failed to add links from clipboard:\n${failed.join('\n')}`);
+        toast.error('Failed to add links from clipboard', {
+          description: failed.join('\n')
+        });
       } else {
-        alert(`Added ${successful.length} links successfully from clipboard.\n\nFailed to add:\n${failed.join('\n')}`);
+        toast.success(`Added ${successful.length} links successfully`, {
+          description: failed.length > 0 ? `Failed to add: ${failed.join(', ')}` : undefined
+        });
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'NotAllowedError') {
-        alert('Clipboard access denied by browser. This is common on HTTP sites.\n\nTo add links:\n1. Copy your URL\n2. Paste it in the input field above\n3. Click "Add link"\n\nOr use HTTPS for automatic clipboard access.');
+        toast.error('Clipboard access denied', {
+          description: 'Please paste the URL manually in the input field above.'
+        });
       } else {
         console.error('Error reading clipboard or adding links:', error);
-        alert('Error reading clipboard. Please paste the URL manually in the input field.');
+        toast.error('Error reading clipboard', {
+          description: 'Please paste the URL manually in the input field.'
+        });
       }
     } finally {
       setIsAdding(false);
@@ -321,7 +341,7 @@ export function ListViewClient({ list }: ListViewClientProps) {
       });
 
       if (urls.length === 0) {
-        alert('Please enter at least one valid URL');
+        toast.error('Please enter at least one valid URL');
         return;
       }
 
@@ -365,18 +385,24 @@ export function ListViewClient({ list }: ListViewClientProps) {
       if (failed.length === 0) {
         // All succeeded
         if (urls.length > 1) {
-          alert(`Successfully added ${urls.length} links!`);
+          toast.success(`Successfully added ${urls.length} links!`);
+        } else {
+          toast.success('Link added successfully!');
         }
       } else if (successful.length === 0) {
         // All failed
-        alert(`Failed to add links:\n${failed.join('\n')}`);
+        toast.error('Failed to add links', {
+          description: failed.join('\n')
+        });
       } else {
         // Partial success
-        alert(`Added ${successful.length} links successfully.\n\nFailed to add:\n${failed.join('\n')}`);
+        toast.success(`Added ${successful.length} links successfully`, {
+          description: `Failed to add: ${failed.join(', ')}`
+        });
       }
     } catch (error) {
       console.error('Error adding links:', error);
-      alert('Unexpected error adding links');
+      toast.error('Unexpected error adding links');
     } finally {
       setIsAdding(false);
     }
@@ -399,11 +425,13 @@ export function ListViewClient({ list }: ListViewClientProps) {
       } else {
         const errorData = await response.json();
         console.error('Failed to update emoji:', errorData.error);
-        alert(errorData.error || 'Failed to update emoji');
+        toast.error('Failed to update emoji', {
+          description: errorData.error
+        });
       }
     } catch (error) {
       console.error('Error updating emoji:', error);
-      alert('Error updating emoji');
+      toast.error('Error updating emoji');
     } finally {
       setIsUpdatingEmoji(false);
     }
@@ -448,10 +476,10 @@ export function ListViewClient({ list }: ListViewClientProps) {
     try {
       await navigator.clipboard.writeText(snackUrl);
       // Show success feedback - you could replace this with a proper toast
-      alert('Link copied to clipboard!');
+      toast.success('Link copied to clipboard!');
     } catch (error) {
       console.error('Failed to copy link:', error);
-      alert('Failed to copy link');
+      toast.error('Failed to copy link');
     }
   };
 
@@ -474,11 +502,13 @@ export function ListViewClient({ list }: ListViewClientProps) {
       } else {
         const errorData = await response.json();
         console.error('Failed to delete item:', errorData.error);
-        alert(errorData.error || 'Failed to delete item');
+        toast.error('Failed to delete item', {
+          description: errorData.error
+        });
       }
     } catch (error) {
       console.error('Error deleting item:', error);
-      alert('Error deleting item');
+      toast.error('Error deleting item');
     } finally {
       setIsDeleting(null);
     }
@@ -528,7 +558,9 @@ export function ListViewClient({ list }: ListViewClientProps) {
           setItems(items);
           const errorData = await response.json();
           console.error('Failed to reorder items:', errorData.error);
-          alert(errorData.error || 'Failed to reorder items');
+          toast.error('Failed to reorder items', {
+            description: errorData.error
+          });
         } else {
           console.log('✅ Reorder successful!');
         }
@@ -537,7 +569,7 @@ export function ListViewClient({ list }: ListViewClientProps) {
         console.log('💥 Fetch error, reverting...');
         setItems(items);
         console.error('Error reordering items:', error);
-        alert('Error reordering items');
+        toast.error('Error reordering items');
       } finally {
         setIsReordering(false);
       }
@@ -563,11 +595,13 @@ export function ListViewClient({ list }: ListViewClientProps) {
       } else {
         const errorData = await response.json();
         console.error('Failed to update view mode:', errorData.error);
-        alert(errorData.error || 'Failed to update view mode');
+        toast.error('Failed to update view mode', {
+          description: errorData.error
+        });
       }
     } catch (error) {
       console.error('Error updating view mode:', error);
-      alert('Error updating view mode');
+      toast.error('Error updating view mode');
     } finally {
       setIsUpdatingViewMode(false);
     }
@@ -585,12 +619,19 @@ export function ListViewClient({ list }: ListViewClientProps) {
           
           <div className="text-left space-y-4 max-w-[672px] mx-auto">
             <div className="flex items-center gap-2">
-              <EmojiPickerComponent
-                currentEmoji={list.emoji || '📝'}
-                onEmojiSelect={handleEmojiUpdate}
-                disabled={isUpdatingEmoji}
-                size="lg"
-              />
+              <div className="relative">
+                <EmojiPickerComponent
+                  currentEmoji={list.emoji || '📝'}
+                  onEmojiSelect={handleEmojiUpdate}
+                  disabled={isUpdatingEmoji}
+                  size="lg"
+                />
+                {isUpdatingEmoji && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded">
+                    <Loader2 className="h-4 w-4 animate-spin text-gray-600" />
+                  </div>
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <InlineEdit
@@ -638,7 +679,7 @@ export function ListViewClient({ list }: ListViewClientProps) {
                 >
                   {isAdding ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
                       Adding...
                     </>
                   ) : url.trim() ? (
@@ -713,7 +754,10 @@ export function ListViewClient({ list }: ListViewClientProps) {
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
             >
-              <SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
+              <SortableContext 
+              items={items.map(item => item.id)} 
+              strategy={viewMode === 'LIST' ? verticalListSortingStrategy : rectSortingStrategy}
+            >
                 {viewMode === 'LIST' ? (
                   <div className="max-w-[672px] mx-auto">
                     <div className="space-y-3">
@@ -728,7 +772,7 @@ export function ListViewClient({ list }: ListViewClientProps) {
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-[1296px] mx-auto">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 max-w-[1296px] mx-auto px-4">
                     {items.map((item) => (
                       <GalleryListItem 
                         key={item.id}
@@ -771,7 +815,7 @@ export function ListViewClient({ list }: ListViewClientProps) {
         {isReordering && (
           <div className="fixed bottom-6 right-6 bg-white border border-gray-200 rounded-lg p-4 shadow-lg">
             <div className="flex items-center space-x-3">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
               <span className="text-sm font-medium text-gray-700">Saving order...</span>
             </div>
           </div>

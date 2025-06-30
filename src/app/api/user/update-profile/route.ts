@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, clerkClient } from '@clerk/nextjs/server';
-import { supabase } from '@/lib/supabase';
+import { createServerAuth } from "@/lib/auth-server"
+import { createServerSupabaseClient } from "@/lib/auth-server"
 import { z } from 'zod';
 
 const updateProfileSchema = z.object({
@@ -9,29 +9,32 @@ const updateProfileSchema = z.object({
     .max(15, 'Username must be 15 characters or less')
     .regex(/^[a-zA-Z0-9]+$/, 'Username can only contain letters and numbers')
     .optional(),
-  firstName: z.string().max(50, 'First name must be 50 characters or less').optional(),
-  lastName: z.string().max(50, 'Last name must be 50 characters or less').optional(),
+  first_name: z.string().max(50, 'First name must be 50 characters or less').optional(),
+  last_name: z.string().max(50, 'Last name must be 50 characters or less').optional(),
   email: z.string().email('Invalid email format').optional()
 });
 
 export async function PATCH(request: NextRequest) {
   try {
     // Check authentication
-    const { userId } = await auth();
-    if (!userId) {
+    const serverAuth = createServerAuth();
+    const user = await serverAuth.getUser();
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Parse and validate request body
     const body = await request.json();
     const validatedData = updateProfileSchema.parse(body);
-    const { username, firstName, lastName, email } = validatedData;
+    const { username, first_name, last_name, email } = validatedData;
 
+    const supabase = createServerSupabaseClient();
+    
     // Get current user from database
     const { data: currentUser, error: userError } = await supabase
       .from('users')
       .select('*')
-      .eq('clerk_id', userId)
+      .eq('id', user.id)
       .single();
 
     if (userError || !currentUser) {
@@ -44,7 +47,7 @@ export async function PATCH(request: NextRequest) {
         .from('users')
         .select('id')
         .ilike('username', username)
-        .neq('clerk_id', userId)
+        .neq('id', user.id)
         .single();
       if (existingUser) {
         return NextResponse.json(
@@ -57,26 +60,22 @@ export async function PATCH(request: NextRequest) {
     // Prepare updates for database
     const dbUpdates: any = {};
     if (username !== undefined) dbUpdates.username = username;
-    if (firstName !== undefined) dbUpdates.first_name = firstName;
-    if (lastName !== undefined) dbUpdates.last_name = lastName;
+    if (first_name !== undefined) dbUpdates.first_name = first_name;
+    if (last_name !== undefined) dbUpdates.last_name = last_name;
+    if (email !== undefined) dbUpdates.email = email;
 
-    // Prepare updates for Clerk
-    const clerkUpdates: any = {};
-    if (firstName !== undefined) clerkUpdates.firstName = firstName;
-    if (lastName !== undefined) clerkUpdates.lastName = lastName;
-    if (email !== undefined) clerkUpdates.emailAddresses = [{ emailAddress: email }];
-
-    // Update Clerk user if needed
-    if (Object.keys(clerkUpdates).length > 0) {
+    // Update auth user metadata if needed
+    if (first_name !== undefined || last_name !== undefined || username !== undefined) {
+      const metadataUpdates: any = {};
+      if (first_name !== undefined) metadataUpdates.first_name = first_name;
+      if (last_name !== undefined) metadataUpdates.last_name = last_name;
+      if (username !== undefined) metadataUpdates.username = username;
+      
       try {
-        const client = await clerkClient();
-        await client.users.updateUser(userId, clerkUpdates);
-      } catch (clerkError) {
-        console.error('Clerk update error:', clerkError);
-        return NextResponse.json(
-          { error: 'Failed to update email/name. Please try again.' },
-          { status: 500 }
-        );
+        await serverAuth.updateUserMetadata(user.id, metadataUpdates);
+      } catch (authError) {
+        console.error('Auth metadata update error:', authError);
+        // Don't fail the request for metadata errors
       }
     }
 
@@ -86,7 +85,7 @@ export async function PATCH(request: NextRequest) {
       const { data: updated, error: updateError } = await supabase
         .from('users')
         .update(dbUpdates)
-        .eq('clerk_id', userId)
+        .eq('id', user.id)
         .select()
         .single();
       if (updateError) {
@@ -95,27 +94,12 @@ export async function PATCH(request: NextRequest) {
       updatedUser = updated;
     }
 
-    // Sync username to Clerk metadata for future reference
-    if (username && username !== currentUser.username) {
-      try {
-        const client = await clerkClient();
-        await client.users.updateUserMetadata(userId, {
-          publicMetadata: {
-            username: username
-          }
-        });
-      } catch (metadataError) {
-        console.error('Clerk metadata update error:', metadataError);
-        // Don't fail the request for metadata errors
-      }
-    }
-
     return NextResponse.json({
       success: true,
       user: {
         username: updatedUser.username,
-        firstName: updatedUser.first_name,
-        lastName: updatedUser.last_name
+        first_name: updatedUser.first_name,
+        last_name: updatedUser.last_name
       },
       message: 'Profile updated successfully'
     });

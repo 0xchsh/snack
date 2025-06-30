@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Edit, Share, Bookmark, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useUser, SignUpButton } from '@clerk/nextjs';
+import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,8 @@ export function ListViewNavbar({
   username,
   mode = 'edit'
 }: ListViewNavbarProps) {
-  const { isSignedIn, user } = useUser();
+  const { user } = useAuth();
+  const isSignedIn = !!user;
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -41,7 +42,7 @@ export function ListViewNavbar({
   const handleSave = async () => {
     if (!isSignedIn) {
       // Redirect to sign up for public users
-      router.push('/sign-up');
+      router.push('/auth/sign-up');
       return;
     }
 
@@ -115,7 +116,7 @@ export function ListViewNavbar({
   // View mode: unified experience for public list viewing
   if (mode === 'view') {
     return (
-      <nav className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm flex items-center justify-between px-6 h-14">
+      <nav className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm flex items-center justify-between px-4 sm:px-6 h-14">
         {/* Left: Made with Snack badge */}
         <Link 
           href="/" 
@@ -137,12 +138,11 @@ export function ListViewNavbar({
             <span className="hidden sm:inline">Share</span>
           </button>
           {!isSignedIn && (
-            <SignUpButton mode="modal">
-              <button className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-4 py-2 rounded-lg transition-colors">
-                <span className="hidden sm:inline">Sign Up</span>
-                <span className="sm:hidden">Sign Up</span>
+            <Link href="/auth/sign-up">
+              <button className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-3 py-2 sm:px-4 rounded-lg transition-colors text-sm sm:text-base">
+                Sign Up
               </button>
-            </SignUpButton>
+            </Link>
           )}
         </div>
       </nav>
@@ -152,7 +152,7 @@ export function ListViewNavbar({
   // Edit mode: current behavior for editing lists
   if (isSignedIn) {
     return (
-      <nav className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm flex items-center justify-between px-6 h-14">
+      <nav className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm flex items-center justify-between px-4 sm:px-6 h-14">
         {/* Left: Back button */}
         <button
           onClick={handleBack}
@@ -260,11 +260,11 @@ export function ListViewNavbar({
           <Share size={18} />
           <span className="hidden sm:inline">Share</span>
         </button>
-        <SignUpButton mode="modal">
+        <Link href="/auth/sign-up">
           <button className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-4 py-2 rounded-lg transition-colors">
             Sign Up
           </button>
-        </SignUpButton>
+        </Link>
       </div>
     </nav>
   );

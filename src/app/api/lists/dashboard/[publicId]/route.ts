@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { currentUser } from '@clerk/nextjs/server';
+import { createServerSupabaseClient, createServerAuth } from '@/lib/auth-server';
 
 export async function GET(
   request: Request,
@@ -8,17 +7,20 @@ export async function GET(
 ) {
   try {
     const { publicId } = await params;
-    const user = await currentUser();
+    const serverAuth = createServerAuth();
+    const user = await serverAuth.getUser();
     
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const supabase = createServerSupabaseClient();
+    
     // Get the database user record
     const { data: dbUser, error: userError } = await supabase
       .from('users')
       .select('id, username')
-      .eq('clerk_id', user.id)
+      .eq('id', user.id)
       .single();
 
     if (userError || !dbUser) {
@@ -30,7 +32,7 @@ export async function GET(
       .from('lists')
       .select('*')
       .eq('public_id', publicId)
-      .eq('user_id', dbUser.id)
+      .eq('user_id', user.id)
       .single();
 
     if (error || !list) {

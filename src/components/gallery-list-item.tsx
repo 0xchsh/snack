@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { ExternalLink, Trash2 } from 'lucide-react';
+import { ExternalLink, Trash2, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Favicon } from '@/components/favicon';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,7 @@ interface GalleryListItemProps {
 
 export const GalleryListItem = ({ item, onDelete, isDeleting = false, isDragOverlay = false }: GalleryListItemProps) => {
   const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
 
   const {
     attributes,
@@ -67,15 +68,26 @@ export const GalleryListItem = ({ item, onDelete, isDeleting = false, isDragOver
             {/* Image */}
             <div className="w-full aspect-[1.91/1] relative bg-gray-100 overflow-hidden rounded-t-lg">
               {item.image && item.image.trim() !== '' && !imageError ? (
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-200"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  unoptimized
-                  onError={() => setImageError(true)}
-                />
+                <>
+                  {imageLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                      <div className="animate-pulse bg-gray-200 w-8 h-8 rounded"></div>
+                    </div>
+                  )}
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    className={`object-cover group-hover:scale-110 transition-transform duration-200 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+                    unoptimized
+                    onError={() => {
+                      setImageError(true);
+                      setImageLoading(false);
+                    }}
+                    onLoad={() => setImageLoading(false)}
+                  />
+                </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-50 to-gray-100">
                   <ExternalLink className="h-8 w-8" />
@@ -115,7 +127,7 @@ export const GalleryListItem = ({ item, onDelete, isDeleting = false, isDragOver
                 className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full h-8 w-8"
               >
                 {isDeleting ? (
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-500"></div>
+                  <Loader2 className="h-3 w-3 animate-spin text-red-500" />
                 ) : (
                   <Trash2 className="h-4 w-4" />
                 )}

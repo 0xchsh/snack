@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
+// import { currentUser } from '@clerk/nextjs/server';
 import { supabase } from '@/lib/supabase';
 import ogs from 'open-graph-scraper';
 import { extractFaviconFromOG } from '@/lib/favicon';
@@ -12,7 +12,8 @@ interface RouteParams {
 
 export async function POST(request: Request, { params }: RouteParams) {
   const { publicId } = await params;
-  const user = await currentUser();
+  // const user = await currentUser();
+  const user = null; // Temporarily disabled
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -1,17 +1,19 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
 import { nanoid } from 'nanoid';
-import { supabase } from '@/lib/supabase';
+import { createServerSupabaseClient } from '@/lib/auth-server';
+import { createServerAuth } from '@/lib/auth-server';
 
 export async function GET(request: NextRequest) {
-  const user = await currentUser();
+  const serverAuth = createServerAuth();
+  const user = await serverAuth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    const supabase = createServerSupabaseClient();
     const { data: lists, error } = await supabase
       .from('lists')
       .select('*')
@@ -28,9 +30,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const user = await currentUser();
-
-  console.log('🔍 Clerk user object:', user);
+  const serverAuth = createServerAuth();
+  const user = await serverAuth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -39,26 +40,16 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { title, description, emoji } = body;
-    console.log('📝 Received request body:', body);
 
     if (!title) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 });
     }
 
-    // Look up the internal user ID by Clerk ID
-    const { data: userRow, error: userLookupError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('clerk_id', user.id)
-      .single();
-
-    if (userLookupError || !userRow) {
-      console.error('User lookup error:', userLookupError);
-      return NextResponse.json({ error: 'User not found in database' }, { status: 404 });
-    }
-
+    const supabase = createServerSupabaseClient();
     const newId = nanoid();
     const now = new Date().toISOString();
+    
+    // With Supabase auth, user.id is the primary key in users table
     const { data: list, error } = await supabase
       .from('lists')
       .insert({
@@ -67,7 +58,7 @@ export async function POST(request: NextRequest) {
         title,
         description,
         emoji,
-        user_id: userRow.id, // use internal ID
+        user_id: user.id, // Direct auth user ID
         view_mode: 'LIST',
         created_at: now,
         updated_at: now,

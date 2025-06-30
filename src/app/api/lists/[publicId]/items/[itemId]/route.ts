@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
-import { supabase } from '@/lib/supabase';
+import { createServerAuth, createServerSupabaseClient } from '@/lib/auth-server';
 
 interface RouteParams {
   params: Promise<{
@@ -11,17 +10,20 @@ interface RouteParams {
 
 export async function DELETE(request: Request, { params }: RouteParams) {
   const { publicId, itemId } = await params;
-  const user = await currentUser();
+  const serverAuth = createServerAuth();
+  const user = await serverAuth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const supabase = createServerSupabaseClient();
+  
   try {
     // Find the list and verify ownership
     const { data: list, error: listError } = await supabase
       .from('lists')
-      .select('*, user:users(clerk_id)')
+      .select('*, user:users(id)')
       .eq('public_id', publicId)
       .single();
 
@@ -29,7 +31,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: 'List not found' }, { status: 404 });
     }
 
-    if (list.user.clerk_id !== user.id) {
+    if (list.user.id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

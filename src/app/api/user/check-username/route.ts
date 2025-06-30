@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { supabase } from '@/lib/supabase';
+import { createServerAuth } from "@/lib/auth-server"
+import { createServerSupabaseClient } from "@/lib/auth-server"
 import { z } from 'zod';
 
 // Rate limiting store (in production, use Redis or similar)
@@ -36,13 +36,14 @@ function checkRateLimit(userId: string): boolean {
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const { userId } = await auth();
-    if (!userId) {
+    const serverAuth = createServerAuth();
+    const user = await serverAuth.getUser();
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check rate limit
-    if (!checkRateLimit(userId)) {
+    if (!checkRateLimit(user.id)) {
       return NextResponse.json(
         { error: 'Too many requests. Please try again later.' },
         { status: 429 }
@@ -54,12 +55,14 @@ export async function POST(request: NextRequest) {
     const validatedData = checkUsernameSchema.parse(body);
     const { username } = validatedData;
 
+    const supabase = createServerSupabaseClient();
+    
     // Check if username is available (excluding current user)
     const { data: existingUser, error } = await supabase
       .from('users')
       .select('id')
       .ilike('username', username)
-      .neq('clerk_id', userId)
+      .neq('id', user.id)
       .maybeSingle();
 
     if (error && error.code !== 'PGRST116') {

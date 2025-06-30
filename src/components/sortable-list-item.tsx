@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent } from '@/components/ui/card';
-import { ExternalLink, GripVertical, Trash2 } from 'lucide-react';
+import { ExternalLink, GripVertical, Trash2, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Favicon } from '@/components/favicon';
 import { Button } from '@/components/ui/button';
@@ -56,20 +56,20 @@ export function SortableListItem({ item, onDelete, isDeleting = false, isDragOve
     >
       <Card className={`overflow-hidden hover:shadow-md transition-all duration-200 group border border-[#D1D5DB] ${isDragging && !isDragOverlay ? 'bg-gray-200 border-gray-300' : 'bg-white'} rounded-lg ${isDragOverlay ? 'shadow-xl' : ''} gap-0`}>
         <CardContent 
-          className={`p-2 py-3 ${!isDragOverlay ? 'cursor-grab active:cursor-grabbing' : ''}`}
+          className={`p-3 sm:p-4 ${!isDragOverlay ? 'cursor-grab active:cursor-grabbing' : ''}`}
           {...(!isDragOverlay ? attributes : {})}
           {...(!isDragOverlay ? listeners : {})}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 sm:gap-4">
             {/* Image */}
-            <div className={`w-[137px] h-[72px] flex-shrink-0 relative overflow-hidden rounded ${isDragging && !isDragOverlay ? 'bg-gray-200' : 'bg-gray-50'}`}>
+            <div className={`w-[80px] h-[60px] sm:w-[120px] sm:h-[72px] flex-shrink-0 relative overflow-hidden rounded ${isDragging && !isDragOverlay ? 'bg-gray-200' : 'bg-gray-50'}`}>
               {item.image && item.image.trim() !== '' && !imageError && !(isDragging && !isDragOverlay) ? (
                 <Image
                   src={item.image}
                   alt={item.title}
                   fill
                   className="object-cover group-hover:scale-110 transition-transform duration-200"
-                  sizes="137px"
+                  sizes="(max-width: 640px) 80px, 120px"
                   unoptimized
                   onError={() => {
                     console.log('Image failed to load:', item.image);
@@ -84,16 +84,16 @@ export function SortableListItem({ item, onDelete, isDeleting = false, isDragOve
             </div>
             
             {/* Content */}
-            <div className="flex-1 flex flex-col justify-center min-w-0 h-[72px]">
+            <div className="flex-1 flex flex-col justify-center min-w-0 h-[60px] sm:h-[72px]">
               <div className="space-y-1">
-                <h3 className={`font-medium line-clamp-2 leading-tight text-sm transition-colors duration-200 ${isDragging && !isDragOverlay ? 'text-gray-400' : 'text-gray-900'}`}> 
+                <h3 className={`font-medium line-clamp-2 leading-tight text-xs sm:text-sm transition-colors duration-200 ${isDragging && !isDragOverlay ? 'text-gray-400' : 'text-gray-900'}`}> 
                   {item.title}
                 </h3>
                 <div 
                   className={`flex items-center gap-1.5 text-xs ${isDragging && !isDragOverlay ? 'text-gray-400' : 'text-gray-500'} transition-colors duration-200`}
                 >
                   <Favicon src={item.favicon} size={12} />
-                  <span className="truncate">
+                  <span className="truncate text-xs">
                     {new URL(item.url).hostname}
                   </span>
                 </div>
@@ -125,7 +125,7 @@ export function SortableListItem({ item, onDelete, isDeleting = false, isDragOve
                   data-delete-button
                 >
                   {isDeleting ? (
-                    <div className="animate-spin rounded-full h-2.5 w-2.5 border-b-2 border-red-500"></div>
+                    <Loader2 className="h-2.5 w-2.5 animate-spin text-red-500" />
                   ) : (
                     <Trash2 className="h-4 w-4" />
                   )}

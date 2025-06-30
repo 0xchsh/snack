@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
+// import { currentUser } from '@clerk/nextjs/server';
 import { supabase } from '@/lib/supabase';
 
 interface RouteParams {
@@ -12,7 +12,8 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   const { publicId } = await params;
   console.log('🔄 Reorder API called for publicId:', publicId);
   
-  const user = await currentUser();
+  // const user = await currentUser();
+  const user = null; // Temporarily disabled
 
   if (!user) {
     console.log('❌ Unauthorized: No user found');

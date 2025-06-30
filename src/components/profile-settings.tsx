@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
-import { useClerk } from '@clerk/nextjs';
-import { UserProfile } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,8 +18,20 @@ interface ProfileSettingsProps {
   user: {
     id: string;
     username: string;
-    firstName: string | null;
-    lastName: string | null;
+    first_name: string | null;
+    last_name: string | null;
+    email: string;
+    avatar_url: string | null;
+  };
+  authUser: {
+    id: string;
+    email: string;
+    user_metadata?: {
+      first_name?: string;
+      last_name?: string;
+      username?: string;
+      avatar_url?: string;
+    };
   };
 }
 
@@ -29,27 +40,20 @@ interface UsernameCheckResult {
   message: string;
 }
 
-export function ProfileSettings({ user }: ProfileSettingsProps) {
-  const { user: clerkUser } = useUser();
-  const { signOut } = useClerk();
+export function ProfileSettings({ user, authUser }: ProfileSettingsProps) {
+  const { signOut } = useAuth();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   
   // Form state
   const [username, setUsername] = useState(user.username);
-  const [firstName, setFirstName] = useState(user.firstName || '');
-  const [lastName, setLastName] = useState(user.lastName || '');
-  const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState(user.first_name || '');
+  const [lastName, setLastName] = useState(user.last_name || '');
+  const [email, setEmail] = useState(user.email);
   
-  // Update email when clerkUser loads
-  useEffect(() => {
-    if (clerkUser?.primaryEmailAddress?.emailAddress) {
-      setEmail(clerkUser.primaryEmailAddress.emailAddress);
-    }
-  }, [clerkUser]);
-
   // Check if user signed up with social auth (email is not changeable)
-  const isSocialAuth = clerkUser?.externalAccounts && clerkUser.externalAccounts.length > 0;
+  const isSocialAuth = !!authUser.user_metadata?.avatar_url;
   
   // Username validation state
   const [usernameCheck, setUsernameCheck] = useState<UsernameCheckResult | null>(null);
@@ -122,8 +126,8 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
       const updates: any = {};
       
       if (username !== user.username) updates.username = username;
-      if (firstName !== user.firstName) updates.firstName = firstName;
-      if (lastName !== user.lastName) updates.lastName = lastName;
+      if (firstName !== user.first_name) updates.first_name = firstName;
+      if (lastName !== user.last_name) updates.last_name = lastName;
 
       if (Object.keys(updates).length === 0) {
         toast.info('No changes to save');
@@ -192,6 +196,7 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
   const handleLogout = async () => {
     try {
       await signOut();
+      router.push('/');
       toast.success('Logged out successfully');
     } catch (error) {
       console.error('Logout error:', error);
@@ -290,21 +295,23 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
           <CardContent className="py-4 px-6">
             <div className="flex items-center gap-6">
               <div className="relative">
-                {clerkUser?.imageUrl ? (
+                {user.avatar_url ? (
                   <img
-                    src={clerkUser.imageUrl}
+                    src={user.avatar_url}
                     alt="Profile picture"
                     className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-200">
-                    <User className="w-8 h-8 text-gray-500" />
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center border-2 border-gray-200">
+                    <span className="text-white font-medium text-lg">
+                      {user.first_name?.[0] || user.username?.[0] || 'U'}
+                    </span>
                   </div>
                 )}
               </div>
               <div className="flex flex-col space-y-2">
                 <h3 className="font-medium">
-                  {clerkUser?.firstName || clerkUser?.username || 'User'}
+                  {user.first_name || user.username || 'User'}
                 </h3>
                 <Dialog>
                   <DialogTrigger asChild>
@@ -323,15 +330,17 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
                       </div>
                       
                       <div className="flex flex-col items-center space-y-4">
-                        {clerkUser?.imageUrl ? (
+                        {user.avatar_url ? (
                           <img
-                            src={clerkUser.imageUrl}
+                            src={user.avatar_url}
                             alt="Current profile picture"
                             className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
                           />
                         ) : (
-                          <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-200">
-                            <User className="w-12 h-12 text-gray-500" />
+                          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center border-2 border-gray-200">
+                            <span className="text-white font-medium text-xl">
+                              {user.first_name?.[0] || user.username?.[0] || 'U'}
+                            </span>
                           </div>
                         )}
                         
@@ -457,7 +466,7 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
                 />
                 <Button
                   onClick={handleUpdateEmail}
-                  disabled={emailLoading || !email || email === clerkUser?.primaryEmailAddress?.emailAddress}
+                  disabled={emailLoading || !email || email === user.email}
                   className="w-full"
                   variant="outline"
                 >

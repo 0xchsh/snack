@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, clerkClient } from '@clerk/nextjs/server';
-import { supabase } from '@/lib/supabase';
+import { createServerAuth, createServerSupabaseClient } from "@/lib/auth-server"
+import { createAdminSupabaseClient } from '@/lib/supabase';
 import { z } from 'zod';
 
 const deleteAccountSchema = z.object({
@@ -13,8 +13,9 @@ const deleteAccountSchema = z.object({
 export async function DELETE(request: NextRequest) {
   try {
     // Check authentication
-    const { userId } = await auth();
-    if (!userId) {
+    const serverAuth = createServerAuth();
+    const user = await serverAuth.getUser();
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -22,11 +23,14 @@ export async function DELETE(request: NextRequest) {
     const body = await request.json();
     deleteAccountSchema.parse(body);
 
+    const supabase = createServerSupabaseClient();
+    const adminSupabase = createAdminSupabaseClient();
+    
     // Fetch lists for stats (optional)
     const { data: lists, error: listErr } = await supabase
       .from('lists')
       .select('id')
-      .eq('user_id', userId);
+      .eq('user_id', user.id);
 
     if (listErr) throw listErr;
 
@@ -47,16 +51,18 @@ export async function DELETE(request: NextRequest) {
     const { error: deleteErr } = await supabase
       .from('users')
       .delete()
-      .eq('clerk_id', userId);
+      .eq('id', user.id);
 
     if (deleteErr) throw deleteErr;
 
-    // Delete user from Clerk
+    // Delete user from Supabase Auth using admin client
     try {
-      const client = await clerkClient();
-      await client.users.deleteUser(userId);
-    } catch (clerkError) {
-      console.error('Clerk deletion error:', clerkError);
+      const { error: authDeleteError } = await adminSupabase.auth.admin.deleteUser(user.id);
+      if (authDeleteError) {
+        console.error('Supabase auth deletion error:', authDeleteError);
+      }
+    } catch (authError) {
+      console.error('Auth deletion error:', authError);
     }
 
     return NextResponse.json({

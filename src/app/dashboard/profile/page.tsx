@@ -1,37 +1,47 @@
 import { Suspense } from 'react';
-import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { createServerSupabaseClient, createServerAuth } from '@/lib/auth-server';
 import { ProfileSettings } from '@/components/profile-settings';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
-async function getUser(clerkId: string) {
-  const { data: user, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('clerk_id', clerkId)
-    .single();
-
-  if (error && error.code !== 'PGRST116') {
-    throw error;
-  }
-
-  return user;
-}
-
 export default async function ProfilePage() {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    redirect('/sign-in');
-  }
-
-  const user = await getUser(userId);
+  const serverAuth = createServerAuth();
+  const user = await serverAuth.getUser();
   
   if (!user) {
-    redirect('/dashboard');
+    redirect('/auth/sign-in');
+  }
+
+  const supabase = createServerSupabaseClient();
+  
+  // Get user data from database
+  let { data: dbUser, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (error && error.code === 'PGRST116') {
+    // User doesn't exist in database, create them
+    const { data: newUser, error: insertErr } = await supabase
+      .from('users')
+      .insert({
+        id: user.id,
+        email: user.email,
+        username: user.user_metadata?.username || `user_${Date.now()}`,
+        first_name: user.user_metadata?.first_name,
+        last_name: user.user_metadata?.last_name,
+        avatar_url: user.user_metadata?.avatar_url,
+      })
+      .select('*')
+      .single();
+
+    if (insertErr) throw insertErr;
+    dbUser = newUser;
+  } else if (error) {
+    throw error;
   }
 
   return (
@@ -50,7 +60,7 @@ export default async function ProfilePage() {
       </div>
       
       <Suspense fallback={<div>Loading...</div>}>
-        <ProfileSettings user={user} />
+        <ProfileSettings user={dbUser} authUser={user} />
       </Suspense>
     </div>
   );

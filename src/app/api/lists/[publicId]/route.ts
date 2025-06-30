@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
-import { supabase } from '@/lib/supabase';
+import { createServerSupabaseClient, createServerAuth } from '@/lib/auth-server';
 
 interface RouteParams {
   params: Promise<{
@@ -10,7 +9,8 @@ interface RouteParams {
 
 export async function PATCH(request: Request, { params }: RouteParams) {
   const { publicId } = await params;
-  const user = await currentUser();
+  const serverAuth = createServerAuth();
+  const user = await serverAuth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -18,28 +18,21 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   try {
     const { emoji, title, description, viewMode } = await request.json();
+    const supabase = createServerSupabaseClient();
 
     // Find the list and verify ownership
     const { data: list, error: listError } = await supabase
       .from('lists')
-      .select('*, user:users(clerk_id)')
+      .select('user_id')
       .eq('public_id', publicId)
       .single();
-
-    console.log('Fetched list:', list);
-    console.log('Fetched list.user:', list?.user);
 
     if (listError || !list) {
       return NextResponse.json({ error: 'List not found' }, { status: 404 });
     }
 
-    let userObj = null;
-    if (Array.isArray(list.user)) {
-      userObj = list.user[0] ?? null;
-    } else {
-      userObj = list.user ?? null;
-    }
-    if (!userObj || userObj.clerk_id !== user.id) {
+    // Simple ownership check with Supabase auth
+    if (list.user_id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -84,17 +77,20 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
 export async function DELETE(request: Request, { params }: RouteParams) {
   const { publicId } = await params;
-  const user = await currentUser();
+  const serverAuth = createServerAuth();
+  const user = await serverAuth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    const supabase = createServerSupabaseClient();
+    
     // Find the list and verify ownership
     const { data: list, error: listError } = await supabase
       .from('lists')
-      .select('*, user:users(clerk_id)')
+      .select('user_id')
       .eq('public_id', publicId)
       .single();
 
@@ -102,13 +98,8 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: 'List not found' }, { status: 404 });
     }
 
-    let userObj = null;
-    if (Array.isArray(list.user)) {
-      userObj = list.user[0] ?? null;
-    } else {
-      userObj = list.user ?? null;
-    }
-    if (!userObj || userObj.clerk_id !== user.id) {
+    // Simple ownership check with Supabase auth
+    if (list.user_id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

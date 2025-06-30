@@ -15,17 +15,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Next.js 15 application called "Snack" - a social platform for creating and sharing curated lists. The app uses:
 
-- **Authentication**: Clerk for user authentication with publicMetadata for usernames/avatars
-- **Database**: Supabase as the primary database (auth disabled, using Clerk instead)
+- **Authentication**: Supabase Auth for user authentication with email/password and OAuth providers
+- **Database**: Supabase as the primary database with integrated authentication
 - **UI Framework**: Tailwind CSS with Radix UI components and custom components in `/src/components/ui`
-- **State Management**: Server-side rendering with Next.js App Router
+- **State Management**: Server-side rendering with Next.js App Router + custom Auth Context
 - **Testing**: Jest with React Testing Library
 
 ### Key Architecture Patterns
 
-**Database Integration**: The app maintains user records in Supabase's `users` table keyed by Clerk's user ID. User creation happens automatically on first dashboard visit.
+**Database Integration**: The app maintains user records in Supabase's `users` table keyed by Supabase Auth user ID. User creation happens automatically via `userDb.upsertUser()` during authentication.
 
-**Authentication Flow**: Clerk middleware protects routes. Dashboard pages require authentication and redirect to `/sign-in` if not authenticated.
+**Authentication Flow**: Supabase Auth middleware protects routes. Dashboard pages require authentication and redirect to `/auth/sign-in` if not authenticated.
+
+**Auth Implementation**: 
+- Custom auth utilities in `/src/lib/auth.ts` and `/src/lib/auth-server.ts`
+- Auth context provider in `/src/hooks/useAuth.tsx`
+- Custom sign-in/up pages at `/auth/sign-in` and `/auth/sign-up`
+- OAuth callback handler at `/auth/callback`
 
 **List Management**: Core entities are `lists` with `items`. Lists have public IDs for sharing. Users can save others' lists via `saved_lists` table.
 
@@ -47,9 +53,15 @@ This is a Next.js 15 application called "Snack" - a social platform for creating
 ### Environment Configuration
 
 Required environment variables:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- Clerk environment variables (standard Clerk setup)
+- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
+- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key (for admin operations)
+
+Optional environment variables for OAuth:
+- `GOOGLE_CLIENT_ID` - Google OAuth client ID (for Google sign-in)
+- `GOOGLE_CLIENT_SECRET` - Google OAuth client secret
+
+**Note**: OAuth providers must also be configured in your Supabase dashboard under Authentication > Settings > Auth Providers.
 
 ### Build Configuration
 

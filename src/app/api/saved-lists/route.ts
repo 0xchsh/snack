@@ -1,20 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { supabase } from '@/lib/supabase';
+import { createServerAuth } from '@/lib/auth-server';
+import { createServerSupabaseClient } from '@/lib/auth-server';
 
 // GET /api/saved-lists - fetch all saved lists for current user
 export async function GET(request: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const serverAuth = createServerAuth();
+  const user = await serverAuth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  // Get the user's DB id
-  const { data: user, error: userError } = await supabase
-    .from('users')
-    .select('id')
-    .eq('clerk_id', userId)
-    .single();
-  if (userError || !user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
-
+  const supabase = createServerSupabaseClient();
+  
   // Fetch saved lists (join with lists table for details)
   const { data: saved, error: savedError } = await supabase
     .from('saved_lists')
@@ -28,18 +23,13 @@ export async function GET(request: NextRequest) {
 
 // POST /api/saved-lists - save a list for current user
 export async function POST(request: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const serverAuth = createServerAuth();
+  const user = await serverAuth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { listId } = await request.json();
   if (!listId) return NextResponse.json({ error: 'Missing listId' }, { status: 400 });
 
-  // Get the user's DB id
-  const { data: user, error: userError } = await supabase
-    .from('users')
-    .select('id')
-    .eq('clerk_id', userId)
-    .single();
-  if (userError || !user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  const supabase = createServerSupabaseClient();
 
   // Prevent saving own list (optional, can be removed if not needed)
   const { data: list, error: listError } = await supabase
@@ -63,18 +53,13 @@ export async function POST(request: NextRequest) {
 
 // DELETE /api/saved-lists - unsave a list for current user
 export async function DELETE(request: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const serverAuth = createServerAuth();
+  const user = await serverAuth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { listId } = await request.json();
   if (!listId) return NextResponse.json({ error: 'Missing listId' }, { status: 400 });
 
-  // Get the user's DB id
-  const { data: user, error: userError } = await supabase
-    .from('users')
-    .select('id')
-    .eq('clerk_id', userId)
-    .single();
-  if (userError || !user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  const supabase = createServerSupabaseClient();
 
   // Delete from saved_lists
   const { error: deleteError } = await supabase

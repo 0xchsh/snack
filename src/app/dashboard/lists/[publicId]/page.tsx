@@ -1,6 +1,5 @@
-import { currentUser } from '@clerk/nextjs/server';
+import { createServerAuth, createServerSupabaseClient } from '@/lib/auth-server';
 import { redirect, notFound } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import { ListViewClient } from './list-view-client';
 import { ListViewNavbar } from '@/components/list-view-navbar';
 
@@ -12,11 +11,14 @@ interface ListPageProps {
 
 export default async function ListPage({ params }: ListPageProps) {
   const { publicId } = await params;
-  const user = await currentUser();
+  const serverAuth = createServerAuth();
+  const user = await serverAuth.getUser();
   
   if (!user) {
-    redirect('/sign-in');
+    redirect('/auth/sign-in');
   }
+  
+  const supabase = createServerSupabaseClient();
 
   // Get the list with its items and user
   const { data: list, error } = await supabase
@@ -30,7 +32,7 @@ export default async function ListPage({ params }: ListPageProps) {
   }
 
   // Check if the current user owns this list
-  if (list.users?.clerk_id !== user.id) {
+  if (list.users?.id !== user.id) {
     redirect('/dashboard');
   }
 

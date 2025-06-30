@@ -1,32 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { createServerAuth } from "@/lib/auth-server"
+import { createServerSupabaseClient } from "@/lib/auth-server"
 
 export async function PATCH(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const serverAuth = createServerAuth();
+    const user = await serverAuth.getUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { email } = await request.json();
     if (!email) return NextResponse.json({ error: 'Email is required' }, { status: 400 });
 
-    const client = await clerkClient();
-    // Get the user and their email addresses
-    const user = await client.users.getUser(userId);
-    const existing = user.emailAddresses.find((ea: any) => ea.emailAddress.toLowerCase() === email.toLowerCase());
-
-    if (existing) {
-      return NextResponse.json({ success: true, message: 'Email already exists. If unverified, please check your inbox.' });
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
     }
 
-    // Add the new email address (this triggers Clerk to send a verification email)
-    await client.emailAddresses.createEmailAddress({ userId, emailAddress: email });
+    // Check if email is the same as current
+    if (email === user.email) {
+      return NextResponse.json({ success: true, message: 'Email is already current' });
+    }
 
-    return NextResponse.json({ success: true, message: 'Verification email sent! Please check your inbox to verify your new email.' });
+    const supabase = createServerSupabaseClient();
+    
+    // Update email in Supabase auth
+    const { error: authError } = await supabase.auth.updateUser({
+      email: email
+    });
+
+    if (authError) {
+      console.error('Supabase auth error:', authError);
+      return NextResponse.json(
+        { error: authError.message || 'Failed to update email' },
+        { status: 422 }
+      );
+    }
+
+    // Update email in users table
+    const { error: dbError } = await supabase
+      .from('users')
+      .update({ email })
+      .eq('id', user.id);
+
+    if (dbError) {
+      console.error('Database update error:', dbError);
+      return NextResponse.json(
+        { error: 'Failed to update email in database' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Email updated successfully! Please check your inbox to confirm the new email.' 
+    });
   } catch (error: any) {
-    console.error('Clerk error:', error);
+    console.error('Email update error:', error);
     return NextResponse.json(
-      { error: error?.errors?.[0]?.message || error.message || 'Failed to update email', details: error },
-      { status: 422 }
+      { error: error.message || 'Failed to update email' },
+      { status: 500 }
     );
   }
 } 
