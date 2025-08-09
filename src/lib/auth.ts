@@ -94,8 +94,14 @@ export const auth = {
   // Social sign in
   signInWithProvider: async (provider: 'github' | 'google' | 'discord') => {
     const supabase = createClient();
-    const redirectUrl = `${window.location.origin}/api/auth/callback`;
+    
+    // Use the current origin, but ensure it's the correct domain for production
+    const currentOrigin = window.location.origin;
+    const isProd = currentOrigin.includes('vercel.app') || currentOrigin.includes('snack-ratlabs');
+    const redirectUrl = `${currentOrigin}/api/auth/callback`;
+    
     console.log('OAuth redirect URL being used:', redirectUrl);
+    console.log('Current origin:', currentOrigin, 'isProd:', isProd);
     
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
