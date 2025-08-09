@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient, createServerAuth } from '@/lib/auth-server';
+import { createServerAuth } from '@/lib/auth-server';
+import { createClient } from '@/utils/supabase/server';
 
 export async function GET(
   request: Request,
@@ -14,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const supabase = createServerSupabaseClient();
+    const supabase = await createClient();
     
     // Get the database user record
     const { data: dbUser, error: userError } = await supabase

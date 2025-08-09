@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerAuth } from "@/lib/auth-server"
-import { createServerSupabaseClient } from "@/lib/auth-server"
+import { createClient } from "@/utils/supabase/server"
 import { z } from 'zod';
 
 const updateProfileSchema = z.object({
@@ -28,7 +28,7 @@ export async function PATCH(request: NextRequest) {
     const validatedData = updateProfileSchema.parse(body);
     const { username, first_name, last_name, email } = validatedData;
 
-    const supabase = createServerSupabaseClient();
+    const supabase = await createClient();
     
     // Get current user from database
     const { data: currentUser, error: userError } = await supabase

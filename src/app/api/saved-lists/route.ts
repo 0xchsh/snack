@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerAuth } from '@/lib/auth-server';
-import { createServerSupabaseClient } from '@/lib/auth-server';
+import { createClient } from '@/utils/supabase/server';
 
 // GET /api/saved-lists - fetch all saved lists for current user
 export async function GET(request: NextRequest) {
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const user = await serverAuth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createClient();
   
   // Fetch saved lists (join with lists table for details)
   const { data: saved, error: savedError } = await supabase
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   const { listId } = await request.json();
   if (!listId) return NextResponse.json({ error: 'Missing listId' }, { status: 400 });
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createClient();
 
   // Prevent saving own list (optional, can be removed if not needed)
   const { data: list, error: listError } = await supabase
@@ -59,7 +59,7 @@ export async function DELETE(request: NextRequest) {
   const { listId } = await request.json();
   if (!listId) return NextResponse.json({ error: 'Missing listId' }, { status: 400 });
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createClient();
 
   // Delete from saved_lists
   const { error: deleteError } = await supabase

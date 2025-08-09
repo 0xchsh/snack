@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerAuth } from "@/lib/auth-server"
-import { createServerSupabaseClient } from "@/lib/auth-server"
+import { createClient } from '@/utils/supabase/server'
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: true, message: 'Email is already current' });
     }
 
-    const supabase = createServerSupabaseClient();
+    const supabase = await createClient();
     
     // Update email in Supabase auth
     const { error: authError } = await supabase.auth.updateUser({

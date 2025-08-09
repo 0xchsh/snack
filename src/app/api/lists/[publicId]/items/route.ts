@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-// import { currentUser } from '@clerk/nextjs/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/server';
+import { createServerAuth } from '@/lib/auth-server';
 import ogs from 'open-graph-scraper';
 import { extractFaviconFromOG } from '@/lib/favicon';
 
@@ -12,14 +12,15 @@ interface RouteParams {
 
 export async function POST(request: Request, { params }: RouteParams) {
   const { publicId } = await params;
-  // const user = await currentUser();
-  const user = null; // Temporarily disabled
+  const serverAuth = createServerAuth();
+  const user = await serverAuth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    const supabase = await createClient();
     const { url } = await request.json();
 
     if (!url) {
@@ -36,7 +37,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     // Find the list and verify ownership
     const { data: list, error: listError } = await supabase
       .from('lists')
-      .select('*, user:users(clerk_id)')
+      .select('*')
       .eq('public_id', publicId)
       .single();
 
@@ -44,7 +45,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: 'List not found' }, { status: 404 });
     }
 
-    if (list.user.clerk_id !== user.id) {
+    if (list.user_id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

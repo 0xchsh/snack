@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerAuth } from "@/lib/auth-server"
-import { createServerSupabaseClient } from "@/lib/auth-server"
+import { createClient } from "@/utils/supabase/server"
 import { z } from 'zod';
 
 // Rate limiting store (in production, use Redis or similar)
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     const validatedData = checkUsernameSchema.parse(body);
     const { username } = validatedData;
 
-    const supabase = createServerSupabaseClient();
+    const supabase = await createClient();
     
     // Check if username is available (excluding current user)
     const { data: existingUser, error } = await supabase

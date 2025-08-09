@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import { AuthUser, userDb } from '@/lib/auth';
 
 // Auth context type
@@ -31,6 +31,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<AuthError | null>(null);
+
+  const supabase = createClient();
 
   const refreshUser = async () => {
     try {
@@ -72,51 +74,67 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    // Force stop loading after 3 seconds to prevent infinite loops
+    let mounted = true;
+    
+    // Force stop loading after 5 seconds to prevent infinite loops
     const loadingTimeout = setTimeout(() => {
-      console.log('Auth loading timeout - forcing loading to false');
-      setLoading(false);
-    }, 3000);
+      if (mounted) {
+        console.log('Auth loading timeout - forcing loading to false');
+        setLoading(false);
+      }
+    }, 5000);
 
     // Get initial session
     const getInitialSession = async () => {
       try {
         console.log('Getting initial session...');
-        console.log('Current URL:', window.location.href);
-        console.log('URL has hash:', !!window.location.hash);
         
         const { data: { session }, error } = await supabase.auth.getSession();
         console.log('Initial session result:', { 
           hasSession: !!session, 
           error: error?.message || null,
-          user: session?.user ? {
-            id: session.user.id,
-            email: session.user.email,
-            metadata: session.user.user_metadata
-          } : null
+          userId: session?.user?.id,
+          userEmail: session?.user?.email
         });
+        
+        if (!mounted) return;
         
         if (error) {
           console.error('Session error:', error);
           setError(error);
+          setSession(null);
+          setUser(null);
         } else {
           setSession(session);
           setUser(session?.user as AuthUser || null);
+          setError(null);
           
           // Ensure user exists in database
           if (session?.user) {
             console.log('Upserting user to database...');
-            const result = await userDb.upsertUser(session.user as AuthUser);
-            console.log('Upsert result:', result.error ? { error: result.error } : { success: true });
+            try {
+              const result = await userDb.upsertUser(session.user as AuthUser);
+              if (result.error) {
+                console.warn('User upsert failed:', result.error);
+              }
+            } catch (upsertErr) {
+              console.warn('User upsert error:', upsertErr);
+            }
           }
         }
       } catch (err) {
         console.error('Error getting initial session:', err);
-        setError(err as AuthError);
+        if (mounted) {
+          setError(err as AuthError);
+          setSession(null);
+          setUser(null);
+        }
       } finally {
-        console.log('Setting loading to false');
-        clearTimeout(loadingTimeout);
-        setLoading(false);
+        if (mounted) {
+          console.log('Setting loading to false');
+          clearTimeout(loadingTimeout);
+          setLoading(false);
+        }
       }
     };
 
@@ -125,6 +143,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         console.log('Auth state change:', event, !!session);
         setSession(session);
         setUser(session?.user as AuthUser || null);
@@ -133,12 +153,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         // Ensure user exists in database on sign in
         if (event === 'SIGNED_IN' && session?.user) {
-          await userDb.upsertUser(session.user as AuthUser);
+          try {
+            await userDb.upsertUser(session.user as AuthUser);
+          } catch (err) {
+            console.warn('Failed to upsert user on sign in:', err);
+          }
         }
       }
     );
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
       clearTimeout(loadingTimeout);
     };

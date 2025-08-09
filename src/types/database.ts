@@ -12,7 +12,6 @@ export interface Database {
       users: {
         Row: {
           id: string
-          clerk_id: string | null
           username: string | null
           first_name: string | null
           last_name: string | null
@@ -23,7 +22,6 @@ export interface Database {
         }
         Insert: {
           id?: string
-          clerk_id?: string | null
           username?: string | null
           first_name?: string | null
           last_name?: string | null
@@ -34,7 +32,6 @@ export interface Database {
         }
         Update: {
           id?: string
-          clerk_id?: string | null
           username?: string | null
           first_name?: string | null
           last_name?: string | null

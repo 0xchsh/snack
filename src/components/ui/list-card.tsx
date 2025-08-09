@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 
 // Types for different list data structures
 export interface BaseListData {
@@ -41,6 +41,7 @@ function LiveItemCount({ listId, initialCount }: { listId: string, initialCount?
   
   useEffect(() => {
     let isMounted = true;
+    const supabase = createClient();
     
     supabase
       .from('items')

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerAuth, createServerSupabaseClient } from "@/lib/auth-server"
+import { createServerAuth } from "@/lib/auth-server"
+import { createClient } from '@/utils/supabase/server'
 import { createAdminSupabaseClient } from '@/lib/supabase';
 import { z } from 'zod';
 
@@ -23,7 +24,7 @@ export async function DELETE(request: NextRequest) {
     const body = await request.json();
     deleteAccountSchema.parse(body);
 
-    const supabase = createServerSupabaseClient();
+    const supabase = await createClient();
     const adminSupabase = createAdminSupabaseClient();
     
     // Fetch lists for stats (optional)

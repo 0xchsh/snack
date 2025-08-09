@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/server';
 import { Card, CardContent } from '@/components/ui/card';
 import { ExternalLink } from 'lucide-react';
 import Image from 'next/image';
@@ -16,6 +16,7 @@ interface TestListPageProps {
 
 // Function to get test list data (bypasses Clerk lookup)
 async function getTestListData(listId: string) {
+  const supabase = await createClient();
   // Fetch list data directly for test user
   const { data: list, error } = await supabase
     .from('lists')

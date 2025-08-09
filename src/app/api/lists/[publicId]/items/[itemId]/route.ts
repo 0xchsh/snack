@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createServerAuth, createServerSupabaseClient } from '@/lib/auth-server';
+import { createServerAuth } from '@/lib/auth-server';
+import { createClient } from '@/utils/supabase/server';
 
 interface RouteParams {
   params: Promise<{
@@ -17,7 +18,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createClient();
   
   try {
     // Find the list and verify ownership

@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/server';
 import { nanoid } from 'nanoid';
 
 export async function POST() {
   try {
+    const supabase = await createClient();
     console.log('🌱 Starting test data seeding...');
     console.log('Environment check:', {
       hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -24,14 +25,14 @@ export async function POST() {
     }
 
     // Step 1: Create test user
-    const testClerkId = 'test_user_123';
+    const testUserId = '550e8400-e29b-41d4-a716-446655440000'; // Fixed UUID for test user
     const testUsername = 'test';
 
     // Check if test user already exists
     const { data: existingUser } = await supabase
       .from('users')
       .select('*')
-      .eq('clerk_id', testClerkId)
+      .eq('id', testUserId)
       .single();
 
     let userId;
@@ -43,10 +44,11 @@ export async function POST() {
       const { data: newUser, error: userError } = await supabase
         .from('users')
         .insert({
-          clerk_id: testClerkId,
+          id: testUserId,
           username: testUsername,
           first_name: 'Test',
           last_name: 'User',
+          email: 'test@example.com',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -220,7 +222,7 @@ export async function POST() {
           items (*)
         )
       `)
-      .eq('clerk_id', testClerkId)
+      .eq('id', testUserId)
       .single();
 
     if (finalError) throw finalError;

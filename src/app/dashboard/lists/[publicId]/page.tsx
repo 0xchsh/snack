@@ -1,4 +1,5 @@
-import { createServerAuth, createServerSupabaseClient } from '@/lib/auth-server';
+import { createServerAuth } from '@/lib/auth-server';
+import { createClient } from '@/utils/supabase/server';
 import { redirect, notFound } from 'next/navigation';
 import { ListViewClient } from './list-view-client';
 import { ListViewNavbar } from '@/components/list-view-navbar';

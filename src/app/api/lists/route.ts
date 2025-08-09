@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
-import { createServerSupabaseClient } from '@/lib/auth-server';
+import { createClient } from '@/utils/supabase/server';
 import { createServerAuth } from '@/lib/auth-server';
 
 export async function GET(request: NextRequest) {
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createClient();
     const { data: lists, error } = await supabase
       .from('lists')
       .select('*')
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 });
     }
 
-    const supabase = createServerSupabaseClient();
+    const supabase = await createClient();
     const newId = nanoid();
     const now = new Date().toISOString();
     

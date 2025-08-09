@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 
 export async function getExploreLists({ limit, offset, sort, order, search }: {
   limit: number;
@@ -8,6 +8,7 @@ export async function getExploreLists({ limit, offset, sort, order, search }: {
   search?: string;
 }) {
   try {
+    const supabase = createClient();
     // Build query with proper joins and filtering
     let query = supabase
       .from('lists')

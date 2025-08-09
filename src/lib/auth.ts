@@ -1,4 +1,5 @@
-import { supabase, createAdminSupabaseClient } from './supabase';
+import { createClient } from '@/utils/supabase/client';
+import { createAdminSupabaseClient } from './supabase';
 import { User, Session } from '@supabase/supabase-js';
 
 // Types
@@ -23,6 +24,7 @@ export const auth = {
     first_name?: string;
     last_name?: string;
   }) => {
+    const supabase = createClient();
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -35,6 +37,7 @@ export const auth = {
 
   // Sign in with email and password
   signIn: async (email: string, password: string) => {
+    const supabase = createClient();
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -44,18 +47,21 @@ export const auth = {
 
   // Sign out
   signOut: async () => {
+    const supabase = createClient();
     const { error } = await supabase.auth.signOut();
     return { error };
   },
 
   // Get current session
   getSession: async () => {
+    const supabase = createClient();
     const { data: { session }, error } = await supabase.auth.getSession();
     return { session, error };
   },
 
   // Get current user
   getUser: async () => {
+    const supabase = createClient();
     const { data: { user }, error } = await supabase.auth.getUser();
     return { user, error };
   },
@@ -71,12 +77,14 @@ export const auth = {
       avatar_url?: string;
     };
   }) => {
+    const supabase = createClient();
     const { data, error } = await supabase.auth.updateUser(attributes);
     return { data, error };
   },
 
   // Reset password
   resetPassword: async (email: string) => {
+    const supabase = createClient();
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/reset-password`,
     });
@@ -85,13 +93,18 @@ export const auth = {
 
   // Social sign in
   signInWithProvider: async (provider: 'github' | 'google' | 'discord') => {
-    const redirectUrl = `${window.location.origin}/auth/callback`;
+    const supabase = createClient();
+    const redirectUrl = `${window.location.origin}/api/auth/callback`;
     console.log('OAuth redirect URL being used:', redirectUrl);
     
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
         redirectTo: redirectUrl,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
       },
     });
     return { data, error };
@@ -105,6 +118,7 @@ export const userDb = {
   // Create or update user in database
   upsertUser: async (authUser: AuthUser) => {
     try {
+      const supabase = createClient();
       console.log('Upserting user with data:', {
         id: authUser.id,
         email: authUser.email,
@@ -165,6 +179,7 @@ export const userDb = {
 
   // Get user by ID
   getById: async (userId: string) => {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from('users')
       .select('*')
@@ -176,6 +191,7 @@ export const userDb = {
 
   // Get user by username
   getByUsername: async (username: string) => {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from('users')
       .select('*')
@@ -192,6 +208,7 @@ export const userDb = {
     last_name?: string;
     avatar_url?: string;
   }) => {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from('users')
       .update({
@@ -207,6 +224,7 @@ export const userDb = {
 
   // Check if username is available
   isUsernameAvailable: async (username: string, excludeUserId?: string) => {
+    const supabase = createClient();
     let query = supabase
       .from('users')
       .select('id')

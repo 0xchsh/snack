@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient, createServerAuth } from '@/lib/auth-server';
+import { createServerAuth } from '@/lib/auth-server';
+import { createClient } from '@/utils/supabase/server';
 
 interface RouteParams {
   params: Promise<{
@@ -18,7 +19,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   try {
     const { emoji, title, description, viewMode } = await request.json();
-    const supabase = createServerSupabaseClient();
+    const supabase = await createClient();
 
     // Find the list and verify ownership
     const { data: list, error: listError } = await supabase
@@ -85,7 +86,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   }
 
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createClient();
     
     // Find the list and verify ownership
     const { data: list, error: listError } = await supabase

@@ -4,8 +4,8 @@ import { Database } from '@/types/database';
 import { User } from '@supabase/supabase-js';
 
 // Server-only Supabase client with cookie support
-export const createServerSupabaseClient = () => {
-  const cookieStore = cookies();
+export const createServerSupabaseClient = async () => {
+  const cookieStore = await cookies();
   
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -44,7 +44,7 @@ export const createServerAuth = () => {
     // Get current user on server
     getUser: async (): Promise<User | null> => {
       try {
-        const supabaseServer = createServerSupabaseClient();
+        const supabaseServer = await createServerSupabaseClient();
         const { data: { user }, error } = await supabaseServer.auth.getUser();
         
         if (error || !user) {
@@ -61,7 +61,7 @@ export const createServerAuth = () => {
     // Update user metadata (server-only)
     updateUserMetadata: async (userId: string, metadata: any) => {
       try {
-        const supabaseServer = createServerSupabaseClient();
+        const supabaseServer = await createServerSupabaseClient();
         const { error } = await supabaseServer.auth.updateUser({
           data: metadata
         });

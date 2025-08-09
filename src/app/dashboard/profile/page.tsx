@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { createServerSupabaseClient, createServerAuth } from '@/lib/auth-server';
+import { createClient } from '@/utils/supabase/server';
+import { createServerAuth } from '@/lib/auth-server';
 import { ProfileSettings } from '@/components/profile-settings';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -14,7 +15,7 @@ export default async function ProfilePage() {
     redirect('/auth/sign-in');
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createClient();
   
   // Get user data from database
   let { data: dbUser, error } = await supabase

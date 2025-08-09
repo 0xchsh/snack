@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 
 export async function GET() {
   try {
+    const supabase = createClient();
     // Simple database query to keep the connection alive
     const { error } = await supabase.rpc('health_check'); // You may need to create a simple function in Supabase
     if (error) throw error;

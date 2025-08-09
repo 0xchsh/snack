@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
-import { createServerSupabaseClient, createServerAuth } from '@/lib/auth-server';
+import { createClient } from '@/utils/supabase/server';
+import { createServerAuth } from '@/lib/auth-server';
 import { DashboardClient } from './dashboard-client';
 import { Button } from '@/components/ui/button';
 import { Settings, User } from 'lucide-react';
@@ -14,7 +15,7 @@ export default async function DashboardPage() {
     redirect('/auth/sign-in');
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createClient();
 
   // With Supabase auth, user.id is the primary key - no need for separate user creation
   // The user should already exist in the users table due to auth hooks

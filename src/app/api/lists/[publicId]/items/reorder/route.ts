@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-// import { currentUser } from '@clerk/nextjs/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/server';
+import { createServerAuth } from '@/lib/auth-server';
 
 interface RouteParams {
   params: Promise<{
@@ -12,8 +12,8 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   const { publicId } = await params;
   console.log('🔄 Reorder API called for publicId:', publicId);
   
-  // const user = await currentUser();
-  const user = null; // Temporarily disabled
+  const serverAuth = createServerAuth();
+  const user = await serverAuth.getUser();
 
   if (!user) {
     console.log('❌ Unauthorized: No user found');
@@ -23,6 +23,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   console.log('✅ User authenticated:', user.id);
 
   try {
+    const supabase = await createClient();
     const { itemIds } = await request.json();
     console.log('📝 Received itemIds:', itemIds);
 
@@ -35,7 +36,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     // Find the list and verify ownership
     const { data: list, error: listError } = await supabase
       .from('lists')
-      .select('id, user:users(clerk_id), items:items(id)')
+      .select('id, user_id, items:items(id)')
       .eq('public_id', publicId)
       .single();
 
@@ -46,14 +47,8 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     console.log('✅ List found:', list.id, 'with', list.items.length, 'items');
 
-    let userObj: { clerk_id: string } | null = null;
-    if (Array.isArray(list.user)) {
-      userObj = list.user[0] ?? null;
-    } else {
-      userObj = list.user ?? null;
-    }
-    if (!userObj || userObj.clerk_id !== user.id) {
-      console.log('❌ Forbidden: User', user.id, 'does not own list owned by', userObj?.clerk_id);
+    if (list.user_id !== user.id) {
+      console.log('❌ Forbidden: User', user.id, 'does not own list owned by', list.user_id);
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

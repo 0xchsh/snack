@@ -8,18 +8,8 @@ if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
   throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_ANON_KEY');
 }
 
-// Client-side Supabase client with auth enabled
-export const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-    },
-  }
-);
+// Note: Client-side Supabase client has been moved to @/utils/supabase/client.ts
+// Use createClient() from that module instead
 
 // Note: Server client functions have been moved to auth-server.ts
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerAuth } from "@/lib/auth-server"
-import { createServerSupabaseClient } from "@/lib/auth-server"
+import { createClient } from '@/utils/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'File size exceeds 5MB' }, { status: 400 });
     }
 
-    const supabase = createServerSupabaseClient();
+    const supabase = await createClient();
     
     // Upload to Supabase Storage
     const fileExt = file.name.split('.').pop();

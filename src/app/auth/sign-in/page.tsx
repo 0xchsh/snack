@@ -41,11 +41,10 @@ function SignInForm() {
   useEffect(() => {
     const clearStuckAuth = setTimeout(() => {
       if (authLoading) {
-        console.log('Auth loading stuck, clearing storage and refreshing');
-        localStorage.clear();
-        window.location.reload();
+        console.log('Auth loading stuck - timeout reached');
+        setError('Authentication timed out. Please try again.');
       }
-    }, 10000); // 10 seconds
+    }, 8000); // 8 seconds
 
     return () => clearTimeout(clearStuckAuth);
   }, [authLoading]);
