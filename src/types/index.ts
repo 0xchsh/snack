@@ -15,18 +15,25 @@ export type LinkUpdate = Database['public']['Tables']['links']['Update']
 // Extended types with relations
 export type ListWithLinks = List & {
   links: Link[]
-  user: Pick<User, 'id' | 'username' | 'display_name' | 'avatar_url'>
+  user: Pick<User, 'id' | 'username'>
 }
 
 export type ListWithUser = List & {
-  user: Pick<User, 'id' | 'username' | 'display_name' | 'avatar_url'>
+  user: Pick<User, 'id' | 'username'>
+}
+
+// 3D Emoji data structure
+export interface Emoji3D {
+  unicode: string
+  url?: string
+  name?: string
 }
 
 // Form types
 export interface CreateListForm {
   title: string
   emoji?: string
-  description?: string
+  emoji_3d?: Emoji3D
   is_public: boolean
   price_cents?: number
 }
@@ -34,7 +41,6 @@ export interface CreateListForm {
 export interface CreateLinkForm {
   url: string
   title?: string
-  description?: string
 }
 
 // API response types

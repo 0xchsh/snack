@@ -1,6 +1,8 @@
+import Link from 'next/link'
+
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100">
+    <main className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">
           <h1 className="text-6xl font-bold text-foreground mb-6">
@@ -11,9 +13,9 @@ export default function HomePage() {
             Discover amazing content curated by creators around the world.
           </p>
           <div className="space-x-4">
-            <button className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors">
+            <Link href="/auth/sign-up" className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors inline-block">
               Get Started
-            </button>
+            </Link>
             <button className="border border-border text-foreground px-8 py-3 rounded-lg font-semibold hover:bg-accent transition-colors">
               Explore Lists
             </button>

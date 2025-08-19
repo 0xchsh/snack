@@ -71,8 +71,30 @@ Optional environment variables:
 - OAuth provider credentials (Google, GitHub, etc.)
 - Third-party service API keys
 - Feature flags and configuration
+- MCP server API keys:
+  - `MAGIC_API_KEY` - API key for @21st-dev/magic MCP server
+  - `FIGMA_API_KEY` - API key for Figma MCP server integration
 
 **Note**: OAuth providers must be configured in your Supabase dashboard under Authentication > Providers.
+
+### MCP Server Integration
+
+The project includes Model Context Protocol (MCP) server configurations for enhanced AI tooling:
+
+**Available MCP Servers:**
+- **@21st-dev/magic** - Advanced development tool with AI capabilities
+- **Figma MCP** - Design integration for Figma API access  
+- **context7** - Upstash-powered context management
+
+**Configuration:**
+- MCP servers are defined in `mcp.json` with environment variable substitution
+- API keys are stored securely in `.env.local` (never commit these to version control)
+- The context7 server requires no additional configuration
+
+**Usage:**
+- Use MCP servers for advanced development workflows
+- Leverage Figma integration for design-to-code workflows  
+- Utilize magic for enhanced AI-powered development tasks
 
 ### Build Configuration
 

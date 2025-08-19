@@ -6,9 +6,6 @@ export interface Database {
           id: string
           email: string
           username: string | null
-          display_name: string | null
-          avatar_url: string | null
-          bio: string | null
           created_at: string
           updated_at: string
         }
@@ -16,9 +13,6 @@ export interface Database {
           id: string
           email: string
           username?: string | null
-          display_name?: string | null
-          avatar_url?: string | null
-          bio?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -26,9 +20,6 @@ export interface Database {
           id?: string
           email?: string
           username?: string | null
-          display_name?: string | null
-          avatar_url?: string | null
-          bio?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -39,7 +30,6 @@ export interface Database {
           user_id: string
           title: string
           emoji: string | null
-          description: string | null
           is_public: boolean
           price_cents: number | null
           created_at: string
@@ -50,7 +40,6 @@ export interface Database {
           user_id: string
           title: string
           emoji?: string | null
-          description?: string | null
           is_public?: boolean
           price_cents?: number | null
           created_at?: string
@@ -61,7 +50,6 @@ export interface Database {
           user_id?: string
           title?: string
           emoji?: string | null
-          description?: string | null
           is_public?: boolean
           price_cents?: number | null
           created_at?: string
@@ -74,7 +62,6 @@ export interface Database {
           list_id: string
           url: string
           title: string | null
-          description: string | null
           image_url: string | null
           favicon_url: string | null
           position: number
@@ -86,7 +73,6 @@ export interface Database {
           list_id: string
           url: string
           title?: string | null
-          description?: string | null
           image_url?: string | null
           favicon_url?: string | null
           position: number
@@ -98,7 +84,6 @@ export interface Database {
           list_id?: string
           url?: string
           title?: string | null
-          description?: string | null
           image_url?: string | null
           favicon_url?: string | null
           position?: number
