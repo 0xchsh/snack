@@ -16,6 +16,7 @@ export type LinkUpdate = Database['public']['Tables']['links']['Update']
 export type ListWithLinks = List & {
   links: Link[]
   user: Pick<User, 'id' | 'username'>
+  emoji_3d?: Emoji3D
 }
 
 export type ListWithUser = List & {

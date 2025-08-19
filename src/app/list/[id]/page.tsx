@@ -2,20 +2,19 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { Plus, Copy, Clock, Link as LinkIcon, Eye, Bookmark } from 'lucide-react'
 import { ListEditor } from '@/components/list-editor'
 import { PublicListView } from '@/components/public-list-view'
 import { CreateList } from '@/components/create-list'
 import { ListWithLinks, CreateListForm, LinkInsert } from '@/types'
 import { getRandomEmoji } from '@/lib/emoji'
-import { getHostname, getFaviconUrl } from '@/lib/url-utils'
-import { Plus } from 'lucide-react'
 
-// Mock data for demo
+// Mock data - in real app this would come from database
 const mockList: ListWithLinks = {
   id: '1',
-  title: 'Absolute must go places in NYC',
+  title: 'Absolute Must Go Places in NYC',
   emoji: '🗽',
-  is_public: false,
+  is_public: true,
   price_cents: null,
   user_id: '1',
   created_at: new Date().toISOString(),
@@ -23,9 +22,9 @@ const mockList: ListWithLinks = {
   links: [
     {
       id: '1',
-      url: 'https://paper.com',
+      url: 'https://paper.design',
       title: 'Paper – design, share, ship',
-      favicon_url: 'https://paper.com/favicon.ico',
+      favicon_url: null,
       image_url: null,
       position: 0,
       list_id: '1',
@@ -33,12 +32,34 @@ const mockList: ListWithLinks = {
       updated_at: new Date().toISOString()
     },
     {
-      id: '2', 
-      url: 'https://example.com',
-      title: 'Example Website',
+      id: '2',
+      url: 'https://eventually.app',
+      title: 'Notion – all-in-one workspace',
       favicon_url: null,
       image_url: null,
       position: 1,
+      list_id: '1',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: '3',
+      url: 'https://airdroid.com',
+      title: 'Miro – online brainstorming',
+      favicon_url: null,
+      image_url: null,
+      position: 2,
+      list_id: '1',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: '4',
+      url: 'https://highlightsapp.net',
+      title: 'Figma – design collaboration',
+      favicon_url: null,
+      image_url: null,
+      position: 3,
       list_id: '1',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -46,20 +67,31 @@ const mockList: ListWithLinks = {
   ],
   user: {
     id: '1',
-    username: 'demo'
+    username: 'Rick Sanchez'
   }
 }
 
-export default function DemoPage() {
+interface ListPageProps {
+  params: {
+    id: string
+  }
+}
+
+export default function ListPage({ params }: ListPageProps) {
   const [lists, setLists] = useState<ListWithLinks[]>([mockList])
-  const [currentListId, setCurrentListId] = useState<string>('1')
   const [showCreateList, setShowCreateList] = useState(false)
   
   // Mock auth state - in real app this would come from auth context
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
-  const currentList = lists.find(list => list.id === currentListId)
+  const currentList = lists.find(list => list.id === params.id) || mockList
+  
+  // Determine if user can edit this list
+  const canEdit = isAuthenticated && currentUserId === currentList.user_id
+  
+  // Determine if list should be visible
+  const canView = currentList.is_public || canEdit
 
   const handleCreateList = (formData: CreateListForm) => {
     const newList: ListWithLinks = {
@@ -67,24 +99,23 @@ export default function DemoPage() {
       ...formData,
       emoji: formData.emoji || getRandomEmoji(),
       price_cents: formData.price_cents || null,
-      user_id: '1',
+      user_id: currentUserId || '1',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       links: [],
       user: {
-        id: '1',
+        id: currentUserId || '1',
         username: 'demo'
       }
     }
 
     setLists(prev => [...prev, newList])
-    setCurrentListId(newList.id)
     setShowCreateList(false)
   }
 
   const handleUpdateList = (updates: Partial<ListWithLinks>) => {
     setLists(prev => prev.map(list => 
-      list.id === currentListId 
+      list.id === currentList.id
         ? { ...list, ...updates, updated_at: new Date().toISOString() }
         : list
     ))
@@ -94,8 +125,8 @@ export default function DemoPage() {
     const newLink = {
       id: `link-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       ...linkData,
-      title: linkData.title || getHostname(linkData.url),
-      favicon_url: getFaviconUrl(linkData.url),
+      title: linkData.title || new URL(linkData.url).hostname,
+      favicon_url: `https://${new URL(linkData.url).hostname}/favicon.ico`,
       image_url: null,
       position: currentList?.links?.length || 0,
       created_at: new Date().toISOString(),
@@ -103,7 +134,7 @@ export default function DemoPage() {
     }
 
     setLists(prev => prev.map(list =>
-      list.id === currentListId
+      list.id === currentList.id
         ? { ...list, links: [...(list.links || []), newLink] }
         : list
     ))
@@ -111,7 +142,7 @@ export default function DemoPage() {
 
   const handleRemoveLink = (linkId: string) => {
     setLists(prev => prev.map(list =>
-      list.id === currentListId
+      list.id === currentList.id
         ? { ...list, links: list.links?.filter(link => link.id !== linkId) || [] }
         : list
     ))
@@ -119,12 +150,11 @@ export default function DemoPage() {
 
   const handleReorderLinks = (linkIds: string[]) => {
     setLists(prev => prev.map(list => {
-      if (list.id !== currentListId) return list
+      if (list.id !== currentList.id) return list
       
       const linkMap = new Map(list.links?.map(link => [link.id, link]) || [])
       const reorderedLinks = linkIds.map(id => linkMap.get(id)).filter(Boolean) as typeof list.links
       
-      // Update positions
       const updatedLinks = reorderedLinks.map((link, index) => ({
         ...link,
         position: index,
@@ -135,13 +165,8 @@ export default function DemoPage() {
     }))
   }
 
-  // Determine if user can edit this list
-  const canEdit = isAuthenticated && currentUserId === currentList?.user_id
-  
-  // Determine if list should be visible - always show demo list
-  const canView = true // For demo purposes, always show the list
-
   const handleLogin = () => {
+    // Mock login - in real app this would handle actual authentication
     setIsAuthenticated(true)
     setCurrentUserId('1')
   }
@@ -151,7 +176,7 @@ export default function DemoPage() {
     setCurrentUserId(null)
   }
 
-  if (!currentList) {
+  if (!canView) {
     return (
       <div className="min-h-screen bg-neutral-100 flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -187,26 +212,8 @@ export default function DemoPage() {
                   className="text-xl font-bold"
                   style={{ fontFamily: 'Open Runde' }}
                 >
-                  Snack Demo
+                  Snack
                 </h1>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                {lists.map(list => (
-                  <button
-                    key={list.id}
-                    onClick={() => setCurrentListId(list.id)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                      currentListId === list.id
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                    style={{ fontFamily: 'Open Runde' }}
-                  >
-                    <span>{list.emoji}</span>
-                    <span>{list.title}</span>
-                  </button>
-                ))}
               </div>
             </div>
             
