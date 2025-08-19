@@ -29,7 +29,7 @@ export function PublicListView({ list, onLoginClick }: PublicListViewProps) {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-100">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="border-b border-border bg-white">
         <div className="container mx-auto px-4 py-4">
@@ -39,23 +39,17 @@ export function PublicListView({ list, onLoginClick }: PublicListViewProps) {
                 <Image
                   src="/images/logo.svg"
                   alt="Snack"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8"
+                  width={40}
+                  height={40}
+                  className="w-10 h-10"
                 />
-                <h1 
-                  className="text-xl font-bold"
-                  style={{ fontFamily: 'Open Runde' }}
-                >
-                  Snack
-                </h1>
               </div>
             </div>
             
             <div className="flex items-center gap-3">
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
                 style={{ fontFamily: 'Open Runde' }}
               >
                 <Copy className="w-4 h-4" />
@@ -63,7 +57,7 @@ export function PublicListView({ list, onLoginClick }: PublicListViewProps) {
               </button>
               <button
                 onClick={onLoginClick}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
                 style={{ fontFamily: 'Open Runde' }}
               >
                 Login (Demo)
@@ -78,7 +72,7 @@ export function PublicListView({ list, onLoginClick }: PublicListViewProps) {
           {/* List Header */}
           <div className="space-y-6">
             {/* Emoji */}
-            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-sm">
+            <div className="w-16 h-16 bg-neutral-100 rounded-2xl flex items-center justify-center text-3xl shadow-sm">
               {list.emoji_3d?.url ? (
                 <Image
                   src={list.emoji_3d.url}
@@ -106,24 +100,24 @@ export function PublicListView({ list, onLoginClick }: PublicListViewProps) {
             </h1>
             
             {/* Creator and metadata */}
-            <div className="flex items-center gap-8">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 bg-neutral-100 rounded-full px-4 py-2">
+                <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-xs font-bold">R</span>
                 </div>
                 <span 
-                  className="text-foreground font-medium"
+                  className="text-foreground font-semibold text-base"
                   style={{ fontFamily: 'Open Runde' }}
                 >
                   {list.user.username}
                 </span>
               </div>
               
-              <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                <button className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
+              <div className="flex items-center gap-3">
+                <button className="px-4 py-2 text-base font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full">
                   <span style={{ fontFamily: 'Open Runde' }}>Save</span>
                 </button>
-                <button className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
+                <button className="px-4 py-2 text-base font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full">
                   <span style={{ fontFamily: 'Open Runde' }}>Share</span>
                 </button>
               </div>
@@ -194,13 +188,13 @@ function PublicLinkItem({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
-      className={`w-full bg-white rounded-xl p-4 hover:bg-gray-50 transition-all cursor-pointer group text-left ${
+      className={`w-full bg-neutral-100 rounded-xl p-4 hover:bg-neutral-200 transition-all cursor-pointer group text-left ${
         isClicked ? 'ring-2 ring-blue-200' : ''
       }`}
       onClick={onClick}
     >
       <div className="flex items-center gap-4">
-        <div className="w-8 h-8 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-lg overflow-hidden bg-white flex-shrink-0 flex items-center justify-center">
           {link.favicon_url ? (
             <Image 
               src={link.favicon_url} 
@@ -218,7 +212,7 @@ function PublicLinkItem({
         
         <div className="flex-1 min-w-0">
           <h3 
-            className="text-base font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors"
+            className="text-base font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors"
             style={{ fontFamily: 'Open Runde' }}
           >
             {link.title || getHostname(link.url)}

@@ -153,7 +153,7 @@ export default function DemoPage() {
 
   if (!currentList) {
     return (
-      <div className="min-h-screen bg-neutral-100 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold text-foreground">List not found</h1>
           <p className="text-muted-foreground">This list is private or doesn't exist.</p>
@@ -169,7 +169,7 @@ export default function DemoPage() {
 
   // Show editable view for authenticated owners
   return (
-    <div className="min-h-screen bg-neutral-100">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
       <div className="border-b border-border bg-white">
         <div className="container mx-auto px-4 py-4">
@@ -196,7 +196,7 @@ export default function DemoPage() {
                   <button
                     key={list.id}
                     onClick={() => setCurrentListId(list.id)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 ${
                       currentListId === list.id
                         ? 'bg-primary text-primary-foreground'
                         : 'text-muted-foreground hover:text-foreground'
@@ -213,14 +213,14 @@ export default function DemoPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
                 style={{ fontFamily: 'Open Runde' }}
               >
                 Logout
               </button>
               <button
                 onClick={() => setShowCreateList(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
                 style={{ fontFamily: 'Open Runde' }}
               >
                 <Plus className="w-4 h-4" />

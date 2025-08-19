@@ -180,7 +180,7 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-6 py-3 bg-secondary text-foreground rounded-lg hover:bg-secondary/80 transition-colors font-medium"
+                className="flex-1 px-6 py-3 bg-secondary text-foreground rounded-lg hover:bg-secondary/80 transition-colors font-semibold"
                 style={{ fontFamily: 'Open Runde' }}
               >
                 Cancel
@@ -188,7 +188,7 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
               <button
                 type="submit"
                 disabled={!formData.title.trim() || isLoading}
-                className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold"
                 style={{ fontFamily: 'Open Runde' }}
               >
                 {isLoading ? 'Creating...' : 'Create List'}

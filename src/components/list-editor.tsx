@@ -119,7 +119,7 @@ export function ListEditor({
           <button
             ref={emojiButtonRef}
             onClick={() => setShowEmojiPicker(true)}
-            className="w-16 h-16 bg-white hover:bg-secondary rounded-2xl flex items-center justify-center text-3xl shadow-sm transition-colors"
+            className="w-16 h-16 bg-neutral-100 hover:bg-neutral-200 rounded-2xl flex items-center justify-center text-3xl transition-colors"
           >
             {currentEmoji3D.url ? (
               <Image
@@ -167,7 +167,7 @@ export function ListEditor({
         </div>
 
         {/* Input and Controls Card */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
+        <div className="bg-neutral-100 rounded-2xl p-6">
           {/* Add Link Input */}
           <div className="mb-6">
             {linkError && (
@@ -175,7 +175,7 @@ export function ListEditor({
                 {linkError}
               </div>
             )}
-            <div className="bg-neutral-100 rounded-xl p-4 flex items-center justify-between">
+            <div className="bg-white rounded-xl p-4 flex items-center justify-between">
               <div className="flex-1">
                 <textarea
                   value={linkInput}
@@ -213,7 +213,7 @@ export function ListEditor({
                 onClick={() => setViewMode('menu')}
                 className={`w-10 h-10 rounded-md flex items-center justify-center transition-colors ${
                   viewMode === 'menu' 
-                    ? 'bg-muted text-foreground' 
+                    ? 'bg-white text-foreground' 
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -224,7 +224,7 @@ export function ListEditor({
                 onClick={() => setViewMode('rows')}
                 className={`w-10 h-10 rounded-md flex items-center justify-center transition-colors ${
                   viewMode === 'rows' 
-                    ? 'bg-muted text-foreground' 
+                    ? 'bg-white text-foreground' 
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -235,7 +235,7 @@ export function ListEditor({
                 onClick={() => setViewMode('grid')}
                 className={`w-10 h-10 rounded-md flex items-center justify-center transition-colors ${
                   viewMode === 'grid' 
-                    ? 'bg-muted text-foreground' 
+                    ? 'bg-white text-foreground' 
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -328,13 +328,11 @@ function DraggableLinkItem({ link, viewMode, onRemove }: DraggableLinkItemProps)
       animate={{ 
         opacity: 1, 
         y: 0, 
-        scale: 1,
-        boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+        scale: 1
       }}
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
       whileDrag={{ 
-        scale: 1.05, 
-        boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+        scale: 1.05,
         zIndex: 50
       }}
       transition={{ 
@@ -362,7 +360,7 @@ function LinkItem({
     // Compact rows - smallest layout
     return (
       <div 
-        className="bg-white rounded-xl p-3 shadow-sm hover:shadow-md transition-all group"
+        className="bg-neutral-100 rounded-xl p-3 hover:bg-neutral-200 transition-all group"
       >
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 rounded-md overflow-hidden bg-muted flex-shrink-0">
@@ -381,7 +379,7 @@ function LinkItem({
           
           <div className="flex-1 min-w-0">
             <h3 
-              className="text-sm font-medium text-foreground truncate"
+              className="text-sm font-semibold text-foreground truncate"
               style={{ fontFamily: 'Open Runde' }}
             >
               {link.title || getHostname(link.url)}
@@ -413,7 +411,7 @@ function LinkItem({
     // Larger cards as rows - medium layout
     return (
       <div 
-        className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all group"
+        className="bg-neutral-100 rounded-xl p-6 hover:bg-neutral-200 transition-all group"
       >
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl overflow-hidden bg-muted flex-shrink-0">
@@ -469,7 +467,7 @@ function LinkItem({
   // Grid layout - largest cards with OG images
   return (
     <div 
-      className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all group overflow-hidden"
+      className="bg-neutral-100 rounded-xl hover:bg-neutral-200 transition-all group overflow-hidden"
     >
       <div className="space-y-4">
         {/* OG Image Preview */}
