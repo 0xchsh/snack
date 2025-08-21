@@ -110,15 +110,9 @@ const mockPublicList: ListWithLinks = {
 }
 
 export default function PublicDemoPage() {
-  const handleLoginClick = () => {
-    // In a real app, this would navigate to login page
-    alert('This would navigate to the login page!')
-  }
-
   return (
     <PublicListView 
       list={mockPublicList}
-      onLoginClick={handleLoginClick}
     />
   )
 }

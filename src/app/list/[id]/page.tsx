@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Plus, Copy, Clock, Link as LinkIcon, Eye, Bookmark } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { ListEditor } from '@/components/list-editor'
 import { PublicListView } from '@/components/public-list-view'
 import { CreateList } from '@/components/create-list'
@@ -150,7 +150,9 @@ export default function ListPage({ params }: ListPageProps) {
 
   const handleReorderLinks = (linkIds: string[]) => {
     setLists(prev => prev.map(list => {
-      if (list.id !== currentList.id) return list
+      if (list.id !== currentList.id) {
+        return list
+      }
       
       const linkMap = new Map(list.links?.map(link => [link.id, link]) || [])
       const reorderedLinks = linkIds.map(id => linkMap.get(id)).filter(Boolean) as typeof list.links
@@ -165,11 +167,6 @@ export default function ListPage({ params }: ListPageProps) {
     }))
   }
 
-  const handleLogin = () => {
-    // Mock login - in real app this would handle actual authentication
-    setIsAuthenticated(true)
-    setCurrentUserId('1')
-  }
 
   const handleLogout = () => {
     setIsAuthenticated(false)
@@ -178,10 +175,10 @@ export default function ListPage({ params }: ListPageProps) {
 
   if (!canView) {
     return (
-      <div className="min-h-screen bg-neutral-100 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold text-foreground">List not found</h1>
-          <p className="text-muted-foreground">This list is private or doesn't exist.</p>
+          <p className="text-muted-foreground">This list is private or doesn&apos;t exist.</p>
         </div>
       </div>
     )
@@ -189,12 +186,12 @@ export default function ListPage({ params }: ListPageProps) {
 
   // Show public view for non-authenticated users or non-owners
   if (!canEdit) {
-    return <PublicListView list={currentList} onLoginClick={handleLogin} />
+    return <PublicListView list={currentList} />
   }
 
   // Show editable view for authenticated owners
   return (
-    <div className="min-h-screen bg-neutral-100">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
       <div className="border-b border-border bg-white">
         <div className="container mx-auto px-4 py-4">
@@ -220,7 +217,7 @@ export default function ListPage({ params }: ListPageProps) {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
                 style={{ fontFamily: 'Open Runde' }}
               >
                 Logout

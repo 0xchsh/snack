@@ -70,11 +70,26 @@ export function getHostname(url: string): string {
 }
 
 /**
- * Generates a favicon URL for a domain
+ * Generates multiple fallback favicon URLs for a domain
+ * @param url The URL to get favicon for
+ * @returns Array of favicon URLs to try
+ */
+export function getFaviconUrls(url: string): string[] {
+  const hostname = getHostname(url)
+  return [
+    `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`,
+    `https://${hostname}/favicon.ico`,
+    `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
+    `https://favicons.githubusercontent.com/${hostname}`,
+  ]
+}
+
+/**
+ * Generates a favicon URL for a domain (primary method)
  * @param url The URL to get favicon for
  * @returns Favicon URL
  */
 export function getFaviconUrl(url: string): string {
   const hostname = getHostname(url)
-  return `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`
+  return `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`
 }

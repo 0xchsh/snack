@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { AuthProvider } from '@/hooks/useAuth'
+import { ListsProvider } from '@/hooks/useLists'
 
 export const metadata: Metadata = {
   title: 'Snack - Curated Link Collections',
@@ -16,7 +17,9 @@ export default function RootLayout({
     <html lang="en">
       <body className="font-sans antialiased">
         <AuthProvider>
-          {children}
+          <ListsProvider>
+            {children}
+          </ListsProvider>
         </AuthProvider>
       </body>
     </html>

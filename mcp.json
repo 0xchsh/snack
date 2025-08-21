@@ -22,6 +22,12 @@
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "og-mcp": {
+      "command": "opengraph-io-mcp",
+      "env": {
+          "APP_ID": "${OPENGRAPH_IO_API_KEY}"
+      }
     }
   }
 }

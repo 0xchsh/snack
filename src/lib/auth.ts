@@ -59,15 +59,23 @@ export const auth = {
       return null
     }
 
-    // Get user profile from our users table
+    // Try to get user profile from our users table
     const { data: user, error } = await supabase
       .from('users')
       .select('*')
       .eq('id', authUser.id)
       .single()
 
+    // If database table doesn't exist or user not found, create from auth user
     if (error || !user) {
-      return null
+      // For development: create user object from auth data when DB doesn't exist
+      return {
+        id: authUser.id,
+        email: authUser.email || '',
+        username: authUser.email?.split('@')[0] || 'user',
+        created_at: authUser.created_at,
+        updated_at: authUser.updated_at || authUser.created_at
+      }
     }
 
     return user

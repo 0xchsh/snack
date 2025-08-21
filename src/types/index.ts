@@ -26,8 +26,8 @@ export type ListWithUser = List & {
 // 3D Emoji data structure
 export interface Emoji3D {
   unicode: string
-  url?: string
-  name?: string
+  url?: string | undefined
+  name?: string | undefined
 }
 
 // Form types

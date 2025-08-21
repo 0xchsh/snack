@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { getRandomEmoji } from '@/lib/emoji'
+import { getDefaultEmoji3D } from '@/lib/emoji'
 import { EmojiPicker } from './emoji-picker'
 import { CreateListForm, Emoji3D } from '@/types'
 import { X } from 'lucide-react'
@@ -13,16 +13,13 @@ interface CreateListProps {
 }
 
 export function CreateList({ onCreateList, onClose }: CreateListProps) {
+  const defaultEmoji3D = getDefaultEmoji3D()
   const [formData, setFormData] = useState<CreateListForm>({
     title: '',
-    emoji: getRandomEmoji(),
+    emoji: defaultEmoji3D.unicode,
     is_public: false
   })
-  const [currentEmoji3D, setCurrentEmoji3D] = useState<Emoji3D>({
-    unicode: getRandomEmoji(),
-    url: undefined,
-    name: undefined
-  })
+  const [currentEmoji3D, setCurrentEmoji3D] = useState<Emoji3D>(defaultEmoji3D)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const emojiButtonRef = useRef<HTMLButtonElement>(null)

@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Plus, Menu, List, Grid3X3, GripVertical, Trash2 } from 'lucide-react'
 import Image from 'next/image'
-import { motion, Reorder, useDragControls } from 'framer-motion'
+import { Reorder, useDragControls } from 'framer-motion'
 import { ListWithLinks, LinkInsert, Link, Emoji3D } from '@/types'
 import { EmojiPicker } from './emoji-picker'
-import { validateAndNormalizeUrl, getHostname, getFaviconUrl } from '@/lib/url-utils'
+import { validateAndNormalizeUrl, getHostname } from '@/lib/url-utils'
+import { Favicon } from './favicon'
 
 interface ListEditorProps {
   list: ListWithLinks
@@ -26,29 +27,51 @@ export function ListEditor({
   onReorderLinks 
 }: ListEditorProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('menu')
-  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [isEditingTitle, setIsEditingTitle] = useState(!list.title) // Start editing if title is empty
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
-  const [title, setTitle] = useState(list.title)
+  const [title, setTitle] = useState(list.title || '') // Ensure title is never undefined
   const [linkInput, setLinkInput] = useState('')
   const [linkError, setLinkError] = useState('')
   const [currentEmoji3D, setCurrentEmoji3D] = useState<Emoji3D>(
     list.emoji_3d || {
       unicode: list.emoji || '🎯',
-      url: undefined,
-      name: undefined
     }
   )
   const [items, setItems] = useState(list.links || [])
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
+  const titleTextareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Auto-resize textarea based on content
+  const adjustTextareaHeight = useCallback(() => {
+    if (titleTextareaRef.current) {
+      // Reset height to auto to get the natural height
+      titleTextareaRef.current.style.height = 'auto'
+      
+      // Only set explicit height if content wraps to multiple lines
+      const scrollHeight = titleTextareaRef.current.scrollHeight
+      const clientHeight = titleTextareaRef.current.clientHeight
+      
+      // If content overflows (wraps), set explicit height
+      if (scrollHeight > clientHeight) {
+        titleTextareaRef.current.style.height = `${scrollHeight}px`
+      }
+      // Otherwise, leave height as 'auto' to match h1 natural height
+    }
+  }, [])
 
   const handleTitleSave = () => {
-    if (title.trim() && title !== list.title) {
-      onUpdateList?.({ title: title.trim() })
+    const trimmedTitle = title.trim()
+    if (!trimmedTitle) {
+      // If title is empty, default to "Untitled List"
+      setTitle('Untitled List')
+      onUpdateList?.({ title: 'Untitled List' })
+    } else if (trimmedTitle !== list.title) {
+      onUpdateList?.({ title: trimmedTitle })
     }
     setIsEditingTitle(false)
   }
 
-  const handleAddLink = () => {
+  const handleAddLink = async () => {
     if (!linkInput.trim()) {
       return
     }
@@ -76,13 +99,15 @@ export function ListEditor({
       return
     }
 
-    validUrls.forEach((url, index) => {
-      onAddLink?.({ 
+    // Add links sequentially to the top of the list
+    for (let i = 0; i < validUrls.length; i++) {
+      const url = validUrls[i]
+      await onAddLink?.({ 
         url,
         list_id: list.id,
-        position: (list.links?.length || 0) + index
+        position: i // Position 0 for first link, 1 for second, etc. (top of list)
       })
-    })
+    }
     
     setLinkInput('')
   }
@@ -104,6 +129,16 @@ export function ListEditor({
       setCurrentEmoji3D(list.emoji_3d)
     }
   }, [list.emoji_3d])
+
+  // Adjust textarea height when editing starts
+  useEffect(() => {
+    if (isEditingTitle) {
+      // Small delay to ensure the textarea is rendered
+      setTimeout(() => {
+        adjustTextareaHeight()
+      }, 0)
+    }
+  }, [isEditingTitle, adjustTextareaHeight])
 
   const handleReorder = (newItems: Link[]) => {
     setItems(newItems)
@@ -137,18 +172,32 @@ export function ListEditor({
           
           {isEditingTitle ? (
             <textarea
+              ref={titleTextareaRef}
               value={title}
-              onChange={(e) => setTitle(e.target.value.slice(0, 60))}
+              onChange={(e) => {
+                setTitle(e.target.value.slice(0, 60))
+                adjustTextareaHeight()
+              }}
               onBlur={handleTitleSave}
-              onKeyDown={(e) => e.key === 'Enter' && handleTitleSave()}
-              className="text-6xl font-bold text-foreground bg-transparent border-none outline-none capitalize w-full max-w-2xl resize-none"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  handleTitleSave()
+                }
+              }}
+              placeholder="Untitled List"
+              className="text-6xl font-bold text-foreground bg-transparent border-none outline-none capitalize w-full max-w-2xl resize-none placeholder:text-muted-foreground break-words overflow-hidden"
               style={{ 
                 fontFamily: 'Open Runde',
                 letterSpacing: '-2.24px',
-                lineHeight: '100%'
+                lineHeight: '100%',
+                wordBreak: 'break-word',
+                whiteSpace: 'pre-wrap',
+                overflowWrap: 'break-word',
+                minHeight: '1em'
               }}
               maxLength={60}
-              rows={2}
+              rows={1}
               autoFocus
             />
           ) : (
@@ -161,7 +210,7 @@ export function ListEditor({
                 lineHeight: '100%'
               }}
             >
-              {list.title}
+              {list.title || <span className="text-muted-foreground">Untitled List</span>}
             </h1>
           )}
         </div>
@@ -181,7 +230,9 @@ export function ListEditor({
                   value={linkInput}
                   onChange={(e) => {
                     setLinkInput(e.target.value)
-                    if (linkError) setLinkError('')
+                    if (linkError) {
+                      setLinkError('')
+                    }
                   }}
                   onKeyDown={handleKeyDown}
                   placeholder="Paste a link or multiple links"
@@ -306,7 +357,7 @@ interface LinkItemProps {
   link: Link
   viewMode: ViewMode
   onRemove: () => void
-  dragControls?: any
+  dragControls?: ReturnType<typeof useDragControls>
 }
 
 interface DraggableLinkItemProps {
@@ -364,17 +415,11 @@ function LinkItem({
       >
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 rounded-md overflow-hidden bg-muted flex-shrink-0">
-            {link.favicon_url ? (
-              <Image 
-                src={link.favicon_url} 
-                alt="" 
-                width={20}
-                height={20}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/10" />
-            )}
+            <Favicon 
+              url={link.url}
+              size={20}
+              className="rounded-md"
+            />
           </div>
           
           <div className="flex-1 min-w-0">
@@ -414,17 +459,16 @@ function LinkItem({
         className="bg-neutral-100 rounded-xl p-6 hover:bg-neutral-200 transition-all group"
       >
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl overflow-hidden bg-muted flex-shrink-0">
-            {link.favicon_url ? (
+          <div className="w-12 h-12 rounded-xl overflow-hidden bg-neutral-200 flex-shrink-0 relative">
+            {link.image_url ? (
               <Image 
-                src={link.favicon_url} 
+                src={link.image_url} 
                 alt="" 
-                width={48}
-                height={48}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/10" />
+              <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300" />
             )}
           </div>
           
@@ -475,12 +519,24 @@ function LinkItem({
           {link.image_url ? (
             <Image 
               src={link.image_url} 
-              alt="" 
+              alt={link.title || ''} 
               fill
               className="object-cover"
+              unoptimized
+              onError={(e) => {
+                console.error('Failed to load OG image:', link.image_url)
+                e.currentTarget.style.display = 'none'
+              }}
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300" />
+            <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
+              <Favicon 
+                url={link.url}
+                size={48}
+                className="rounded-lg"
+                fallbackClassName="bg-white/20 rounded-lg"
+              />
+            </div>
           )}
           
           {/* Actions overlay */}
@@ -512,17 +568,11 @@ function LinkItem({
           </h3>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded-sm overflow-hidden bg-muted flex-shrink-0">
-              {link.favicon_url ? (
-                <Image 
-                  src={link.favicon_url} 
-                  alt="" 
-                  width={16}
-                  height={16}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/10" />
-              )}
+              <Favicon 
+                url={link.url}
+                size={16}
+                className="rounded-sm"
+              />
             </div>
             <p 
               className="text-sm text-muted-foreground/70 truncate"

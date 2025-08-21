@@ -4,16 +4,18 @@ import { useState } from 'react'
 import { Copy, Clock, Link as LinkIcon, Eye, Bookmark } from 'lucide-react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { ListWithLinks, Link as LinkType, Emoji3D } from '@/types'
+import { useRouter } from 'next/navigation'
+import { ListWithLinks, Link as LinkType } from '@/types'
 import { getHostname } from '@/lib/url-utils'
+import { Favicon } from './favicon'
 
 interface PublicListViewProps {
   list: ListWithLinks
-  onLoginClick?: () => void
 }
 
-export function PublicListView({ list, onLoginClick }: PublicListViewProps) {
+export function PublicListView({ list }: PublicListViewProps) {
   const [clickedLinks, setClickedLinks] = useState<Set<string>>(new Set())
+  const router = useRouter()
 
   const handleLinkClick = (linkId: string, url: string) => {
     setClickedLinks(prev => new Set(prev).add(linkId))
@@ -26,6 +28,10 @@ export function PublicListView({ list, onLoginClick }: PublicListViewProps) {
     } catch {
       // Silently handle error
     }
+  }
+
+  const handleLogin = () => {
+    router.push('/auth/sign-in')
   }
 
   return (
@@ -49,18 +55,18 @@ export function PublicListView({ list, onLoginClick }: PublicListViewProps) {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
                 style={{ fontFamily: 'Open Runde' }}
               >
                 <Copy className="w-4 h-4" />
                 Copy
               </button>
               <button
-                onClick={onLoginClick}
+                onClick={handleLogin}
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
                 style={{ fontFamily: 'Open Runde' }}
               >
-                Login (Demo)
+                Sign In
               </button>
             </div>
           </div>
@@ -195,19 +201,12 @@ function PublicLinkItem({
     >
       <div className="flex items-center gap-4">
         <div className="w-8 h-8 rounded-lg overflow-hidden bg-white flex-shrink-0 flex items-center justify-center">
-          {link.favicon_url ? (
-            <Image 
-              src={link.favicon_url} 
-              alt="" 
-              width={24}
-              height={24}
-              className="w-6 h-6 object-cover"
-            />
-          ) : (
-            <div className="w-6 h-6 bg-blue-100 rounded-sm flex items-center justify-center">
-              <div className="w-3 h-3 bg-blue-400 rounded-sm" />
-            </div>
-          )}
+          <Favicon 
+            url={link.url}
+            size={24}
+            className="rounded-lg"
+            fallbackClassName="bg-blue-100 rounded-lg"
+          />
         </div>
         
         <div className="flex-1 min-w-0">

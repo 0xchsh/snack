@@ -2,12 +2,11 @@
 
 import { useRef, useEffect, useState } from 'react'
 import { Picker, EmojiType } from 'ms-3d-emoji-picker'
-import Image from 'next/image'
 import { Emoji3D } from '@/types'
 
 interface EmojiPickerProps {
   isOpen: boolean
-  triggerRef: React.RefObject<HTMLElement>
+  triggerRef: React.RefObject<HTMLElement | HTMLButtonElement | null>
   currentEmoji: Emoji3D
   onSelectEmoji: (emoji: Emoji3D) => void
   onClose: () => void
@@ -16,7 +15,7 @@ interface EmojiPickerProps {
 export function EmojiPicker({ 
   isOpen, 
   triggerRef, 
-  currentEmoji, 
+  currentEmoji: _currentEmoji, 
   onSelectEmoji, 
   onClose 
 }: EmojiPickerProps) {
@@ -62,7 +61,9 @@ export function EmojiPicker({
     onClose()
   }
 
-  if (!isOpen) return null
+  if (!isOpen) {
+    return null
+  }
 
   return (
     <>
