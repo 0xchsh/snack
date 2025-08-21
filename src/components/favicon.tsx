@@ -44,9 +44,22 @@ export function Favicon({
     )
   }
 
+  const currentSrc = faviconUrls[currentIndex]
+  
+  if (!currentSrc) {
+    return (
+      <div 
+        className={`${fallbackClassName} flex items-center justify-center text-xs font-bold text-muted-foreground ${className}`}
+        style={{ width: size, height: size }}
+      >
+        {hostname.charAt(0).toUpperCase()}
+      </div>
+    )
+  }
+
   return (
     <Image
-      src={faviconUrls[currentIndex]}
+      src={currentSrc}
       alt={`${hostname} favicon`}
       width={size}
       height={size}

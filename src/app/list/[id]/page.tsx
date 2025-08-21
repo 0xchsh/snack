@@ -72,12 +72,13 @@ const mockList: ListWithLinks = {
 }
 
 interface ListPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export default function ListPage({ params }: ListPageProps) {
+export default async function ListPage({ params }: ListPageProps) {
+  const { id } = await params
   const [lists, setLists] = useState<ListWithLinks[]>([mockList])
   const [showCreateList, setShowCreateList] = useState(false)
   
@@ -85,7 +86,7 @@ export default function ListPage({ params }: ListPageProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
-  const currentList = lists.find(list => list.id === params.id) || mockList
+  const currentList = lists.find(list => list.id === id) || mockList
   
   // Determine if user can edit this list
   const canEdit = isAuthenticated && currentUserId === currentList.user_id

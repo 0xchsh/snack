@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -14,7 +14,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useLists } from '@/hooks/useLists'
 import { Plus, ArrowLeft, Copy, Eye } from 'lucide-react'
 
-export default function DemoPage() {
+function DemoPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const listId = searchParams.get('list')
@@ -302,11 +302,19 @@ export default function DemoPage() {
           <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <CreateList
               onCreateList={handleCreateList}
-              onCancel={() => setShowCreateList(false)}
+              onClose={() => setShowCreateList(false)}
             />
           </div>
         </div>
       )}
     </div>
+  )
+}
+
+export default function DemoPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DemoPageContent />
+    </Suspense>
   )
 }

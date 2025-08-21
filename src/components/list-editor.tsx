@@ -102,11 +102,13 @@ export function ListEditor({
     // Add links sequentially to the top of the list
     for (let i = 0; i < validUrls.length; i++) {
       const url = validUrls[i]
-      await onAddLink?.({ 
-        url,
-        list_id: list.id,
-        position: i // Position 0 for first link, 1 for second, etc. (top of list)
-      })
+      if (url) {
+        await onAddLink?.({ 
+          url,
+          list_id: list.id,
+          position: i // Position 0 for first link, 1 for second, etc. (top of list)
+        })
+      }
     }
     
     setLinkInput('')

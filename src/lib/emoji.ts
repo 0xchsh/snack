@@ -169,7 +169,9 @@ const EMOJI_3D_MAP: Record<string, { url: string; name: string }> = {
 export function getRandomEmoji3D() {
   const availableEmojis = Object.keys(EMOJI_3D_MAP)
   const randomEmoji = availableEmojis[Math.floor(Math.random() * availableEmojis.length)]
+  if (!randomEmoji) return getDefaultEmoji3D()
   const emoji3D = EMOJI_3D_MAP[randomEmoji]
+  if (!emoji3D) return getDefaultEmoji3D()
   
   return {
     unicode: randomEmoji,

@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const mockUser: User = {
       id: 'mock-user-id',
       email: email,
-      username: email.split('@')[0],
+      username: email?.split('@')[0] || 'user',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }
