@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { ListWithLinks, CreateListForm } from '@/types'
-import { hybridListDB } from '@/lib/hybrid-lists'
+import { supabaseListDB } from '@/lib/supabase-lists'
 import { useAuth } from '@/hooks/useAuth'
 
 interface ListsContextType {
@@ -10,7 +10,6 @@ interface ListsContextType {
   lists: ListWithLinks[]
   loading: boolean
   error: string | null
-  storageMethod: 'supabase' | 'localstorage'
   
   // List operations
   createEmptyList: () => Promise<ListWithLinks>
@@ -23,9 +22,6 @@ interface ListsContextType {
   // Link operations
   addLinkToList: (listId: string, linkData: { url: string; title?: string }) => Promise<ListWithLinks | null>
   removeLinkFromList: (listId: string, linkId: string) => Promise<ListWithLinks | null>
-  
-  // Storage management
-  retrySupabaseConnection: () => Promise<boolean>
 }
 
 const ListsContext = createContext<ListsContextType | undefined>(undefined)
@@ -34,7 +30,6 @@ export function ListsProvider({ children }: { children: ReactNode }) {
   const [lists, setLists] = useState<ListWithLinks[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [storageMethod, setStorageMethod] = useState<'supabase' | 'localstorage'>('supabase')
   const { user } = useAuth()
 
   // Load user's lists when user changes
@@ -50,16 +45,12 @@ export function ListsProvider({ children }: { children: ReactNode }) {
         setLoading(true)
         console.log('Loading lists for user:', user.id)
         
-        // Initialize demo data if this is a new user
-        await hybridListDB.initializeDemoData(user)
-        
-        // Load user's lists
-        const userLists = await hybridListDB.getUserLists(user.id)
+        // Load user's lists directly from Supabase
+        const userLists = await supabaseListDB.getUserLists(user.id)
         setLists(userLists)
         setError(null)
-        setStorageMethod(hybridListDB.getCurrentStorageMethod())
         
-        console.log('Loaded lists:', userLists, 'using', hybridListDB.getCurrentStorageMethod())
+        console.log('Loaded lists from Supabase:', userLists)
       } catch (err) {
         console.error('Error loading lists:', err)
         setError('Failed to load lists')
@@ -76,25 +67,14 @@ export function ListsProvider({ children }: { children: ReactNode }) {
   const refreshLists = async () => {
     if (user) {
       try {
-        const userLists = await hybridListDB.getUserLists(user.id)
+        const userLists = await supabaseListDB.getUserLists(user.id)
         setLists(userLists)
-        setStorageMethod(hybridListDB.getCurrentStorageMethod())
-        console.log('Refreshed lists:', userLists, 'using', hybridListDB.getCurrentStorageMethod())
+        console.log('Refreshed lists from Supabase:', userLists)
       } catch (err) {
         console.error('Error refreshing lists:', err)
         setError('Failed to refresh lists')
       }
     }
-  }
-
-  // Retry Supabase connection
-  const retrySupabaseConnection = async (): Promise<boolean> => {
-    const success = await hybridListDB.retrySupabaseConnection()
-    if (success) {
-      setStorageMethod('supabase')
-      await refreshLists()
-    }
-    return success
   }
 
   // Create a new empty list
@@ -105,14 +85,13 @@ export function ListsProvider({ children }: { children: ReactNode }) {
 
     try {
       setLoading(true)
-      const newList = await hybridListDB.createEmptyList(user)
-      setStorageMethod(hybridListDB.getCurrentStorageMethod())
+      const newList = await supabaseListDB.createEmptyList(user)
       
       // Update local state
       setLists(prev => [...prev, newList])
       setError(null)
       
-      console.log('Created empty list:', newList)
+      console.log('Created empty list in Supabase:', newList)
       return newList
     } catch (err) {
       console.error('Error creating empty list:', err)
@@ -131,14 +110,13 @@ export function ListsProvider({ children }: { children: ReactNode }) {
 
     try {
       setLoading(true)
-      const newList = await hybridListDB.createList(formData, user)
-      setStorageMethod(hybridListDB.getCurrentStorageMethod())
+      const newList = await supabaseListDB.createList(formData, user)
       
       // Update local state
       setLists(prev => [...prev, newList])
       setError(null)
       
-      console.log('Created list:', newList)
+      console.log('Created list in Supabase:', newList)
       return newList
     } catch (err) {
       console.error('Error creating list:', err)
@@ -152,8 +130,7 @@ export function ListsProvider({ children }: { children: ReactNode }) {
   // Update an existing list
   const updateList = async (listId: string, updates: Partial<ListWithLinks>): Promise<ListWithLinks | null> => {
     try {
-      const updatedList = await hybridListDB.updateList(listId, updates)
-      setStorageMethod(hybridListDB.getCurrentStorageMethod())
+      const updatedList = await supabaseListDB.updateList(listId, updates)
       
       if (updatedList) {
         // Update local state
@@ -161,7 +138,7 @@ export function ListsProvider({ children }: { children: ReactNode }) {
           list.id === listId ? updatedList : list
         ))
         setError(null)
-        console.log('Updated list:', updatedList)
+        console.log('Updated list in Supabase:', updatedList)
       }
       
       return updatedList
@@ -179,14 +156,13 @@ export function ListsProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const success = await hybridListDB.deleteList(listId, user.id)
-      setStorageMethod(hybridListDB.getCurrentStorageMethod())
+      const success = await supabaseListDB.deleteList(listId, user.id)
       
       if (success) {
         // Update local state
         setLists(prev => prev.filter(list => list.id !== listId))
         setError(null)
-        console.log('Deleted list:', listId)
+        console.log('Deleted list from Supabase:', listId)
       }
       
       return success
@@ -205,8 +181,7 @@ export function ListsProvider({ children }: { children: ReactNode }) {
   // Add a link to a list
   const addLinkToList = async (listId: string, linkData: { url: string; title?: string }): Promise<ListWithLinks | null> => {
     try {
-      const updatedList = await hybridListDB.addLinkToList(listId, linkData)
-      setStorageMethod(hybridListDB.getCurrentStorageMethod())
+      const updatedList = await supabaseListDB.addLinkToList(listId, linkData)
       
       if (updatedList) {
         // Update local state
@@ -214,7 +189,7 @@ export function ListsProvider({ children }: { children: ReactNode }) {
           list.id === listId ? updatedList : list
         ))
         setError(null)
-        console.log('Added link to list:', linkData)
+        console.log('Added link to list in Supabase:', linkData)
       }
       
       return updatedList
@@ -228,8 +203,7 @@ export function ListsProvider({ children }: { children: ReactNode }) {
   // Remove a link from a list
   const removeLinkFromList = async (listId: string, linkId: string): Promise<ListWithLinks | null> => {
     try {
-      const updatedList = await hybridListDB.removeLinkFromList(listId, linkId)
-      setStorageMethod(hybridListDB.getCurrentStorageMethod())
+      const updatedList = await supabaseListDB.removeLinkFromList(listId, linkId)
       
       if (updatedList) {
         // Update local state
@@ -237,7 +211,7 @@ export function ListsProvider({ children }: { children: ReactNode }) {
           list.id === listId ? updatedList : list
         ))
         setError(null)
-        console.log('Removed link from list:', linkId)
+        console.log('Removed link from list in Supabase:', linkId)
       }
       
       return updatedList
@@ -253,7 +227,6 @@ export function ListsProvider({ children }: { children: ReactNode }) {
     lists,
     loading,
     error,
-    storageMethod,
     
     // List operations
     createEmptyList,
@@ -266,9 +239,6 @@ export function ListsProvider({ children }: { children: ReactNode }) {
     // Link operations
     addLinkToList,
     removeLinkFromList,
-    
-    // Storage management
-    retrySupabaseConnection,
   }
 
   return (

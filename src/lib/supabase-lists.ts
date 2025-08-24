@@ -6,6 +6,14 @@ import { fetchOGDataClient } from './og-client'
 // Supabase database service for lists
 export class SupabaseListDatabase {
   private supabase = createClient()
+  
+  constructor() {
+    // Verify Supabase client is initialized
+    if (!this.supabase) {
+      throw new Error('Supabase client failed to initialize. Check your environment variables.')
+    }
+    console.log('SupabaseListDatabase initialized')
+  }
 
   // Get lists for a specific user
   async getUserLists(userId: string): Promise<ListWithLinks[]> {
@@ -14,57 +22,73 @@ export class SupabaseListDatabase {
       
       const { data: lists, error } = await this.supabase
         .from('lists')
-        .select(`
-          *,
-          links (*),
-          users!lists_user_id_fkey (id, username)
-        `)
+        .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
 
       if (error) {
-        // Check if it's a table not found error or permission issue first
-        if (error.code === 'PGRST204' || 
-            error.code === '42P01' || 
-            error.message?.includes('relation') || 
-            error.message?.includes('does not exist') ||
-            error.message?.includes('permission denied') ||
-            error.message?.includes('JWT')) {
-          console.info('Supabase database not available, falling back to localStorage')
-          return []
-        }
-        
-        // Only log as error if it's an unexpected error
-        console.error('Supabase error details:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        })
-        
+        console.error('Error fetching user lists:', error)
         throw error
       }
 
       console.log('Successfully fetched lists:', lists?.length || 0)
+      
+      // Debug: Check the order of lists by created_at
+      if (lists && lists.length > 0) {
+        console.log('Lists order check:', lists.map(l => ({ 
+          id: l.id.substring(0, 8), 
+          title: l.title, 
+          created_at: l.created_at 
+        })))
+      }
 
-      // Transform the data to match our ListWithLinks type
-      return (lists || []).map(list => ({
-        ...list,
-        links: list.links || [],
-        user: {
-          id: list.users.id,
-          username: list.users.username || 'Anonymous'
-        }
-      }))
+      // Get links for each list and transform the data
+      const listsWithLinks = await Promise.all(
+        (lists || []).map(async (list) => {
+          let links: any[] = []
+          
+          try {
+            const { data: listLinks, error: linksError } = await this.supabase
+              .from('links')
+              .select('*')
+              .eq('list_id', list.id)
+              .order('position', { ascending: true })
+
+            if (linksError) {
+              console.warn('Error fetching links for list', list.id, ':', linksError.message)
+            } else {
+              links = listLinks || []
+            }
+          } catch (linkError) {
+            console.warn('Failed to fetch links for list', list.id)
+          }
+
+          return {
+            ...list,
+            emoji_3d: list.emoji_3d ? JSON.parse(list.emoji_3d) : null,
+            links,
+            user: {
+              id: list.user_id,
+              username: 'User'
+            }
+          }
+        })
+      )
+
+      // Ensure newest lists are first (double-check sorting)
+      const sortedLists = listsWithLinks.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+      
+      console.log('Final sorted order:', sortedLists.map(l => ({ 
+        id: l.id.substring(0, 8), 
+        title: l.title, 
+        created_at: l.created_at 
+      })))
+
+      return sortedLists
     } catch (error) {
       console.error('Failed to get user lists:', error)
-      
-      // If it's a database connectivity issue, return empty array instead of throwing
-      if (error instanceof TypeError && error.message?.includes('fetch')) {
-        console.warn('Network error connecting to Supabase. Using fallback.')
-        return []
-      }
-      
       throw error
     }
   }
@@ -76,8 +100,7 @@ export class SupabaseListDatabase {
         .from('lists')
         .select(`
           *,
-          links (*),
-          users!lists_user_id_fkey (id, username)
+          links (*)
         `)
         .eq('id', listId)
         .single()
@@ -91,13 +114,21 @@ export class SupabaseListDatabase {
         throw error
       }
 
+      // Get user data separately 
+      const { data: userData } = await this.supabase
+        .from('users')
+        .select('id, username')
+        .eq('id', list.user_id)
+        .single()
+
       // Transform the data to match our ListWithLinks type
       return {
         ...list,
+        emoji_3d: list.emoji_3d ? JSON.parse(list.emoji_3d) : null,
         links: list.links || [],
         user: {
-          id: list.users.id,
-          username: list.users.username || 'Anonymous'
+          id: list.user_id,
+          username: userData?.username || 'Anonymous'
         }
       }
     } catch (error) {
@@ -109,38 +140,58 @@ export class SupabaseListDatabase {
   // Create a new empty list for a user
   async createEmptyList(user: User): Promise<ListWithLinks> {
     try {
-      // First, ensure user exists in the users table
-      await this.ensureUserExists(user)
-
+      console.log('Creating empty list for user:', user.id)
+      
+      // Check if we have a valid Supabase session
+      const { data: { session }, error: sessionError } = await this.supabase.auth.getSession()
+      
+      if (sessionError) {
+        console.error('Error getting session:', sessionError)
+        throw new Error('Failed to verify authentication')
+      }
+      
+      if (!session) {
+        console.error('No active Supabase session')
+        throw new Error('You must be signed in to create lists')
+      }
+      
+      console.log('Session found for user:', session.user.id, 'email:', session.user.email)
+      
       const defaultEmoji = getDefaultEmoji3D()
       const newListData = {
         title: 'New list', // Default title - user can edit
         emoji: defaultEmoji.unicode, // Default pretzel emoji
-        emoji_3d: JSON.stringify(defaultEmoji),
+        emoji_3d: JSON.stringify(defaultEmoji), // Now that column exists
         is_public: false,
-        price_cents: null,
-        user_id: user.id,
+        price_cents: null, // Now that column exists
+        user_id: session.user.id, // Use the session user ID to ensure it matches auth
       }
+
+      console.log('Inserting list with data:', newListData)
 
       const { data: list, error } = await this.supabase
         .from('lists')
         .insert(newListData)
-        .select(`
-          *,
-          links (*),
-          users!lists_user_id_fkey (id, username)
-        `)
+        .select()
         .single()
 
       if (error) {
-        console.error('Error creating empty list:', error)
-        throw error
+        console.error('Supabase error creating list:', JSON.stringify(error, null, 2))
+        console.error('Error details:', { 
+          code: error.code, 
+          message: error.message, 
+          details: error.details,
+          hint: error.hint,
+          fullError: error
+        })
+        throw new Error(error.message || 'Failed to create list in Supabase')
       }
 
       console.log('Created new empty list:', list)
       
       return {
         ...list,
+        emoji_3d: list.emoji_3d ? JSON.parse(list.emoji_3d) : defaultEmoji,
         links: [],
         user: {
           id: user.id,
@@ -156,38 +207,57 @@ export class SupabaseListDatabase {
   // Create a list from form data
   async createList(formData: CreateListForm, user: User): Promise<ListWithLinks> {
     try {
-      // First, ensure user exists in the users table
-      await this.ensureUserExists(user)
-
+      console.log('Creating list for user:', user.id)
+      
+      // Check if we have a valid Supabase session
+      const { data: { session }, error: sessionError } = await this.supabase.auth.getSession()
+      
+      if (sessionError) {
+        console.error('Error getting session:', sessionError)
+        throw new Error('Failed to verify authentication')
+      }
+      
+      if (!session) {
+        console.error('No active Supabase session')
+        throw new Error('You must be signed in to create lists')
+      }
+      
+      console.log('Session found for user:', session.user.id, 'email:', session.user.email)
+      
       const newListData = {
+        id: crypto.randomUUID(), // Generate a UUID for the list
+        public_id: crypto.randomUUID(), // Generate a UUID for public access
         title: formData.title,
         emoji: formData.emoji || getRandomEmoji(),
-        emoji_3d: formData.emoji_3d ? JSON.stringify(formData.emoji_3d) : null,
+        // emoji_3d: formData.emoji_3d ? JSON.stringify(formData.emoji_3d) : null, // Temporarily removed
         is_public: formData.is_public,
-        price_cents: formData.price_cents || null,
-        user_id: user.id,
+        // price_cents: formData.price_cents || null, // Temporarily removed
+        user_id: session.user.id, // Use the session user ID to ensure it matches auth
       }
 
       const { data: list, error } = await this.supabase
         .from('lists')
         .insert(newListData)
-        .select(`
-          *,
-          links (*),
-          users!lists_user_id_fkey (id, username)
-        `)
+        .select()
         .single()
 
       if (error) {
-        console.error('Error creating list:', error)
-        throw error
+        console.error('Supabase error creating list:', JSON.stringify(error, null, 2))
+        console.error('Error details:', { 
+          code: error.code, 
+          message: error.message, 
+          details: error.details,
+          hint: error.hint,
+          fullError: error
+        })
+        throw new Error(error.message || 'Failed to create list in Supabase')
       }
 
       console.log('Created new list:', list)
       
       return {
         ...list,
-        emoji_3d: list.emoji_3d ? JSON.parse(list.emoji_3d) : undefined,
+        emoji_3d: list.emoji_3d ? JSON.parse(list.emoji_3d) : null,
         links: [],
         user: {
           id: user.id,
@@ -203,6 +273,52 @@ export class SupabaseListDatabase {
   // Update an existing list
   async updateList(listId: string, updates: Partial<ListWithLinks>): Promise<ListWithLinks | null> {
     try {
+      // Check if we have a valid Supabase session
+      const { data: { session }, error: sessionError } = await this.supabase.auth.getSession()
+      
+      if (sessionError) {
+        console.error('Error getting session:', sessionError)
+        throw new Error('Failed to verify authentication')
+      }
+      
+      if (!session) {
+        console.error('No active Supabase session')
+        throw new Error('You must be signed in to update lists')
+      }
+
+      console.log('Attempting to update list:', { listId, sessionUserId: session.user.id })
+
+      // First check if the list exists and user has permission to update it
+      const { data: existingList, error: fetchError } = await this.supabase
+        .from('lists')
+        .select('id, user_id, title')
+        .eq('id', listId)
+        .maybeSingle() // Use maybeSingle instead of single to handle 0 results gracefully
+
+      if (fetchError) {
+        console.error('Error checking if list exists:', JSON.stringify(fetchError, null, 2))
+        throw new Error(`Database error while checking list: ${fetchError.message}`)
+      }
+
+      if (!existingList) {
+        console.error('List not found:', listId)
+        throw new Error('List not found. It may have been deleted or you may not have permission to access it.')
+      }
+
+      console.log('Found existing list:', { 
+        id: existingList.id, 
+        user_id: existingList.user_id, 
+        title: existingList.title 
+      })
+
+      if (existingList.user_id !== session.user.id) {
+        console.error('Permission denied:', { 
+          listOwner: existingList.user_id, 
+          currentUser: session.user.id 
+        })
+        throw new Error('You can only update your own lists')
+      }
+
       // Prepare the update data, excluding read-only fields
       const updateData: any = {}
       
@@ -212,31 +328,46 @@ export class SupabaseListDatabase {
       if (updates.is_public !== undefined) updateData.is_public = updates.is_public
       if (updates.price_cents !== undefined) updateData.price_cents = updates.price_cents
 
+      console.log('Updating list with data:', { listId, updateData })
+
       const { data: list, error } = await this.supabase
         .from('lists')
         .update(updateData)
         .eq('id', listId)
         .select(`
           *,
-          links (*),
-          users!lists_user_id_fkey (id, username)
+          links (*)
         `)
         .single()
 
       if (error) {
-        console.error('Error updating list:', error)
-        throw error
+        console.error('Supabase error updating list:', JSON.stringify(error, null, 2))
+        console.error('Error details:', { 
+          code: error.code, 
+          message: error.message, 
+          details: error.details,
+          hint: error.hint,
+          fullError: error
+        })
+        throw new Error(error.message || 'Failed to update list in Supabase')
       }
+
+      // Get user data separately 
+      const { data: userData } = await this.supabase
+        .from('users')
+        .select('id, username')
+        .eq('id', list.user_id)
+        .single()
 
       console.log('Updated list:', list)
       
       return {
         ...list,
-        emoji_3d: list.emoji_3d ? JSON.parse(list.emoji_3d) : undefined,
+        emoji_3d: list.emoji_3d ? JSON.parse(list.emoji_3d) : null,
         links: list.links || [],
         user: {
-          id: list.users.id,
-          username: list.users.username || 'Anonymous'
+          id: list.user_id,
+          username: userData?.username || 'Anonymous'
         }
       }
     } catch (error) {
@@ -298,9 +429,10 @@ export class SupabaseListDatabase {
 
       const newLinkData = {
         url: linkData.url,
-        title: linkData.title || ogData.title || new URL(linkData.url).hostname,
+        title: ogData.title || linkData.title || new URL(linkData.url).hostname,
         favicon_url: ogData.favicon_url || `https://www.google.com/s2/favicons?domain=${new URL(linkData.url).hostname}&sz=32`,
         image_url: ogData.image_url,
+        description: ogData.description,
         position: 0, // Always add at the top
         list_id: listId,
       }
@@ -341,101 +473,6 @@ export class SupabaseListDatabase {
     } catch (error) {
       console.error('Failed to remove link from list:', error)
       throw error
-    }
-  }
-
-  // Ensure user exists in the users table (for mock auth compatibility)
-  private async ensureUserExists(user: User): Promise<void> {
-    try {
-      const { data: existingUser, error: fetchError } = await this.supabase
-        .from('users')
-        .select('id')
-        .eq('id', user.id)
-        .single()
-
-      if (fetchError && fetchError.code === 'PGRST116') {
-        // User doesn't exist, create them
-        const { error: insertError } = await this.supabase
-          .from('users')
-          .insert({
-            id: user.id,
-            email: user.email,
-            username: user.username,
-          })
-
-        if (insertError) {
-          // Check if it's a table/permission issue
-          if (insertError.code === '42P01' || 
-              insertError.message?.includes('relation') || 
-              insertError.message?.includes('does not exist') ||
-              insertError.message?.includes('permission denied')) {
-            console.info('Supabase user creation not available, using localStorage fallback')
-            return
-          }
-          console.error('Error creating user:', insertError)
-          throw insertError
-        }
-
-        console.log('Created user:', user.id)
-      } else if (fetchError) {
-        // Check if it's a table/permission issue
-        if (fetchError.code === '42P01' || 
-            fetchError.message?.includes('relation') || 
-            fetchError.message?.includes('does not exist') ||
-            fetchError.message?.includes('permission denied')) {
-          console.info('Supabase user check not available, using localStorage fallback')
-          return
-        }
-        console.error('Error checking user existence:', fetchError)
-        throw fetchError
-      }
-      // User exists, continue
-    } catch (error) {
-      // Check if it's a database availability error
-      if (error && typeof error === 'object' && 'code' in error) {
-        const supabaseError = error as any
-        if (supabaseError.code === '42P01' || 
-            supabaseError.message?.includes('relation') || 
-            supabaseError.message?.includes('does not exist') ||
-            supabaseError.message?.includes('permission denied')) {
-          console.info('Supabase user management not available, using localStorage fallback')
-          return
-        }
-      }
-      console.error('Failed to ensure user exists:', error)
-      throw error
-    }
-  }
-
-  // Initialize with some demo data if user has no lists
-  async initializeDemoData(user: User): Promise<void> {
-    try {
-      const existingLists = await this.getUserLists(user.id)
-      
-      // Only add demo data if user has no lists
-      if (existingLists.length === 0) {
-        const demoList = await this.createList({
-          title: 'Welcome to Snack! 👋',
-          emoji: '🍿',
-          is_public: false,
-        }, user)
-
-        // Add some demo links
-        await this.addLinkToList(demoList.id, {
-          url: 'https://github.com',
-          title: 'GitHub - Where software is built'
-        })
-        
-        await this.addLinkToList(demoList.id, {
-          url: 'https://vercel.com',
-          title: 'Vercel - Develop. Preview. Ship.'
-        })
-
-        console.log('Initialized demo data for user:', user.id)
-      }
-    } catch (error) {
-      console.error('Failed to initialize demo data:', error)
-      // Don't throw here - demo data is not critical
     }
   }
 }

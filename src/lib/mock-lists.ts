@@ -197,32 +197,7 @@ export class MockListDatabase {
     return updatedList
   }
 
-  // Initialize with some demo data if localStorage is empty
-  initializeDemoData(user: User): void {
-    const existingLists = this.getUserLists(user.id)
-    
-    // Only add demo data if user has no lists
-    if (existingLists.length === 0) {
-      const demoList = this.createList({
-        title: 'Welcome to Snack! 👋',
-        emoji: '🍿',
-        is_public: false,
-      }, user)
-
-      // Add some demo links
-      this.addLinkToList(demoList.id, {
-        url: 'https://github.com',
-        title: 'GitHub - Where software is built'
-      })
-      
-      this.addLinkToList(demoList.id, {
-        url: 'https://vercel.com',
-        title: 'Vercel - Develop. Preview. Ship.'
-      })
-
-      console.log('Initialized demo data for user:', user.id)
-    }
-  }
+  // Demo data initialization removed - users create their own content
 }
 
 // Export singleton instance

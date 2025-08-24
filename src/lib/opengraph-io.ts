@@ -139,6 +139,15 @@ function getFallbackOGData(url: string): OGData {
           favicon_url: 'https://github.githubassets.com/favicons/favicon.svg',
           site_name: 'GitHub'
         }
+      } else {
+        // Generic GitHub fallback
+        return {
+          title: 'GitHub',
+          description: 'Where software is built',
+          image_url: 'https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png',
+          favicon_url: 'https://github.githubassets.com/favicons/favicon.svg',
+          site_name: 'GitHub'
+        }
       }
     }
 
@@ -172,6 +181,61 @@ function getFallbackOGData(url: string): OGData {
         image_url: 'https://www.notion.so/images/meta/default.png',
         favicon_url: 'https://www.notion.so/images/favicon.ico',
         site_name: 'Notion'
+      }
+    }
+
+    // YouTube
+    if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) {
+      return {
+        title: 'YouTube',
+        description: 'Enjoy the videos and music you love',
+        image_url: 'https://www.youtube.com/img/desktop/yt_1200.png',
+        favicon_url: 'https://www.youtube.com/s/desktop/f506e53b/img/favicon_32x32.png',
+        site_name: 'YouTube'
+      }
+    }
+
+    // Twitter/X
+    if (hostname.includes('twitter.com') || hostname.includes('x.com')) {
+      return {
+        title: 'X (Twitter)',
+        description: 'From breaking news and entertainment to sports and politics',
+        image_url: 'https://abs.twimg.com/errors/logo46x38.png',
+        favicon_url: 'https://abs.twimg.com/favicons/twitter.3.ico',
+        site_name: 'X'
+      }
+    }
+
+    // LinkedIn
+    if (hostname.includes('linkedin.com')) {
+      return {
+        title: 'LinkedIn',
+        description: 'Professional networking platform',
+        image_url: 'https://static.licdn.com/aero-v1/sc/h/al2o9zrvru7aqj8e1x2rzsrca',
+        favicon_url: 'https://static.licdn.com/favicon.ico',
+        site_name: 'LinkedIn'
+      }
+    }
+
+    // Dribbble
+    if (hostname.includes('dribbble.com')) {
+      return {
+        title: 'Dribbble',
+        description: 'Discover the world\'s top designers & creatives',
+        image_url: 'https://cdn.dribbble.com/assets/dribbble-ball-mark-2bd45f09c2fb58dbbfb44766d5d1d07c5a12972d602ef8b32204d28fa3dda554.svg',
+        favicon_url: 'https://cdn.dribbble.com/assets/favicon-b38525134603b5513b6e8844d1b0be7e5d4aef35ad8e67aeca20b2a13ca7f5e5.ico',
+        site_name: 'Dribbble'
+      }
+    }
+
+    // Medium
+    if (hostname.includes('medium.com')) {
+      return {
+        title: 'Medium',
+        description: 'Where good ideas find you',
+        image_url: 'https://miro.medium.com/v2/1*m-R_BkNf1Qjr1YbyOIJY2w.png',
+        favicon_url: 'https://cdn-static-1.medium.com/sites/medium.com/favicon.ico',
+        site_name: 'Medium'
       }
     }
 

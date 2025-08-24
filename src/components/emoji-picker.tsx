@@ -51,8 +51,10 @@ export function EmojiPicker({
   }, [isOpen, triggerRef])
 
   const handle3DEmojiSelect = (selectedEmoji: EmojiType) => {
+    // Since the 3D emoji picker only provides URLs and numeric names,
+    // we'll use a default emoji unicode and rely on the 3D image
     const emoji3D: Emoji3D = {
-      unicode: getUnicodeFromName(selectedEmoji.name),
+      unicode: '✨', // Default emoji as fallback since 3D picker doesn't provide Unicode
       url: selectedEmoji.url,
       name: selectedEmoji.name
     }
@@ -89,18 +91,4 @@ export function EmojiPicker({
       </div>
     </>
   )
-}
-
-// Helper function to map emoji names to Unicode (simplified version)
-function getUnicodeFromName(name: string): string {
-  const emojiMap: Record<string, string> = {
-    '1': '😀', '2': '😃', '3': '😄', '4': '😁', '5': '😆',
-    '6': '😅', '7': '🤣', '8': '😂', '9': '🙂', '10': '🙃',
-    '11': '🫠', '12': '😉', '13': '😊', '14': '😇', '15': '🥰',
-    '16': '😍', '17': '🤩', '18': '😘', '19': '😗', '20': '☺️',
-    '21': '😚', '22': '😙', '23': '🥲', '24': '😋', '25': '😛',
-    '26': '😜', '27': '🤪', '28': '😝', '29': '🤑', '30': '🤗'
-  }
-  
-  return emojiMap[name] || name || '🎯'
 }

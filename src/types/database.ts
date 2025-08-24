@@ -3,65 +3,85 @@ export interface Database {
     Tables: {
       users: {
         Row: {
-          id: string
-          email: string
-          username: string | null
+          id: string // UUID
+          username: string
+          first_name: string | null
+          last_name: string | null
+          email: string | null
+          profile_picture_url: string | null
+          subscription_status: string
+          subscription_tier: string
           created_at: string
           updated_at: string
         }
         Insert: {
-          id: string
-          email: string
-          username?: string | null
+          id?: string // UUID auto-generated
+          username: string
+          first_name?: string | null
+          last_name?: string | null
+          email?: string | null
+          profile_picture_url?: string | null
+          subscription_status?: string
+          subscription_tier?: string
           created_at?: string
           updated_at?: string
         }
         Update: {
-          id?: string
-          email?: string
-          username?: string | null
-          created_at?: string
+          username?: string
+          first_name?: string | null
+          last_name?: string | null
+          email?: string | null
+          profile_picture_url?: string | null
+          subscription_status?: string
+          subscription_tier?: string
           updated_at?: string
         }
       }
       lists: {
         Row: {
-          id: string
-          user_id: string
+          id: string // UUID
+          user_id: string // UUID reference
           title: string
+          description: string | null
           emoji: string | null
+          emoji_3d: any | null // JSONB
+          view_mode: string
           is_public: boolean
-          price_cents: number | null
+          save_count: number // Counter cache for performance
           created_at: string
           updated_at: string
         }
         Insert: {
-          id?: string
+          id?: string // UUID auto-generated
           user_id: string
           title: string
+          description?: string | null
           emoji?: string | null
+          emoji_3d?: any | null
+          view_mode?: string
           is_public?: boolean
-          price_cents?: number | null
+          save_count?: number
           created_at?: string
           updated_at?: string
         }
         Update: {
-          id?: string
-          user_id?: string
           title?: string
+          description?: string | null
           emoji?: string | null
+          emoji_3d?: any | null
+          view_mode?: string
           is_public?: boolean
-          price_cents?: number | null
-          created_at?: string
+          save_count?: number
           updated_at?: string
         }
       }
       links: {
         Row: {
-          id: string
-          list_id: string
+          id: string // UUID
+          list_id: string // UUID reference
           url: string
           title: string | null
+          description: string | null
           image_url: string | null
           favicon_url: string | null
           position: number
@@ -69,10 +89,11 @@ export interface Database {
           updated_at: string
         }
         Insert: {
-          id?: string
+          id?: string // UUID auto-generated
           list_id: string
           url: string
           title?: string | null
+          description?: string | null
           image_url?: string | null
           favicon_url?: string | null
           position: number
@@ -80,20 +101,195 @@ export interface Database {
           updated_at?: string
         }
         Update: {
-          id?: string
-          list_id?: string
           url?: string
           title?: string | null
+          description?: string | null
           image_url?: string | null
           favicon_url?: string | null
           position?: number
+          updated_at?: string
+        }
+      }
+      saved_lists: {
+        Row: {
+          user_id: string // UUID reference (composite PK)
+          list_id: string // UUID reference (composite PK)
+          saved_at: string
+          notes: string | null // User's private notes about the saved list
+        }
+        Insert: {
+          user_id: string
+          list_id: string
+          saved_at?: string
+          notes?: string | null
+        }
+        Update: {
+          saved_at?: string
+          notes?: string | null
+        }
+      }
+      subscriptions: {
+        Row: {
+          id: string // UUID
+          user_id: string // UUID reference
+          stripe_subscription_id: string
+          stripe_customer_id: string
+          status: string // active, canceled, past_due, etc.
+          tier: string // pro, premium, etc.
+          billing_cycle: string // monthly, yearly
+          current_period_start: string
+          current_period_end: string
+          cancel_at_period_end: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string // UUID auto-generated
+          user_id: string
+          stripe_subscription_id: string
+          stripe_customer_id: string
+          status: string
+          tier: string
+          billing_cycle: string
+          current_period_start: string
+          current_period_end: string
+          cancel_at_period_end?: boolean
           created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          stripe_subscription_id?: string
+          stripe_customer_id?: string
+          status?: string
+          tier?: string
+          billing_cycle?: string
+          current_period_start?: string
+          current_period_end?: string
+          cancel_at_period_end?: boolean
+          updated_at?: string
+        }
+      }
+      payment_methods: {
+        Row: {
+          id: string // UUID
+          user_id: string // UUID reference
+          stripe_payment_method_id: string
+          type: string // card, bank_account, etc.
+          brand: string | null // visa, mastercard, etc.
+          last4: string | null // last 4 digits
+          exp_month: number | null // expiration month
+          exp_year: number | null // expiration year
+          is_default: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string // UUID auto-generated
+          user_id: string
+          stripe_payment_method_id: string
+          type: string
+          brand?: string | null
+          last4?: string | null
+          exp_month?: number | null
+          exp_year?: number | null
+          is_default?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          stripe_payment_method_id?: string
+          type?: string
+          brand?: string | null
+          last4?: string | null
+          exp_month?: number | null
+          exp_year?: number | null
+          is_default?: boolean
+          updated_at?: string
+        }
+      }
+      invoices: {
+        Row: {
+          id: string // UUID
+          user_id: string // UUID reference
+          subscription_id: string | null // UUID reference
+          stripe_invoice_id: string
+          number: string // invoice number from Stripe
+          status: string // paid, open, void, etc.
+          amount_paid: number // in cents
+          currency: string
+          billing_period_start: string | null
+          billing_period_end: string | null
+          invoice_pdf: string | null // URL to PDF from Stripe
+          hosted_invoice_url: string | null // Stripe hosted invoice URL
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string // UUID auto-generated
+          user_id: string
+          subscription_id?: string | null
+          stripe_invoice_id: string
+          number: string
+          status: string
+          amount_paid: number
+          currency?: string
+          billing_period_start?: string | null
+          billing_period_end?: string | null
+          invoice_pdf?: string | null
+          hosted_invoice_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          subscription_id?: string | null
+          stripe_invoice_id?: string
+          number?: string
+          status?: string
+          amount_paid?: number
+          currency?: string
+          billing_period_start?: string | null
+          billing_period_end?: string | null
+          invoice_pdf?: string | null
+          hosted_invoice_url?: string | null
           updated_at?: string
         }
       }
     }
     Views: {
-      [_ in never]: never
+      active_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          stripe_subscription_id: string
+          stripe_customer_id: string
+          status: string
+          tier: string
+          billing_cycle: string
+          current_period_start: string
+          current_period_end: string
+          cancel_at_period_end: boolean
+          created_at: string
+          updated_at: string
+          email: string | null
+          username: string
+          first_name: string | null
+          last_name: string | null
+        }
+      }
+      user_billing_summary: {
+        Row: {
+          user_id: string
+          email: string | null
+          username: string
+          subscription_status: string
+          subscription_tier: string
+          stripe_customer_id: string | null
+          current_period_end: string | null
+          cancel_at_period_end: boolean | null
+          total_invoices: number
+          total_paid: number
+        }
+      }
     }
     Functions: {
       [_ in never]: never

@@ -26,7 +26,7 @@ export function normalizeUrl(url: string): string {
   }
   
   // Add https:// if it looks like a domain
-  if (trimmed.includes('.') && !trimmed.includes(' ')) {
+  if (trimmed.includes('.') && !trimmed.includes(' ') && !trimmed.includes(',')) {
     return `https://${trimmed}`
   }
   

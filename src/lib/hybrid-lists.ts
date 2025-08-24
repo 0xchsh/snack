@@ -57,7 +57,17 @@ export class HybridListDatabase {
     if (this.useSupabase) {
       try {
         return await supabaseListDB.createEmptyList(user)
-      } catch (error) {
+      } catch (error: any) {
+        // Check if it's a database error specifically
+        if (error?.message === 'SUPABASE_DB_ERROR' || 
+            error?.message === 'SUPABASE_RLS_ERROR' || 
+            error?.code === '42501' || 
+            error?.code === '42P01' ||
+            error?.code === 'PGRST204') {
+          console.warn('Supabase database issue, falling back to localStorage')
+          this.useSupabase = false
+          return mockListDB.createEmptyList(user)
+        }
         console.warn('Supabase failed, falling back to localStorage:', error)
         this.useSupabase = false
         return mockListDB.createEmptyList(user)
@@ -72,7 +82,17 @@ export class HybridListDatabase {
     if (this.useSupabase) {
       try {
         return await supabaseListDB.createList(formData, user)
-      } catch (error) {
+      } catch (error: any) {
+        // Check if it's a database error specifically
+        if (error?.message === 'SUPABASE_DB_ERROR' || 
+            error?.message === 'SUPABASE_RLS_ERROR' || 
+            error?.code === '42501' || 
+            error?.code === '42P01' ||
+            error?.code === 'PGRST204') {
+          console.warn('Supabase database issue, falling back to localStorage')
+          this.useSupabase = false
+          return mockListDB.createList(formData, user)
+        }
         console.warn('Supabase failed, falling back to localStorage:', error)
         this.useSupabase = false
         return mockListDB.createList(formData, user)
@@ -142,20 +162,7 @@ export class HybridListDatabase {
     }
   }
 
-  // Initialize with some demo data if user has no lists
-  async initializeDemoData(user: User): Promise<void> {
-    if (this.useSupabase) {
-      try {
-        await supabaseListDB.initializeDemoData(user)
-      } catch (error) {
-        console.warn('Supabase failed, falling back to localStorage:', error)
-        this.useSupabase = false
-        mockListDB.initializeDemoData(user)
-      }
-    } else {
-      mockListDB.initializeDemoData(user)
-    }
-  }
+  // Demo data initialization removed - users create their own content
 
   // Get current storage method being used
   getCurrentStorageMethod(): 'supabase' | 'localstorage' {

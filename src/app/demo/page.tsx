@@ -10,8 +10,8 @@ import { CreateList } from '@/components/create-list'
 import { ListWithLinks, CreateListForm, LinkInsert } from '@/types'
 import { getRandomEmoji } from '@/lib/emoji'
 import { getHostname, getFaviconUrl } from '@/lib/url-utils'
-import { useAuth } from '@/hooks/useAuth'
 import { useLists } from '@/hooks/useLists'
+import { useAuth } from '@/hooks/useAuth'
 import { Plus, ArrowLeft, Copy, Eye } from 'lucide-react'
 
 function DemoPageContent() {
@@ -21,25 +21,26 @@ function DemoPageContent() {
   
   const [showCreateList, setShowCreateList] = useState(false)
   
-  // Real auth and lists state from context
+  // Use authentication hook
   const { user, loading: authLoading, signOut } = useAuth()
+  
+  // Use the hybrid database useLists hook
   const { 
     lists, 
     loading: listsLoading, 
-    getListById, 
-    updateList, 
-    addLinkToList, 
-    removeLinkFromList,
-    createList: createNewList
+    createList,
+    updateList,
+    addLinkToList,
+    removeLinkFromList
   } = useLists()
 
-  // Determine current list based on URL params
-  const currentList = listId ? getListById(listId) : null
+  // Find current list from lists array
+  const currentList = listId ? lists.find(list => list.id === listId) : null
 
   // Handle list creation from the create list form
   const handleCreateList = async (formData: CreateListForm) => {
     try {
-      const newList = await createNewList(formData)
+      const newList = await createList(formData)
       router.push(`/demo?list=${newList.id}`)
       setShowCreateList(false)
     } catch (error) {
@@ -58,7 +59,7 @@ function DemoPageContent() {
     if (!currentList) return
     await addLinkToList(currentList.id, {
       url: linkData.url,
-      title: linkData.title || getHostname(linkData.url)
+      title: linkData.title
     })
   }
 
@@ -68,23 +69,9 @@ function DemoPageContent() {
     await removeLinkFromList(currentList.id, linkId)
   }
 
-  // Handle reordering links (simplified for now)
-  const handleReorderLinks = async (linkIds: string[]) => {
-    if (!currentList) return
-    
-    // Create new links array with updated positions
-    const linkMap = new Map(currentList.links.map(link => [link.id, link]))
-    const reorderedLinks = linkIds
-      .map(id => linkMap.get(id))
-      .filter(Boolean)
-      .map((link, index) => ({ ...link!, position: index }))
-    
-    await updateList(currentList.id, { links: reorderedLinks })
-  }
-
   // Determine if user can edit this list
   const isAuthenticated = !!user && !authLoading
-  const canEdit = isAuthenticated && currentList?.user_id === user?.id
+  const canEdit = isAuthenticated && currentList?.user?.id === user?.id
 
   // Handle copy URL
   const handleCopyUrl = async () => {
@@ -281,6 +268,7 @@ function DemoPageContent() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
+        
         {canEdit ? (
           // Editing mode for list owner
           <ListEditor
@@ -288,7 +276,6 @@ function DemoPageContent() {
             onUpdateList={handleUpdateList}
             onAddLink={handleAddLink}
             onRemoveLink={handleRemoveLink}
-            onReorderLinks={handleReorderLinks}
           />
         ) : (
           // Public view mode for non-owners or non-authenticated users
