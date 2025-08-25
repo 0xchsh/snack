@@ -17,7 +17,7 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
   const [formData, setFormData] = useState<CreateListForm>({
     title: '',
     emoji: defaultEmoji3D.unicode,
-    is_public: false
+    is_public: true
   })
   const [currentEmoji3D, setCurrentEmoji3D] = useState<Emoji3D>(defaultEmoji3D)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)

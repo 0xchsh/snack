@@ -130,11 +130,23 @@ export class OptimizedSavedListsDB {
         throw error
       }
 
+      // Get unique user IDs from the saved lists
+      const userIds = [...new Set((data || []).map(save => save.lists.user_id))]
+      
+      // Fetch user data for all unique user IDs
+      const { data: usersData } = await this.supabase
+        .from('users')
+        .select('id, username')
+        .in('id', userIds)
+      
+      // Create a map for quick user lookup
+      const usersMap = new Map(usersData?.map(u => [u.id, u]) || [])
+
       return (data || []).map(save => ({
         ...save,
         list: {
           ...save.lists,
-          user: { id: save.lists.user_id, username: 'User' }, // Simplified
+          user: usersMap.get(save.lists.user_id) || { id: save.lists.user_id, username: 'User' },
           is_saved: true
         }
       })) as SavedListWithDetails[]
@@ -164,6 +176,18 @@ export class OptimizedSavedListsDB {
         throw error
       }
 
+      // Get unique user IDs from the saved lists
+      const userIds = [...new Set((data || []).map(save => save.lists.user_id))]
+      
+      // Fetch user data for all unique user IDs
+      const { data: usersData } = await this.supabase
+        .from('users')
+        .select('id, username')
+        .in('id', userIds)
+      
+      // Create a map for quick user lookup
+      const usersMap = new Map(usersData?.map(u => [u.id, u]) || [])
+
       return (data || []).map(save => ({
         list_id: save.list_id,
         title: save.lists.title,
@@ -172,7 +196,7 @@ export class OptimizedSavedListsDB {
         is_saved: true,
         saved_at: save.saved_at,
         notes: save.notes,
-        user: { id: save.lists.user_id, username: 'User' }
+        user: usersMap.get(save.lists.user_id) || { id: save.lists.user_id, username: 'User' }
       }))
     } catch (error) {
       console.error('Failed to fetch saved list cards:', error)
@@ -203,13 +227,25 @@ export class OptimizedSavedListsDB {
         throw error
       }
 
+      // Get unique user IDs from the lists
+      const userIds = [...new Set((data || []).map(list => list.user_id))]
+      
+      // Fetch user data for all unique user IDs
+      const { data: usersData } = await this.supabase
+        .from('users')
+        .select('id, username')
+        .in('id', userIds)
+      
+      // Create a map for quick user lookup
+      const usersMap = new Map(usersData?.map(u => [u.id, u]) || [])
+
       return (data || []).map(list => ({
         list_id: list.id,
         title: list.title,
         emoji: list.emoji,
         save_count: list.save_count,
         is_saved: false, // Will be updated by caller if user is logged in
-        user: { id: list.user_id, username: 'User' }
+        user: usersMap.get(list.user_id) || { id: list.user_id, username: 'User' }
       }))
     } catch (error) {
       console.error('Failed to fetch popular lists:', error)

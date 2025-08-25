@@ -61,8 +61,9 @@ export class MockListDatabase {
       title: 'New list', // Default title - user can edit
       emoji: defaultEmoji.unicode, // Default pretzel emoji
       emoji_3d: defaultEmoji,
-      is_public: false,
+      is_public: true,
       price_cents: null,
+      view_mode: 'menu', // Default view mode
       user_id: user.id,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -90,6 +91,7 @@ export class MockListDatabase {
       emoji_3d: formData.emoji_3d,
       is_public: formData.is_public,
       price_cents: formData.price_cents || null,
+      view_mode: 'menu', // Default view mode
       user_id: user.id,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

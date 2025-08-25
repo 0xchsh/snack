@@ -131,11 +131,18 @@ export default function DashboardPage() {
             
             <div className="flex items-center gap-3">
               <Link
-                href="/profile"
+                href={`/u/${user?.username || user?.id}`}
                 className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
                 style={{ fontFamily: 'Open Runde' }}
               >
                 Profile
+              </Link>
+              <Link
+                href="/profile"
+                className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
+                style={{ fontFamily: 'Open Runde' }}
+              >
+                Settings
               </Link>
               <button
                 onClick={handleLogout}
@@ -152,21 +159,23 @@ export default function DashboardPage() {
       {/* Dashboard Title */}
       <div className="bg-white">
         <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <h1 
-              className="text-3xl font-bold text-foreground"
-              style={{ fontFamily: 'Open Runde' }}
-            >
-              Your Snacks
-            </h1>
-            <button
-              onClick={handleCreateList}
-              disabled={creatingList}
-              className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ fontFamily: 'Open Runde' }}
-            >
-              {creatingList ? 'Creating...' : 'Create list +'}
-            </button>
+          <div className="max-w-[624px] mx-auto">
+            <div className="flex items-center justify-between">
+              <h1 
+                className="text-3xl font-bold text-foreground"
+                style={{ fontFamily: 'Open Runde' }}
+              >
+                Your Snacks
+              </h1>
+              <button
+                onClick={handleCreateList}
+                disabled={creatingList}
+                className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ fontFamily: 'Open Runde' }}
+              >
+                {creatingList ? 'Creating...' : 'Create list +'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -405,6 +414,7 @@ interface ListCardProps {
 
 function ListCard({ list, showActions = true, onDelete }: ListCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
+  const router = useRouter()
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault() // Prevent navigation
@@ -425,18 +435,37 @@ function ListCard({ list, showActions = true, onDelete }: ListCardProps) {
     }
   }
 
+  const handleView = (e: React.MouseEvent) => {
+    e.preventDefault() // Prevent navigation from Link
+    e.stopPropagation() // Stop event bubbling
+    router.push(`/list/${list.id}?view=public`)
+  }
+
   return (
     <div className="relative bg-white rounded-2xl p-6 hover:shadow-lg hover:shadow-gray-100 transition-all duration-200 group border border-gray-100">
-      {/* Delete Button */}
-      {showActions && onDelete && (
-        <button
-          onClick={handleDelete}
-          disabled={isDeleting}
-          className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed z-10"
-          title="Delete list"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+      {/* Action Buttons */}
+      {showActions && (
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-10">
+          {/* View Button */}
+          <button
+            onClick={handleView}
+            className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 transition-colors"
+            title="View public list"
+          >
+            <Eye className="w-4 h-4" />
+          </button>
+          {/* Delete Button */}
+          {onDelete && (
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Delete list"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       )}
 
       {/* Clickable area for navigation */}
@@ -483,7 +512,7 @@ function ListCard({ list, showActions = true, onDelete }: ListCardProps) {
             {list.title}
           </h3>
           <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-            <span>{list.links?.length || 0} items</span>
+            <span>{list.links?.length || 0} links</span>
             <span>•</span>
             <span>72K views</span>
           </div>

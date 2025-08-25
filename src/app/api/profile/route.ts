@@ -66,7 +66,7 @@ export async function PUT(request: NextRequest) {
 
     // Parse request body
     const body = await request.json()
-    const { first_name, last_name, username, email } = body
+    const { first_name, last_name, username, email, bio, profile_is_public } = body
 
     // Validate required fields
     if (!username || !email) {
@@ -106,6 +106,8 @@ export async function PUT(request: NextRequest) {
         last_name: last_name || null,
         username,
         email,
+        bio: bio || null,
+        profile_is_public: profile_is_public ?? true,
         updated_at: new Date().toISOString(),
       })
       .eq('id', user.id)

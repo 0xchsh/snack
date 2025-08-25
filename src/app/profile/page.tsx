@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { User, CreditCard, Shield, Camera, Mail, Edit, Trash2, ArrowLeft } from 'lucide-react'
+import { User, CreditCard, Shield, Camera, Mail, Edit, Trash2, ArrowLeft, ExternalLink, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 type ProfileTab = 'account' | 'billing' | 'security'
@@ -58,7 +58,7 @@ export default function ProfilePage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <Link href="/" className="flex items-center gap-3">
+              <Link href="/dashboard" className="flex items-center gap-3">
                 <Image
                   src="/images/logo.svg"
                   alt="Snack"
@@ -116,12 +116,20 @@ export default function ProfilePage() {
                 className="text-3xl font-bold text-foreground mb-1"
                 style={{ fontFamily: 'Open Runde' }}
               >
-                {user.first_name || user.last_name 
-                  ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
-                  : user.username}
+                Account Settings
               </h1>
               <p className="text-muted-foreground text-lg">@{user.username}</p>
               <p className="text-muted-foreground">{user.email}</p>
+              <div className="mt-3">
+                <Link
+                  href={`/u/${user.username}`}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors"
+                  style={{ fontFamily: 'Open Runde' }}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View Public Profile
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -314,6 +322,8 @@ function AccountTab({ user }: { user: any }) {
       last_name: currentUser.last_name || '',
       username: currentUser.username || '',
       email: currentUser.email || '',
+      bio: currentUser.bio || '',
+      profile_is_public: currentUser.profile_is_public ?? true,
     })
     setIsEditing(false)
     setMessage(null)

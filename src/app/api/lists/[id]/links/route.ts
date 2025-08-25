@@ -5,11 +5,11 @@ import { fetchOGData } from '@/lib/og'
 // POST /api/lists/[id]/links - Add a link to a list
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient()
-    const listId = params.id
+    const { id: listId } = await params
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -100,11 +100,11 @@ export async function POST(
 // PATCH /api/lists/[id]/links/reorder - Reorder links in a list
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient()
-    const listId = params.id
+    const { id: listId } = await params
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()

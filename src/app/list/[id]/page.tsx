@@ -1,75 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, use } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { ListEditor } from '@/components/list-editor'
 import { PublicListView } from '@/components/public-list-view'
 import { CreateList } from '@/components/create-list'
 import { ListWithLinks, CreateListForm, LinkInsert } from '@/types'
 import { getRandomEmoji } from '@/lib/emoji'
-
-// Mock data - in real app this would come from database
-const mockList: ListWithLinks = {
-  id: '1',
-  title: 'Absolute Must Go Places in NYC',
-  emoji: '🗽',
-  is_public: true,
-  price_cents: null,
-  user_id: '1',
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  links: [
-    {
-      id: '1',
-      url: 'https://paper.design',
-      title: 'Paper – design, share, ship',
-      favicon_url: null,
-      image_url: null,
-      position: 0,
-      list_id: '1',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    },
-    {
-      id: '2',
-      url: 'https://eventually.app',
-      title: 'Notion – all-in-one workspace',
-      favicon_url: null,
-      image_url: null,
-      position: 1,
-      list_id: '1',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    },
-    {
-      id: '3',
-      url: 'https://airdroid.com',
-      title: 'Miro – online brainstorming',
-      favicon_url: null,
-      image_url: null,
-      position: 2,
-      list_id: '1',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    },
-    {
-      id: '4',
-      url: 'https://highlightsapp.net',
-      title: 'Figma – design collaboration',
-      favicon_url: null,
-      image_url: null,
-      position: 3,
-      list_id: '1',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-  ],
-  user: {
-    id: '1',
-    username: 'Rick Sanchez'
-  }
-}
+import { useAuth } from '@/hooks/useAuth'
 
 interface ListPageProps {
   params: Promise<{
@@ -77,120 +18,229 @@ interface ListPageProps {
   }>
 }
 
-export default async function ListPage({ params }: ListPageProps) {
-  const { id } = await params
-  const [lists, setLists] = useState<ListWithLinks[]>([mockList])
+export default function ListPage({ params }: ListPageProps) {
+  const { id } = use(params)
+  const [currentList, setCurrentList] = useState<ListWithLinks | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showCreateList, setShowCreateList] = useState(false)
+  const { user } = useAuth()
+  const router = useRouter()
+  const searchParams = useSearchParams()
   
-  // Mock auth state - in real app this would come from auth context
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const isAuthenticated = !!user
+  const currentUserId = user?.id || null
+  const forcePublicView = searchParams.get('view') === 'public'
 
-  const currentList = lists.find(list => list.id === id) || mockList
+  // Fetch list data from API
+  useEffect(() => {
+    const fetchList = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        const response = await fetch(`/api/lists/${id}`)
+        const data = await response.json()
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            // List might be in localStorage, redirect to demo page with view parameter
+            const viewParam = forcePublicView ? '&view=public' : ''
+            router.replace(`/demo?list=${id}${viewParam}`)
+            return
+          } else if (response.status === 403) {
+            setError('This list is private')
+          } else {
+            setError(data.error || 'Failed to load list')
+          }
+          return
+        }
+        
+        setCurrentList(data.data)
+      } catch (err) {
+        console.error('Error fetching list:', err)
+        setError('Failed to load list')
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    if (id) {
+      fetchList()
+    }
+  }, [id])
   
   // Determine if user can edit this list
-  const canEdit = isAuthenticated && currentUserId === currentList.user_id
+  const canEdit = isAuthenticated && currentUserId === currentList?.user_id
   
   // Determine if list should be visible
-  const canView = currentList.is_public || canEdit
+  const canView = currentList?.is_public || canEdit
 
-  const handleCreateList = (formData: CreateListForm) => {
-    const newList: ListWithLinks = {
-      id: `list-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      ...formData,
-      emoji: formData.emoji || getRandomEmoji(),
-      price_cents: formData.price_cents || null,
-      user_id: currentUserId || '1',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      links: [],
-      user: {
-        id: currentUserId || '1',
-        username: 'demo'
-      }
-    }
-
-    setLists(prev => [...prev, newList])
-    setShowCreateList(false)
+  const handleCreateList = async (formData: CreateListForm) => {
+    // Navigate to dashboard to create new lists
+    router.push('/dashboard')
   }
 
-  const handleUpdateList = (updates: Partial<ListWithLinks>) => {
-    setLists(prev => prev.map(list => 
-      list.id === currentList.id
-        ? { ...list, ...updates, updated_at: new Date().toISOString() }
-        : list
-    ))
-  }
-
-  const handleAddLink = (linkData: LinkInsert) => {
-    const newLink = {
-      id: `link-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      ...linkData,
-      title: linkData.title || new URL(linkData.url).hostname,
-      favicon_url: `https://${new URL(linkData.url).hostname}/favicon.ico`,
-      image_url: null,
-      position: currentList?.links?.length || 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-
-    setLists(prev => prev.map(list =>
-      list.id === currentList.id
-        ? { ...list, links: [...(list.links || []), newLink] }
-        : list
-    ))
-  }
-
-  const handleRemoveLink = (linkId: string) => {
-    setLists(prev => prev.map(list =>
-      list.id === currentList.id
-        ? { ...list, links: list.links?.filter(link => link.id !== linkId) || [] }
-        : list
-    ))
-  }
-
-  const handleReorderLinks = (linkIds: string[]) => {
-    setLists(prev => prev.map(list => {
-      if (list.id !== currentList.id) {
-        return list
+  const handleUpdateList = async (updates: Partial<ListWithLinks>) => {
+    if (!currentList) return
+    
+    try {
+      const response = await fetch(`/api/lists/${currentList.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to update list')
       }
       
-      const linkMap = new Map(list.links?.map(link => [link.id, link]) || [])
-      const reorderedLinks = linkIds.map(id => linkMap.get(id)).filter(Boolean) as typeof list.links
+      const data = await response.json()
+      setCurrentList(data.data)
+    } catch (error) {
+      console.error('Error updating list:', error)
+      // Could add toast notification here
+    }
+  }
+
+  const handleAddLink = async (linkData: LinkInsert) => {
+    if (!currentList) return
+    
+    try {
+      const response = await fetch(`/api/lists/${currentList.id}/links`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(linkData),
+      })
       
-      const updatedLinks = reorderedLinks.map((link, index) => ({
-        ...link,
-        position: index,
-        updated_at: new Date().toISOString()
-      }))
+      if (!response.ok) {
+        throw new Error('Failed to add link')
+      }
       
-      return { ...list, links: updatedLinks }
-    }))
+      const data = await response.json()
+      setCurrentList(prev => prev ? {
+        ...prev,
+        links: [...(prev.links || []), data.data]
+      } : null)
+    } catch (error) {
+      console.error('Error adding link:', error)
+      // Could add toast notification here
+    }
+  }
+
+  const handleRemoveLink = async (linkId: string) => {
+    if (!currentList) return
+    
+    try {
+      const response = await fetch(`/api/lists/${currentList.id}/links/${linkId}`, {
+        method: 'DELETE',
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to remove link')
+      }
+      
+      setCurrentList(prev => prev ? {
+        ...prev,
+        links: prev.links?.filter(link => link.id !== linkId) || []
+      } : null)
+    } catch (error) {
+      console.error('Error removing link:', error)
+      // Could add toast notification here
+    }
+  }
+
+  const handleReorderLinks = async (linkIds: string[]) => {
+    if (!currentList) return
+    
+    try {
+      // Update local state immediately for better UX
+      const linkMap = new Map(currentList.links?.map(link => [link.id, link]) || [])
+      const reorderedLinks = linkIds.map(id => linkMap.get(id)).filter(Boolean) as typeof currentList.links
+      
+      setCurrentList(prev => prev ? {
+        ...prev,
+        links: reorderedLinks.map((link, index) => ({
+          ...link,
+          position: index
+        }))
+      } : null)
+      
+      // Then sync with server
+      const response = await fetch(`/api/lists/${currentList.id}/links`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ linkIds }),
+      })
+      
+      if (!response.ok) {
+        // Revert on failure
+        setCurrentList(currentList)
+        throw new Error('Failed to reorder links')
+      }
+    } catch (error) {
+      console.error('Error reordering links:', error)
+      // Could add toast notification here
+    }
   }
 
 
-  const handleLogout = () => {
-    setIsAuthenticated(false)
-    setCurrentUserId(null)
+  const handleLogout = async () => {
+    // TODO: Implement proper logout functionality
+    router.push('/auth/sign-in')
   }
 
-  if (!canView) {
+  // Show loading state
+  if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center space-y-4">
-          <h1 className="text-2xl font-bold text-foreground">List not found</h1>
-          <p className="text-muted-foreground">This list is private or doesn&apos;t exist.</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading list...</p>
         </div>
       </div>
     )
   }
 
-  // Show public view for non-authenticated users or non-owners
-  if (!canEdit) {
+  // Show error state
+  if (error || !currentList) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <h1 className="text-2xl font-bold text-foreground">
+            {error === 'List not found' ? 'List not found' : 'Unable to load list'}
+          </h1>
+          <p className="text-muted-foreground">
+            {error === 'This list is private' 
+              ? 'This list is private and you don\'t have access to it.'
+              : error === 'List not found'
+              ? 'The list you\'re looking for doesn\'t exist or has been deleted.'
+              : 'Something went wrong while loading this list. Please try again.'
+            }
+          </p>
+          <button
+            onClick={() => router.push('/')}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
+          >
+            Go Home
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Show public view if forced via query param, or for non-authenticated users/non-owners
+  if (forcePublicView || !canEdit) {
     return <PublicListView list={currentList} />
   }
 
-  // Show editable view for authenticated owners
+  // Show editable view for authenticated owners (when not forced to public view)
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -199,19 +249,39 @@ export default async function ListPage({ params }: ListPageProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-3">
-                <Image
-                  src="/images/logo.svg"
-                  alt="Snack"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8"
-                />
-                <h1 
-                  className="text-xl font-bold"
-                  style={{ fontFamily: 'Open Runde' }}
-                >
-                  Snack
-                </h1>
+                {user ? (
+                  <Link href="/dashboard" className="flex items-center gap-3">
+                    <Image
+                      src="/images/logo.svg"
+                      alt="Snack"
+                      width={32}
+                      height={32}
+                      className="w-8 h-8 cursor-pointer"
+                    />
+                    <h1 
+                      className="text-xl font-bold"
+                      style={{ fontFamily: 'Open Runde' }}
+                    >
+                      Snack
+                    </h1>
+                  </Link>
+                ) : (
+                  <>
+                    <Image
+                      src="/images/logo.svg"
+                      alt="Snack"
+                      width={32}
+                      height={32}
+                      className="w-8 h-8"
+                    />
+                    <h1 
+                      className="text-xl font-bold"
+                      style={{ fontFamily: 'Open Runde' }}
+                    >
+                      Snack
+                    </h1>
+                  </>
+                )}
               </div>
             </div>
             

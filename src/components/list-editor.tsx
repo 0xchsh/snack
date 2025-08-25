@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Plus, Menu, List, Grid3X3, GripVertical, Trash2, RefreshCw, MoreHorizontal, Clipboard, Download, FileText } from 'lucide-react'
+import { Plus, Menu, List, Grid3X3, GripVertical, Trash2, RefreshCw, MoreHorizontal, Clipboard, Download, FileText, Eye, Link2 } from 'lucide-react'
 import Image from 'next/image'
 import { Reorder, useDragControls } from 'framer-motion'
 import { ListWithLinks, LinkInsert, Link, Emoji3D } from '@/types'
@@ -20,6 +20,50 @@ interface ListEditorProps {
 }
 
 type ViewMode = 'menu' | 'rows' | 'grid'
+
+// Ghost loading component for different view modes
+function GhostLinkItem({ viewMode }: { viewMode: ViewMode }) {
+  if (viewMode === 'menu') {
+    return (
+      <div className="bg-neutral-100 rounded-xl p-3 animate-pulse">
+        <div className="flex items-center gap-3">
+          <div className="w-5 h-5 rounded-md bg-neutral-200 flex-shrink-0"></div>
+          <div className="flex-1">
+            <div className="h-4 bg-neutral-200 rounded w-3/4"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (viewMode === 'rows') {
+    return (
+      <div className="bg-neutral-100 rounded-2xl p-4 animate-pulse">
+        <div className="flex items-center gap-4">
+          <div className="w-20 h-11 rounded-xl bg-neutral-200 flex-shrink-0"></div>
+          <div className="flex-1">
+            <div className="h-5 bg-neutral-200 rounded w-3/4 mb-2"></div>
+            <div className="h-4 bg-neutral-200 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Grid layout
+  return (
+    <div className="bg-neutral-100 rounded-xl animate-pulse overflow-hidden">
+      <div className="aspect-video bg-neutral-200"></div>
+      <div className="px-4 pb-4 pt-4 space-y-2">
+        <div className="h-4 bg-neutral-200 rounded w-3/4"></div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded-sm bg-neutral-200 flex-shrink-0"></div>
+          <div className="h-3 bg-neutral-200 rounded w-1/2"></div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export function ListEditor({ 
   list, 
@@ -44,6 +88,7 @@ export function ListEditor({
   const [items, setItems] = useState(list.links || [])
   const [isRefreshingOG, setIsRefreshingOG] = useState(false)
   const [showMoreMenu, setShowMoreMenu] = useState(false)
+  const [loadingLinks, setLoadingLinks] = useState<string[]>([])
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
   const titleTextareaRef = useRef<HTMLTextAreaElement>(null)
   const moreMenuRef = useRef<HTMLDivElement>(null)
@@ -108,6 +153,10 @@ export function ListEditor({
       return
     }
 
+    // Add ghost loading placeholders immediately
+    setLoadingLinks(validUrls)
+    setLinkInput('')
+
     // Add links sequentially to the top of the list
     for (let i = 0; i < validUrls.length; i++) {
       const url = validUrls[i]
@@ -116,10 +165,10 @@ export function ListEditor({
           url,
           title: url // Use URL as default title, it will be updated with OG data
         })
+        // Remove from loading state as each one completes
+        setLoadingLinks(prev => prev.filter(loadingUrl => loadingUrl !== url))
       }
     }
-    
-    setLinkInput('')
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -264,6 +313,32 @@ export function ListEditor({
       } else {
         setLinkError('Failed to access clipboard. Please try again.')
       }
+    }
+  }
+
+  // Copy public list link
+  const copyListLink = async () => {
+    setShowMoreMenu(false)
+    
+    try {
+      const url = `${window.location.origin}/list/${list.id}`
+      await navigator.clipboard.writeText(url)
+      console.log('List link copied to clipboard:', url)
+      // TODO: Could add a toast notification here
+    } catch (error) {
+      console.error('Failed to copy list link:', error)
+      // Fallback for browsers that don't support clipboard API
+      const textArea = document.createElement('textarea')
+      textArea.value = `${window.location.origin}/list/${list.id}`
+      document.body.appendChild(textArea)
+      textArea.select()
+      try {
+        document.execCommand('copy')
+        console.log('List link copied to clipboard (fallback)')
+      } catch (fallbackError) {
+        console.error('Fallback copy failed:', fallbackError)
+      }
+      document.body.removeChild(textArea)
     }
   }
 
@@ -556,15 +631,26 @@ export function ListEditor({
               </button>
             </div>
             
-            {/* More Options Menu */}
-            <div className="relative" ref={moreMenuRef}>
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2">
+              {/* View Button */}
               <button
-                onClick={() => setShowMoreMenu(!showMoreMenu)}
-                className="w-10 h-10 rounded-md flex items-center justify-center transition-colors bg-white text-foreground hover:bg-neutral-50"
-                title="More options"
+                onClick={() => window.open(`/list/${list.id}?view=public`, '_blank')}
+                className="w-10 h-10 rounded-md flex items-center justify-center transition-colors bg-white text-foreground hover:bg-blue-50 hover:text-blue-600"
+                title="View public list"
               >
-                <MoreHorizontal className="w-5 h-5" />
+                <Eye className="w-5 h-5" />
               </button>
+              
+              {/* More Options Menu */}
+              <div className="relative" ref={moreMenuRef}>
+                <button
+                  onClick={() => setShowMoreMenu(!showMoreMenu)}
+                  className="w-10 h-10 rounded-md flex items-center justify-center transition-colors bg-white text-foreground hover:bg-neutral-50"
+                  title="More options"
+                >
+                  <MoreHorizontal className="w-5 h-5" />
+                </button>
               
               {/* Dropdown Menu */}
               {showMoreMenu && (
@@ -597,6 +683,14 @@ export function ListEditor({
                     <span className="flex-1" style={{ fontFamily: 'Open Runde' }}>Export to .csv</span>
                   </button>
                   
+                  <button
+                    onClick={copyListLink}
+                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-neutral-50 transition-colors"
+                  >
+                    <Link2 className="w-4 h-4 text-muted-foreground" />
+                    <span className="flex-1" style={{ fontFamily: 'Open Runde' }}>Copy link</span>
+                  </button>
+                  
                   <div className="my-2 border-t border-neutral-200" />
                   
                   <button
@@ -608,6 +702,7 @@ export function ListEditor({
                   </button>
                 </div>
               )}
+              </div>
             </div>
           </div>
         </div>
@@ -616,6 +711,10 @@ export function ListEditor({
       {/* Links List */}
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-3 gap-6">
+          {/* Ghost loading placeholders */}
+          {loadingLinks.map((url, index) => (
+            <GhostLinkItem key={`ghost-${url}-${index}`} viewMode={viewMode} />
+          ))}
           {items.map((link) => (
             <LinkItem
               key={link.id}
@@ -626,24 +725,30 @@ export function ListEditor({
           ))}
         </div>
       ) : (
-        <Reorder.Group 
-          axis="y" 
-          values={items} 
-          onReorder={handleReorder}
-          className={viewMode === 'rows' ? 'space-y-6' : 'space-y-3'}
-        >
-          {items.map((link) => (
-            <DraggableLinkItem
-              key={link.id}
-              link={link}
-              viewMode={viewMode}
-              onRemove={() => onRemoveLink?.(link.id)}
-            />
+        <div className={viewMode === 'rows' ? 'space-y-6' : 'space-y-3'}>
+          {/* Ghost loading placeholders */}
+          {loadingLinks.map((url, index) => (
+            <GhostLinkItem key={`ghost-${url}-${index}`} viewMode={viewMode} />
           ))}
-        </Reorder.Group>
+          <Reorder.Group 
+            axis="y" 
+            values={items} 
+            onReorder={handleReorder}
+            className={viewMode === 'rows' ? 'space-y-6' : 'space-y-3'}
+          >
+            {items.map((link) => (
+              <DraggableLinkItem
+                key={link.id}
+                link={link}
+                viewMode={viewMode}
+                onRemove={() => onRemoveLink?.(link.id)}
+              />
+            ))}
+          </Reorder.Group>
+        </div>
       )}
       
-      {(!items || items.length === 0) && (
+      {(!items || items.length === 0) && loadingLinks.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
           <p style={{ fontFamily: 'Open Runde' }}>
             Add your first link to get started

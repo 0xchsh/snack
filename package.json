@@ -4,7 +4,7 @@
   "private": true,
   "description": "A social platform for creating and sharing curated lists of links",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

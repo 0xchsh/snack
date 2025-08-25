@@ -52,6 +52,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           first_name: null,
           last_name: null,
           profile_picture_url: null,
+          profile_is_public: true,
+          bio: null,
           subscription_status: 'free',
           subscription_tier: 'free',
           created_at: supabaseUser.created_at,
@@ -67,6 +69,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         last_name: userProfile.last_name || null,
         email: userProfile.email || supabaseUser.email || '',
         profile_picture_url: userProfile.profile_picture_url || null,
+        profile_is_public: userProfile.profile_is_public ?? true,
+        bio: userProfile.bio || null,
         subscription_status: userProfile.subscription_status || 'free',
         subscription_tier: userProfile.subscription_tier || 'free',
         created_at: userProfile.created_at,
@@ -82,6 +86,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         first_name: null,
         last_name: null,
         profile_picture_url: null,
+        profile_is_public: true,
+        bio: null,
         subscription_status: 'free',
         subscription_tier: 'free',
         created_at: supabaseUser.created_at,
@@ -131,10 +137,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('useAuth: Found session for user:', session.user.email)
           
           // Use session data directly
+          const emailPrefix = session.user.email?.split('@')[0] || 'user'
           const basicUser: User = {
             id: session.user.id,
             email: session.user.email || '',
-            username: session.user.user_metadata?.username || session.user.email?.split('@')[0] || 'user',
+            username: session.user.user_metadata?.username || `@${emailPrefix}`,
             first_name: session.user.user_metadata?.first_name || null,
             last_name: session.user.user_metadata?.last_name || null,
             profile_picture_url: session.user.user_metadata?.avatar_url || null,

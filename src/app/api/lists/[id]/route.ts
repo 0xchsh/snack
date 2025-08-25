@@ -4,22 +4,26 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 // GET /api/lists/[id] - Get a specific list
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient()
-    const listId = params.id
+    const { id: listId } = await params
     
     // Get current user (optional for public lists)
     const { data: { user } } = await supabase.auth.getUser()
     
-    // Fetch the list with links
+    // Fetch the list with links and user information
     const { data: list, error } = await supabase
       .from('lists')
       .select(`
         *,
         links (
           *
+        ),
+        users!lists_user_id_fkey (
+          id,
+          username
         )
       `)
       .eq('id', listId)
@@ -34,11 +38,18 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
     
-    // Sort links by position
+    // Sort links by position and format response
     const listWithSortedLinks = {
       ...list,
-      links: list.links?.sort((a: any, b: any) => a.position - b.position) || []
+      links: list.links?.sort((a: any, b: any) => a.position - b.position) || [],
+      user: list.users ? {
+        id: list.users.id,
+        username: list.users.username
+      } : null
     }
+    
+    // Remove the nested users object from the response
+    delete (listWithSortedLinks as any).users
     
     return NextResponse.json({ data: listWithSortedLinks })
   } catch (error) {
@@ -50,11 +61,11 @@ export async function GET(
 // PATCH /api/lists/[id] - Update a list
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient()
-    const listId = params.id
+    const { id: listId } = await params
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -87,7 +98,8 @@ export async function PATCH(
         title: body.title,
         emoji: body.emoji,
         emoji_3d: body.emoji_3d,
-        is_public: body.is_public
+        is_public: body.is_public,
+        view_mode: body.view_mode
       })
       .eq('id', listId)
       .select(`
@@ -119,11 +131,11 @@ export async function PATCH(
 // DELETE /api/lists/[id] - Delete a list
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient()
-    const listId = params.id
+    const { id: listId } = await params
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()

@@ -18,6 +18,7 @@ function DemoPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const listId = searchParams.get('list')
+  const forcePublicView = searchParams.get('view') === 'public'
   
   const [showCreateList, setShowCreateList] = useState(false)
   
@@ -76,7 +77,7 @@ function DemoPageContent() {
   // Handle copy URL
   const handleCopyUrl = async () => {
     try {
-      const listUrl = `${window.location.origin}/demo?list=${currentList?.id}`
+      const listUrl = `${window.location.origin}/list/${currentList?.id}`
       await navigator.clipboard.writeText(listUrl)
     } catch (error) {
       console.error('Failed to copy URL:', error)
@@ -86,7 +87,7 @@ function DemoPageContent() {
   // Handle view public version
   const handleViewPublic = () => {
     if (currentList) {
-      const publicUrl = `${window.location.origin}/demo?list=${currentList.id}`
+      const publicUrl = `${window.location.origin}/list/${currentList.id}?view=public`
       window.open(publicUrl, '_blank', 'noopener,noreferrer')
     }
   }
@@ -182,7 +183,7 @@ function DemoPageContent() {
       <div className="border-b border-border bg-white">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            {canEdit ? (
+            {canEdit && !forcePublicView ? (
               // Editing mode header - Back button on left
               <>
                 <div className="flex items-center gap-6">
@@ -214,7 +215,7 @@ function DemoPageContent() {
                 </div>
               </>
             ) : (
-              // Public mode header - Logo on left
+              // Public mode header - Same as dashboard nav
               <>
                 <div className="flex items-center gap-6">
                   <Link href="/" className="flex items-center gap-3">
@@ -235,25 +236,34 @@ function DemoPageContent() {
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <Link
-                    href="/dashboard"
-                    className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
-                    style={{ fontFamily: 'Open Runde' }}
-                  >
-                    Dashboard
-                  </Link>
                   {isAuthenticated ? (
-                    <button
-                      onClick={() => signOut()}
-                      className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
-                      style={{ fontFamily: 'Open Runde' }}
-                    >
-                      Logout
-                    </button>
+                    <>
+                      <Link
+                        href={`/u/${user?.username || user?.id}`}
+                        className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
+                        style={{ fontFamily: 'Open Runde' }}
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        href="/profile"
+                        className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
+                        style={{ fontFamily: 'Open Runde' }}
+                      >
+                        Settings
+                      </Link>
+                      <button
+                        onClick={() => signOut()}
+                        className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
+                        style={{ fontFamily: 'Open Runde' }}
+                      >
+                        Logout
+                      </button>
+                    </>
                   ) : (
                     <Link
                       href="/auth/sign-in"
-                      className="px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                      className="px-4 py-2 text-sm font-semibold bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
                       style={{ fontFamily: 'Open Runde' }}
                     >
                       Sign In
@@ -269,17 +279,18 @@ function DemoPageContent() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         
-        {canEdit ? (
-          // Editing mode for list owner
+        {/* Show public view if forced via query param, otherwise check ownership */}
+        {forcePublicView || !canEdit ? (
+          // Public view mode for non-owners, non-authenticated users, or when forced
+          <PublicListView list={currentList} />
+        ) : (
+          // Editing mode for list owner (when not forced to public view)
           <ListEditor
             list={currentList}
             onUpdateList={handleUpdateList}
             onAddLink={handleAddLink}
             onRemoveLink={handleRemoveLink}
           />
-        ) : (
-          // Public view mode for non-owners or non-authenticated users
-          <PublicListView list={currentList} />
         )}
       </div>
 

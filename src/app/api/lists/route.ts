@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
         title: body.title,
         emoji: body.emoji || '🎯',
         emoji_3d: body.emoji_3d || null,
-        is_public: body.is_public || false
+        is_public: body.is_public !== undefined ? body.is_public : true
       })
       .select()
       .single()

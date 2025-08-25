@@ -9,6 +9,8 @@ export interface Database {
           last_name: string | null
           email: string | null
           profile_picture_url: string | null
+          profile_is_public: boolean
+          bio: string | null
           subscription_status: string
           subscription_tier: string
           created_at: string
@@ -21,6 +23,8 @@ export interface Database {
           last_name?: string | null
           email?: string | null
           profile_picture_url?: string | null
+          profile_is_public?: boolean
+          bio?: string | null
           subscription_status?: string
           subscription_tier?: string
           created_at?: string
@@ -32,6 +36,8 @@ export interface Database {
           last_name?: string | null
           email?: string | null
           profile_picture_url?: string | null
+          profile_is_public?: boolean
+          bio?: string | null
           subscription_status?: string
           subscription_tier?: string
           updated_at?: string

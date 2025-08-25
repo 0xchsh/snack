@@ -4,12 +4,11 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 // DELETE /api/lists/[id]/links/[linkId] - Delete a link from a list
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; linkId: string } }
+  { params }: { params: Promise<{ id: string; linkId: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient()
-    const listId = params.id
-    const linkId = params.linkId
+    const { id: listId, linkId } = await params
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -72,12 +71,11 @@ export async function DELETE(
 // PATCH /api/lists/[id]/links/[linkId] - Update a link
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string; linkId: string } }
+  { params }: { params: Promise<{ id: string; linkId: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient()
-    const listId = params.id
-    const linkId = params.linkId
+    const { id: listId, linkId } = await params
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
