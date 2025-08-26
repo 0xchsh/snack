@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Plus, Menu, List, Grid3X3, GripVertical, Trash2, RefreshCw, MoreHorizontal, Clipboard, Download, FileText, Eye, Link2 } from 'lucide-react'
+import { Menu, List, Grid3X3, GripVertical, Trash2, RefreshCw, MoreHorizontal, Clipboard, FileText, Eye, Link2 } from 'lucide-react'
 import Image from 'next/image'
-import { Reorder, useDragControls } from 'framer-motion'
 import { ListWithLinks, LinkInsert, Link, Emoji3D } from '@/types'
 import { EmojiPicker } from './emoji-picker'
 import { validateAndNormalizeUrl, getHostname } from '@/lib/url-utils'
@@ -85,10 +84,15 @@ export function ListEditor({
       name: getDefaultEmoji3D().name
     }
   )
-  const [items, setItems] = useState(list.links || [])
   const [isRefreshingOG, setIsRefreshingOG] = useState(false)
   const [showMoreMenu, setShowMoreMenu] = useState(false)
   const [loadingLinks, setLoadingLinks] = useState<string[]>([])
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [draggedItemPosition, setDraggedItemPosition] = useState({ x: 0, y: 0 })
+  const dragStartPosition = useRef({ x: 0, y: 0 })
+  const dragOffset = useRef({ x: 0, y: 0 })
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
   const titleTextareaRef = useRef<HTMLTextAreaElement>(null)
   const moreMenuRef = useRef<HTMLDivElement>(null)
@@ -177,10 +181,6 @@ export function ListEditor({
     }
   }
 
-  // Update items when list.links changes
-  useEffect(() => {
-    setItems(list.links || [])
-  }, [list.links])
 
   // Update emoji when list.emoji_3d changes
   useEffect(() => {
@@ -199,25 +199,174 @@ export function ListEditor({
     }
   }, [isEditingTitle, adjustTextareaHeight])
 
-  const handleReorder = (newItems: Link[]) => {
-    setItems(newItems)
-    onReorderLinks?.(newItems.map(link => link.id))
-  }
+  // Custom drag handlers with visual feedback
+  const handleMouseDown = useCallback((e: React.MouseEvent, linkId: string, index: number) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    const element = e.currentTarget as HTMLElement
+    const rect = element.getBoundingClientRect()
+    
+    // Calculate center offset for better drag feel
+    dragOffset.current = {
+      x: rect.width / 2,
+      y: rect.height / 2
+    }
+    
+    setDraggedItemId(linkId)
+    setIsDragging(true)
+    setDraggedItemPosition({
+      x: e.clientX - dragOffset.current.x,
+      y: e.clientY - dragOffset.current.y
+    })
+    
+    document.body.style.cursor = 'grabbing'
+    document.body.style.userSelect = 'none'
+  }, [])
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging || !draggedItemId) return
+    
+    // Update drag preview position
+    setDraggedItemPosition({
+      x: e.clientX - dragOffset.current.x,
+      y: e.clientY - dragOffset.current.y
+    })
+    
+    // Find which item we're hovering over based on current view mode
+    let containerSelector: string
+    if (viewMode === 'grid') {
+      containerSelector = '#drag-grid-container'
+    } else {
+      containerSelector = '.draggable-list-container'
+    }
+    
+    const container = document.querySelector(containerSelector)
+    if (!container) return
+    
+    const items = container.children
+    let newHoverIndex = null
+    
+    // Check each item to see if we're hovering over it
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i] as HTMLElement
+      // Skip the drag preview element
+      if (item.classList.contains('fixed')) continue
+      
+      const rect = item.getBoundingClientRect()
+      
+      if (viewMode === 'grid') {
+        // Grid: check if mouse is within the grid cell bounds
+        if (e.clientX >= rect.left && e.clientX <= rect.right &&
+            e.clientY >= rect.top && e.clientY <= rect.bottom) {
+          newHoverIndex = i
+          break
+        }
+      } else {
+        // Linear layouts: check if mouse is in the vertical range
+        const midY = rect.top + rect.height / 2
+        if (e.clientY <= midY) {
+          newHoverIndex = i
+          break
+        }
+      }
+    }
+    
+    // For linear layouts, if we're past all items, set to last position
+    if (newHoverIndex === null && viewMode !== 'grid' && items.length > 0) {
+      const lastItem = items[items.length - 1] as HTMLElement
+      if (!lastItem.classList.contains('fixed')) {
+        const lastRect = lastItem.getBoundingClientRect()
+        if (e.clientY > lastRect.bottom) {
+          newHoverIndex = items.length - 1
+        }
+      }
+    }
+    
+    if (newHoverIndex !== null) {
+      setDragOverIndex(newHoverIndex)
+    }
+  }, [isDragging, draggedItemId, viewMode])
+
+  const handleMouseUp = useCallback((e: MouseEvent) => {
+    console.log('Mouse up:', { 
+      isDragging, 
+      draggedItemId, 
+      dragOverIndex, 
+      viewMode,
+      hasLinks: !!list.links,
+      linksCount: list.links?.length || 0
+    })
+    
+    if (!isDragging || !list.links || !draggedItemId) {
+      cleanup()
+      return
+    }
+    
+    const draggedIndex = list.links.findIndex(link => link.id === draggedItemId)
+    console.log('Drag indices:', { draggedIndex, dragOverIndex, viewMode })
+    
+    if (draggedIndex !== -1 && dragOverIndex !== null && draggedIndex !== dragOverIndex) {
+      // Reorder the links
+      const newLinks = [...list.links]
+      const [draggedItem] = newLinks.splice(draggedIndex, 1)
+      newLinks.splice(dragOverIndex, 0, draggedItem)
+      
+      console.log('Reordering in', viewMode, ':', {
+        from: draggedIndex,
+        to: dragOverIndex,
+        draggedItem: draggedItem.id,
+        newOrder: newLinks.map(l => l.id)
+      })
+      
+      // Update the order
+      onReorderLinks?.(newLinks.map(link => link.id))
+    } else {
+      console.log('No reordering needed:', {
+        draggedIndex,
+        dragOverIndex,
+        samePosition: draggedIndex === dragOverIndex
+      })
+    }
+    
+    cleanup()
+  }, [isDragging, list.links, draggedItemId, dragOverIndex, onReorderLinks, viewMode])
+  
+  const cleanup = useCallback(() => {
+    setIsDragging(false)
+    setDraggedItemId(null)
+    setDragOverIndex(null)
+    document.body.style.cursor = 'auto'
+    document.body.style.userSelect = 'auto'
+  }, [])
+  
+  // Set up global mouse event listeners when dragging starts
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp])
 
   // Refresh OG data for all links that don't have images
   const refreshOGData = async () => {
-    if (isRefreshingOG) return
+    if (isRefreshingOG) {
+      return
+    }
     
     setIsRefreshingOG(true)
     setShowMoreMenu(false)
-    console.log('Refreshing OG data for links without images...')
     
     try {
       const updatedLinks = await Promise.all(
-        items.map(async (link) => {
+        (list.links || []).map(async (link) => {
           // Only refresh if link doesn't have an image
           if (!link.image_url) {
-            console.log('Fetching OG data for:', link.url)
             const ogData = await fetchOGDataClient(link.url)
             
             return {
@@ -233,8 +382,6 @@ export function ListEditor({
       
       // Update the list with new OG data
       onUpdateList?.({ links: updatedLinks })
-      setItems(updatedLinks)
-      console.log('OG data refresh complete')
     } catch (error) {
       console.error('Error refreshing OG data:', error)
     } finally {
@@ -251,7 +398,7 @@ export function ListEditor({
       // Headers
       ['Title', 'URL'].join(','),
       // Data rows
-      ...items.map(link => {
+      ...(list.links || []).map(link => {
         const title = (link.title || getHostname(link.url)).replace(/"/g, '""') // Escape quotes
         const url = link.url
         return `"${title}","${url}"`
@@ -321,20 +468,18 @@ export function ListEditor({
     setShowMoreMenu(false)
     
     try {
-      const url = `${window.location.origin}/list/${list.id}`
+      const url = `${window.location.origin}/${list.user?.username || 'list'}/${list.id}`
       await navigator.clipboard.writeText(url)
-      console.log('List link copied to clipboard:', url)
       // TODO: Could add a toast notification here
     } catch (error) {
       console.error('Failed to copy list link:', error)
       // Fallback for browsers that don't support clipboard API
       const textArea = document.createElement('textarea')
-      textArea.value = `${window.location.origin}/list/${list.id}`
+      textArea.value = `${window.location.origin}/${list.user?.username || 'list'}/${list.id}`
       document.body.appendChild(textArea)
       textArea.select()
       try {
         document.execCommand('copy')
-        console.log('List link copied to clipboard (fallback)')
       } catch (fallbackError) {
         console.error('Fallback copy failed:', fallbackError)
       }
@@ -347,14 +492,12 @@ export function ListEditor({
     setShowMoreMenu(false)
     // This would need to be implemented with proper confirmation dialog
     // and call a delete handler passed from parent
-    console.log('Delete list not yet implemented')
   }
 
   // Auto-refresh OG data on mount if any links are missing images
   useEffect(() => {
-    const hasLinksWithoutImages = items.some(link => !link.image_url)
+    const hasLinksWithoutImages = (list.links || []).some(link => !link.image_url)
     if (hasLinksWithoutImages && !isRefreshingOG) {
-      console.log('Found links without images, auto-refreshing OG data...')
       refreshOGData()
     }
   }, []) // Only run once on mount
@@ -635,7 +778,7 @@ export function ListEditor({
             <div className="flex items-center gap-2">
               {/* View Button */}
               <button
-                onClick={() => window.open(`/list/${list.id}?view=public`, '_blank')}
+                onClick={() => window.open(`/${list.user?.username || 'list'}/${list.id}?view=public`, '_blank')}
                 className="w-10 h-10 rounded-md flex items-center justify-center transition-colors bg-white text-foreground hover:bg-blue-50 hover:text-blue-600"
                 title="View public list"
               >
@@ -710,19 +853,65 @@ export function ListEditor({
 
       {/* Links List */}
       {viewMode === 'grid' ? (
-        <div className="grid grid-cols-3 gap-6">
+        <div className="space-y-6">
           {/* Ghost loading placeholders */}
-          {loadingLinks.map((url, index) => (
-            <GhostLinkItem key={`ghost-${url}-${index}`} viewMode={viewMode} />
-          ))}
-          {items.map((link) => (
-            <LinkItem
-              key={link.id}
-              link={link}
-              viewMode={viewMode}
-              onRemove={() => onRemoveLink?.(link.id)}
-            />
-          ))}
+          {loadingLinks.length > 0 && (
+            <div className="grid grid-cols-3 gap-6">
+              {loadingLinks.map((url, index) => (
+                <GhostLinkItem key={`ghost-${url}-${index}`} viewMode={viewMode} />
+              ))}
+            </div>
+          )}
+          {/* Custom Draggable CSS Grid Layout */}
+          <div 
+            className="grid grid-cols-3 gap-6 w-full relative"
+            id="drag-grid-container"
+          >
+            {(list.links || []).map((link, index) => (
+              <div
+                key={link.id}
+                onMouseDown={(e) => handleMouseDown(e, link.id, index)}
+                className={`
+                  transition-all duration-300 ease-out cursor-move select-none
+                  ${draggedItemId === link.id ? 'opacity-30' : 'opacity-100'}
+                  ${dragOverIndex === index && draggedItemId !== link.id ? 
+                    'transform scale-105 ring-2 ring-offset-2 rounded-xl' : ''}
+                `}
+              >
+                <LinkItem
+                  link={link}
+                  viewMode={viewMode}
+                  onRemove={() => onRemoveLink?.(link.id)}
+                />
+              </div>
+            ))}
+            
+            {/* Floating Drag Preview */}
+            {isDragging && draggedItemId && (() => {
+              const draggedLink = list.links?.find(l => l.id === draggedItemId)
+              if (!draggedLink) return null
+              
+              return (
+                <div
+                  className="fixed z-50 pointer-events-none"
+                  style={{
+                    left: `${draggedItemPosition.x}px`,
+                    top: `${draggedItemPosition.y}px`,
+                    width: '320px',
+                    transform: 'rotate(2deg) scale(1.03)',
+                    filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.25))',
+                    opacity: 0.95
+                  }}
+                >
+                  <LinkItem
+                    link={draggedLink}
+                    viewMode={viewMode}
+                    onRemove={() => {}}
+                  />
+                </div>
+              )
+            })()}
+          </div>
         </div>
       ) : (
         <div className={viewMode === 'rows' ? 'space-y-6' : 'space-y-3'}>
@@ -730,25 +919,62 @@ export function ListEditor({
           {loadingLinks.map((url, index) => (
             <GhostLinkItem key={`ghost-${url}-${index}`} viewMode={viewMode} />
           ))}
-          <Reorder.Group 
-            axis="y" 
-            values={items} 
-            onReorder={handleReorder}
-            className={viewMode === 'rows' ? 'space-y-6' : 'space-y-3'}
-          >
-            {items.map((link) => (
-              <DraggableLinkItem
+          {/* Draggable linear layout for menu and rows modes */}
+          <div className="relative draggable-list-container">
+            {(list.links || []).map((link, index) => (
+              <div 
                 key={link.id}
-                link={link}
-                viewMode={viewMode}
-                onRemove={() => onRemoveLink?.(link.id)}
-              />
+                onMouseDown={(e) => handleMouseDown(e, link.id, index)}
+                className={`
+                  ${viewMode === 'rows' ? 'mb-6 last:mb-0' : 'mb-3 last:mb-0'}
+                  transition-all duration-300 ease-out cursor-move select-none
+                  ${draggedItemId === link.id ? 'opacity-30' : 'opacity-100'}
+                  ${dragOverIndex === index && draggedItemId !== link.id ? 
+                    `transform translate-y-2 ring-2 ring-offset-1 ${
+                      viewMode === 'rows' ? 'rounded-2xl' : 'rounded-xl'
+                    }` : ''}
+                `}
+              >
+                <LinkItem
+                  link={link}
+                  viewMode={viewMode}
+                  onRemove={() => onRemoveLink?.(link.id)}
+                />
+              </div>
             ))}
-          </Reorder.Group>
+            
+            {/* Floating Drag Preview for linear layouts */}
+            {isDragging && draggedItemId && viewMode !== 'grid' && (() => {
+              const draggedLink = list.links?.find(l => l.id === draggedItemId)
+              if (!draggedLink) return null
+              
+              const width = viewMode === 'rows' ? '600px' : '400px'
+              
+              return (
+                <div
+                  className="fixed z-50 pointer-events-none"
+                  style={{
+                    left: `${draggedItemPosition.x}px`,
+                    top: `${draggedItemPosition.y}px`,
+                    width: width,
+                    transform: 'rotate(1deg) scale(1.02)',
+                    filter: 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.2))',
+                    opacity: 0.95
+                  }}
+                >
+                  <LinkItem
+                    link={draggedLink}
+                    viewMode={viewMode}
+                    onRemove={() => {}}
+                  />
+                </div>
+              )
+            })()}
+          </div>
         </div>
       )}
       
-      {(!items || items.length === 0) && loadingLinks.length === 0 && (
+      {(!list.links || list.links.length === 0) && loadingLinks.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
           <p style={{ fontFamily: 'Open Runde' }}>
             Add your first link to get started
@@ -778,61 +1004,24 @@ interface LinkItemProps {
   link: Link
   viewMode: ViewMode
   onRemove: () => void
-  dragControls?: ReturnType<typeof useDragControls>
-}
-
-interface DraggableLinkItemProps {
-  link: Link
-  viewMode: ViewMode
-  onRemove: () => void
-}
-
-function DraggableLinkItem({ link, viewMode, onRemove }: DraggableLinkItemProps) {
-  const controls = useDragControls()
-  
-  return (
-    <Reorder.Item 
-      value={link}
-      dragListener={false}
-      dragControls={controls}
-      className="list-none"
-      initial={{ opacity: 0, y: 20, scale: 1 }}
-      animate={{ 
-        opacity: 1, 
-        y: 0, 
-        scale: 1
-      }}
-      exit={{ opacity: 0, y: -20, scale: 0.95 }}
-      whileDrag={{ 
-        scale: 1.05,
-        zIndex: 9999
-      }}
-      transition={{ 
-        duration: 0.2,
-        ease: "easeOut"
-      }}
-    >
-      <LinkItem
-        link={link}
-        viewMode={viewMode}
-        onRemove={onRemove}
-        dragControls={controls}
-      />
-    </Reorder.Item>
-  )
 }
 
 function LinkItem({ 
   link, 
   viewMode, 
-  onRemove,
-  dragControls 
+  onRemove
 }: LinkItemProps) {
   if (viewMode === 'menu') {
     // Compact rows - smallest layout
     return (
       <div 
-        className="bg-neutral-100 rounded-xl p-3 hover:bg-neutral-200 transition-all group"
+        className="bg-neutral-100 rounded-xl p-3 hover:bg-neutral-200 transition-all group cursor-pointer relative"
+        style={{ 
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
+          transformOrigin: 'center',
+          willChange: 'transform'
+        }}
       >
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 rounded-md overflow-hidden bg-muted flex-shrink-0">
@@ -853,13 +1042,9 @@ function LinkItem({
           </div>
           
           <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-            <button
-              className="text-muted-foreground hover:text-foreground transition-colors p-1 cursor-grab active:cursor-grabbing"
-              title="Drag to reorder"
-              onPointerDown={(e) => dragControls?.start(e)}
-            >
+            <div className="text-muted-foreground/50 p-1" title="Drag to reorder">
               <GripVertical className="w-3 h-3" />
-            </button>
+            </div>
             <button
               onClick={onRemove}
               className="text-muted-foreground hover:text-destructive transition-colors p-1"
@@ -877,10 +1062,16 @@ function LinkItem({
     // Larger cards as rows - medium layout
     return (
       <div 
-        className="bg-neutral-100 rounded-2xl p-4 hover:bg-neutral-200 transition-all group"
+        className="bg-neutral-100 rounded-2xl p-4 hover:bg-neutral-200 transition-all group cursor-pointer relative"
+        style={{ 
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
+          transformOrigin: 'center',
+          willChange: 'transform'
+        }}
       >
         <div className="flex items-center gap-4">
-          <div className="w-20 h-11 rounded-xl overflow-hidden bg-neutral-200 flex-shrink-0 relative">
+          <div className="w-[100px] h-14 rounded-xl overflow-hidden bg-neutral-200 flex-shrink-0 relative">
             {link.image_url ? (
               <>
                 <Image 
@@ -928,22 +1119,27 @@ function LinkItem({
             >
               {link.title || getHostname(link.url)}
             </h3>
-            <p 
-              className="text-sm text-muted-foreground/80 truncate mt-1"
-              style={{ fontFamily: 'Open Runde' }}
-            >
-              {link.url}
-            </p>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="w-4 h-4 rounded-sm overflow-hidden bg-muted flex-shrink-0">
+                <Favicon 
+                  url={link.url}
+                  size={16}
+                  className="rounded-sm"
+                />
+              </div>
+              <p 
+                className="text-sm text-muted-foreground/80 truncate"
+                style={{ fontFamily: 'Open Runde' }}
+              >
+                {getHostname(link.url)}
+              </p>
+            </div>
           </div>
           
           <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-            <button
-              className="text-muted-foreground hover:text-foreground transition-colors p-2 cursor-grab active:cursor-grabbing"
-              title="Drag to reorder"
-              onPointerDown={(e) => dragControls?.start(e)}
-            >
+            <div className="text-muted-foreground/50 p-2" title="Drag to reorder">
               <GripVertical className="w-4 h-4" />
-            </button>
+            </div>
             <button
               onClick={onRemove}
               className="text-muted-foreground hover:text-destructive transition-colors p-2"
@@ -958,17 +1154,17 @@ function LinkItem({
   }
 
   // Grid layout - largest cards with OG images
-  // Debug log to see what data we have
-  console.log('Grid layout link data:', { 
-    url: link.url, 
-    title: link.title, 
-    image_url: link.image_url,
-    favicon_url: link.favicon_url 
-  })
   
   return (
     <div 
-      className="bg-neutral-100 rounded-xl hover:bg-neutral-200 transition-all group overflow-hidden"
+      className="bg-neutral-100 rounded-xl hover:bg-neutral-200 transition-all group overflow-hidden cursor-pointer"
+      style={{ 
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
+        minHeight: '280px',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
     >
       <div className="space-y-4">
         {/* OG Image Preview */}
@@ -982,7 +1178,6 @@ function LinkItem({
                 className="object-cover"
                 unoptimized
                 onError={(e) => {
-                  console.error('Failed to load OG image:', link.image_url)
                   // Hide the failed image
                   e.currentTarget.style.display = 'none'
                   // Show the fallback div
@@ -1019,13 +1214,6 @@ function LinkItem({
           {/* Actions overlay */}
           <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
             <button
-              className="bg-white/90 backdrop-blur-sm text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-lg cursor-grab active:cursor-grabbing"
-              title="Drag to reorder"
-              onPointerDown={(e) => dragControls?.start(e)}
-            >
-              <GripVertical className="w-4 h-4" />
-            </button>
-            <button
               onClick={onRemove}
               className="bg-white/90 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-lg"
               title="Delete link"
@@ -1036,9 +1224,9 @@ function LinkItem({
         </div>
         
         {/* Content */}
-        <div className="px-4 pb-4 space-y-2">
+        <div className="px-4 pb-4 space-y-2 flex-1 flex flex-col justify-end">
           <h3 
-            className="font-semibold text-foreground text-base leading-tight line-clamp-2"
+            className="font-semibold text-foreground text-base leading-tight line-clamp-2 flex-1"
             style={{ fontFamily: 'Open Runde' }}
           >
             {link.title || getHostname(link.url)}
