@@ -352,9 +352,7 @@ function PublicLinkItem({
         initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={hasAnimated ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
-        className={`bg-neutral-100 rounded-xl p-3 hover:bg-neutral-200 transition-all cursor-pointer group ${
-          isClicked ? 'ring-2 ring-neutral-300' : ''
-        }`}
+        className="bg-neutral-100 rounded-xl p-3 hover:bg-neutral-200 transition-all cursor-pointer group"
         onClick={onClick}
       >
         <div className="flex items-center gap-3">
@@ -386,9 +384,7 @@ function PublicLinkItem({
         initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={hasAnimated ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
-        className={`bg-neutral-100 rounded-2xl p-4 hover:bg-neutral-200 transition-all cursor-pointer group ${
-          isClicked ? 'ring-2 ring-neutral-300' : ''
-        }`}
+        className="bg-neutral-100 rounded-2xl p-4 hover:bg-neutral-200 transition-all cursor-pointer group"
         onClick={onClick}
       >
         <div className="flex items-center gap-4">
@@ -467,9 +463,7 @@ function PublicLinkItem({
       initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={hasAnimated ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
-      className={`bg-neutral-100 rounded-xl hover:bg-neutral-200 transition-all cursor-pointer group overflow-hidden ${
-        isClicked ? 'ring-2 ring-neutral-300' : ''
-      }`}
+      className="bg-neutral-100 rounded-xl hover:bg-neutral-200 transition-all cursor-pointer group overflow-hidden"
       onClick={onClick}
     >
       <div className="space-y-4">

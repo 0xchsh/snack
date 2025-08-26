@@ -286,3 +286,8 @@
     backdrop-filter: blur(4px);
   }
 }
+
+/* Remove visited link styling */
+a:visited {
+  color: inherit;
+}
