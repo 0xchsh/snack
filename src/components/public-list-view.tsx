@@ -105,20 +105,14 @@ export function PublicListView({ list }: PublicListViewProps) {
       <div className="border-b border-border bg-white">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3">
+            <Link href="/" className="flex items-center">
               <Image
                 src="/images/logo.svg"
                 alt="Snack"
-                width={32}
-                height={32}
-                className="w-8 h-8"
+                width={40}
+                height={40}
+                className="w-10 h-10"
               />
-              <h1 
-                className="text-xl font-bold"
-                style={{ fontFamily: 'Open Runde' }}
-              >
-                Snack
-              </h1>
             </Link>
             
             {user ? (
@@ -135,7 +129,7 @@ export function PublicListView({ list }: PublicListViewProps) {
                 className="px-4 py-2 text-sm font-medium bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
                 style={{ fontFamily: 'Open Runde' }}
               >
-                Log In
+                Make a Snack
               </button>
             )}
           </div>

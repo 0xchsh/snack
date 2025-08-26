@@ -58,7 +58,7 @@ export default function ProfilePage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <Link href="/dashboard" className="flex items-center gap-3">
+              <Link href="/dashboard" className="flex items-center">
                 <Image
                   src="/images/logo.svg"
                   alt="Snack"
@@ -66,12 +66,6 @@ export default function ProfilePage() {
                   height={40}
                   className="w-10 h-10"
                 />
-                <h1 
-                  className="text-xl font-bold"
-                  style={{ fontFamily: 'Open Runde' }}
-                >
-                  Snack
-                </h1>
               </Link>
             </div>
             
@@ -89,51 +83,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Profile Header */}
-      <div className="bg-white border-b border-border">
-        <div className="container mx-auto px-6 py-8">
-          <div className="flex items-center gap-6">
-            {/* Profile Picture */}
-            <div className="relative">
-              <div className="w-24 h-24 rounded-full bg-neutral-100 flex items-center justify-center overflow-hidden">
-                {user?.profile_picture_url ? (
-                  <Image
-                    src={user.profile_picture_url}
-                    alt="Profile"
-                    width={96}
-                    height={96}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <User className="w-8 h-8 text-muted-foreground" />
-                )}
-              </div>
-            </div>
-            
-            {/* User Info */}
-            <div>
-              <h1 
-                className="text-3xl font-bold text-foreground mb-1"
-                style={{ fontFamily: 'Open Runde' }}
-              >
-                Account Settings
-              </h1>
-              <p className="text-muted-foreground text-lg">@{user.username}</p>
-              <p className="text-muted-foreground">{user.email}</p>
-              <div className="mt-3">
-                <Link
-                  href={`/${user.username}`}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors"
-                  style={{ fontFamily: 'Open Runde' }}
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  View Public Profile
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div className="container mx-auto px-6 py-8">
         {/* Navigation Tabs */}

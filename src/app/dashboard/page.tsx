@@ -116,7 +116,7 @@ export default function DashboardPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <Link href="/" className="flex items-center gap-3">
+              <Link href="/" className="flex items-center">
                 <Image
                   src="/images/logo.svg"
                   alt="Snack"
@@ -124,12 +124,6 @@ export default function DashboardPage() {
                   height={40}
                   className="w-10 h-10"
                 />
-                <h1 
-                  className="text-xl font-bold"
-                  style={{ fontFamily: 'Open Runde' }}
-                >
-                  Snack
-                </h1>
               </Link>
             </div>
             

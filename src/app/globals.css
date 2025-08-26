@@ -291,3 +291,12 @@
 a:visited {
   color: inherit;
 }
+
+/* Force navigation links to use exact same color as buttons */
+.navigation-button {
+  color: rgb(113 113 122) !important; /* text-muted-foreground exact value */
+}
+
+.navigation-button:hover {
+  color: rgb(10 10 10) !important; /* text-foreground exact value */
+}

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { ArrowLeft, Copy, ExternalLink } from 'lucide-react'
 import { ListEditor } from '@/components/list-editor'
 import { PublicListView } from '@/components/public-list-view'
 import { CreateList } from '@/components/create-list'
@@ -262,71 +262,39 @@ export default function UserListPage() {
       <div className="border-b border-border bg-white">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3">
-                {user ? (
-                  <Link href="/dashboard" className="flex items-center gap-3">
-                    <Image
-                      src="/images/logo.svg"
-                      alt="Snack"
-                      width={32}
-                      height={32}
-                      className="w-8 h-8 cursor-pointer"
-                    />
-                    <h1 
-                      className="text-xl font-bold"
-                      style={{ fontFamily: 'Open Runde' }}
-                    >
-                      Snack
-                    </h1>
-                  </Link>
-                ) : (
-                  <>
-                    <Image
-                      src="/images/logo.svg"
-                      alt="Snack"
-                      width={32}
-                      height={32}
-                      className="w-8 h-8"
-                    />
-                    <h1 
-                      className="text-xl font-bold"
-                      style={{ fontFamily: 'Open Runde' }}
-                    >
-                      Snack
-                    </h1>
-                  </>
-                )}
-              </div>
-            </div>
+            {/* Back button */}
+            <Link 
+              href="/dashboard" 
+              className="navigation-button flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors bg-neutral-100 rounded-full no-underline"
+              style={{ fontFamily: 'Open Runde' }}
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Link>
             
+            {/* Copy and View buttons */}
             <div className="flex items-center gap-3">
-              <Link
-                href={`/${username}`}
-                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
+              <button
+                onClick={async () => {
+                  const url = `${window.location.origin}/${username}/${listId}?view=public`
+                  await navigator.clipboard.writeText(url)
+                }}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full border-0 outline-none"
                 style={{ fontFamily: 'Open Runde' }}
               >
-                Back to Profile
+                Copy
+                <Copy className="w-4 h-4" />
+              </button>
+              <Link
+                href={`/${username}/${listId}?view=public`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="navigation-button flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors bg-neutral-100 rounded-full no-underline"
+                style={{ fontFamily: 'Open Runde' }}
+              >
+                View
+                <ExternalLink className="w-4 h-4" />
               </Link>
-              {user && (
-                <>
-                  <button
-                    onClick={handleLogout}
-                    className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
-                    style={{ fontFamily: 'Open Runde' }}
-                  >
-                    Logout
-                  </button>
-                  <button
-                    onClick={() => setShowCreateList(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
-                    style={{ fontFamily: 'Open Runde' }}
-                  >
-                    <Plus className="w-4 h-4" />
-                    New List
-                  </button>
-                </>
-              )}
             </div>
           </div>
         </div>
