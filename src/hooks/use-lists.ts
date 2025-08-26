@@ -110,15 +110,8 @@ export function useLists() {
         throw new Error(result.error || 'Failed to add link')
       }
       
-      setLists(prev => prev.map(list => {
-        if (list.id === listId) {
-          return {
-            ...list,
-            links: [result.data, ...list.links].sort((a, b) => a.position - b.position)
-          }
-        }
-        return list
-      }))
+      // Re-fetch the list to get updated positions for all links
+      await fetchLists()
       
       return result.data
     } catch (err) {

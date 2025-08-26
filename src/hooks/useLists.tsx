@@ -43,7 +43,7 @@ export function ListsProvider({ children }: { children: ReactNode }) {
 
       try {
         setLoading(true)
-        console.log('Loading lists for user:', user.id)
+        console.log('Loading lists for user:', user.id, 'username:', user.username, 'email:', user.email)
         
         // Load user's lists directly from Supabase
         const userLists = await supabaseListDB.getUserLists(user.id)

@@ -21,7 +21,11 @@ export default function SimpleDashboardPage() {
     setCreatingList(true)
     try {
       const newList = await createEmptyList()
-      router.push(`/demo?list=${newList.id}`)
+      if (user?.username) {
+        router.push(`/${user.username}/${newList.id}`)
+      } else {
+        router.push(`/list/${newList.id}`)
+      }
     } catch (error) {
       console.error('Error creating list:', error)
     } finally {
@@ -285,7 +289,7 @@ function ListCard({ list, onDelete }: { list: ListWithLinks; onDelete: (id: stri
       </button>
 
       <Link 
-        href={`/demo?list=${list.id}`}
+        href={`/${list.user?.username || 'list'}/${list.id}`}
         className="block cursor-pointer"
       >
         <div className="flex items-center justify-center mb-6 pt-4">

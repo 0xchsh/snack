@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Copy, Clock, Link as LinkIcon, Eye, Bookmark } from 'lucide-react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
@@ -29,6 +29,7 @@ function formatCount(count: number): string {
 
 export function PublicListView({ list }: PublicListViewProps) {
   const [clickedLinks, setClickedLinks] = useState<Set<string>>(new Set())
+  const [hasAnimated, setHasAnimated] = useState(false)
   const router = useRouter()
   const { user } = useAuth()
   
@@ -90,8 +91,58 @@ export function PublicListView({ list }: PublicListViewProps) {
     router.push('/auth/sign-in')
   }
 
+  // Set hasAnimated to true after initial render
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasAnimated(true)
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="min-h-screen bg-white">
+      {/* Navigation */}
+      <div className="border-b border-border bg-white">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-3">
+              <Image
+                src="/images/logo.svg"
+                alt="Snack"
+                width={32}
+                height={32}
+                className="w-8 h-8"
+              />
+              <h1 
+                className="text-xl font-bold"
+                style={{ fontFamily: 'Open Runde' }}
+              >
+                Snack
+              </h1>
+            </Link>
+            
+            {user ? (
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="px-4 py-2 text-sm font-medium bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                style={{ fontFamily: 'Open Runde' }}
+              >
+                Dashboard
+              </button>
+            ) : (
+              <button
+                onClick={handleLogin}
+                className="px-4 py-2 text-sm font-medium bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                style={{ fontFamily: 'Open Runde' }}
+              >
+                Log In
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      <div className="container mx-auto px-4 py-12">
         <div className={`${viewMode === 'grid' ? 'w-full' : 'max-w-2xl mx-auto'} space-y-8`}>
           {/* List Header */}
           <div className={`${viewMode === 'grid' ? 'max-w-2xl mx-auto' : ''} space-y-6`}>
@@ -127,7 +178,7 @@ export function PublicListView({ list }: PublicListViewProps) {
             <div className="flex items-center justify-between">
               {list.user?.username ? (
                 <Link 
-                  href={`/u/${list.user.username}`}
+                  href={`/${list.user.username}`}
                   className="flex items-center gap-2 bg-neutral-100 rounded-full px-4 py-2 hover:bg-neutral-200 transition-colors"
                 >
                   <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center overflow-hidden">
@@ -243,6 +294,7 @@ export function PublicListView({ list }: PublicListViewProps) {
                   isClicked={clickedLinks.has(link.id)}
                   index={index}
                   viewMode={viewMode}
+                  hasAnimated={hasAnimated}
                 />
               ))}
             </div>
@@ -256,6 +308,7 @@ export function PublicListView({ list }: PublicListViewProps) {
                   isClicked={clickedLinks.has(link.id)}
                   index={index}
                   viewMode={viewMode}
+                  hasAnimated={hasAnimated}
                 />
               ))}
             </div>
@@ -270,6 +323,7 @@ export function PublicListView({ list }: PublicListViewProps) {
           )}
         </div>
       </div>
+    </div>
   )
 }
 
@@ -279,6 +333,7 @@ interface PublicLinkItemProps {
   isClicked: boolean
   index: number
   viewMode: ViewMode
+  hasAnimated: boolean
 }
 
 function PublicLinkItem({ 
@@ -286,16 +341,17 @@ function PublicLinkItem({
   onClick, 
   isClicked, 
   index,
-  viewMode 
+  viewMode,
+  hasAnimated
 }: PublicLinkItemProps) {
   
   if (viewMode === 'menu') {
     // Compact rows - smallest layout (exact match to edit view)
     return (
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.05 }}
+        transition={hasAnimated ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
         className={`bg-neutral-100 rounded-xl p-3 hover:bg-neutral-200 transition-all cursor-pointer group ${
           isClicked ? 'ring-2 ring-neutral-300' : ''
         }`}
@@ -327,16 +383,16 @@ function PublicLinkItem({
     // Larger cards as rows - medium layout (exact match to edit view)
     return (
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.05 }}
+        transition={hasAnimated ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
         className={`bg-neutral-100 rounded-2xl p-4 hover:bg-neutral-200 transition-all cursor-pointer group ${
           isClicked ? 'ring-2 ring-neutral-300' : ''
         }`}
         onClick={onClick}
       >
         <div className="flex items-center gap-4">
-          <div className="w-20 h-11 rounded-xl overflow-hidden bg-neutral-200 flex-shrink-0 relative">
+          <div className="w-[100px] h-14 rounded-xl overflow-hidden bg-neutral-200 flex-shrink-0 relative">
             {link.image_url ? (
               <>
                 <Image 
@@ -384,12 +440,21 @@ function PublicLinkItem({
             >
               {link.title || getHostname(link.url)}
             </h3>
-            <p 
-              className="text-sm text-muted-foreground/80 truncate mt-1"
-              style={{ fontFamily: 'Open Runde' }}
-            >
-              {link.url}
-            </p>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="w-4 h-4 rounded-sm overflow-hidden bg-muted flex-shrink-0">
+                <Favicon 
+                  url={link.url}
+                  size={16}
+                  className="rounded-sm"
+                />
+              </div>
+              <p 
+                className="text-sm text-muted-foreground/80 truncate"
+                style={{ fontFamily: 'Open Runde' }}
+              >
+                {getHostname(link.url)}
+              </p>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -399,9 +464,9 @@ function PublicLinkItem({
   // Grid layout - largest cards (exact match to edit view)
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
+      transition={hasAnimated ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
       className={`bg-neutral-100 rounded-xl hover:bg-neutral-200 transition-all cursor-pointer group overflow-hidden ${
         isClicked ? 'ring-2 ring-neutral-300' : ''
       }`}
@@ -456,7 +521,7 @@ function PublicLinkItem({
         {/* Content */}
         <div className="px-4 pb-4 space-y-2">
           <h3 
-            className="font-semibold text-foreground text-base leading-tight line-clamp-2"
+            className="font-semibold text-foreground text-base leading-tight truncate"
             style={{ fontFamily: 'Open Runde' }}
           >
             {link.title || getHostname(link.url)}

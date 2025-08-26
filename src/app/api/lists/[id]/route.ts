@@ -91,16 +91,17 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
     
-    // Update the list
+    // Update the list - only update provided fields
+    const updateData: any = {}
+    if (body.title !== undefined) updateData.title = body.title
+    if (body.emoji !== undefined) updateData.emoji = body.emoji
+    if (body.emoji_3d !== undefined) updateData.emoji_3d = body.emoji_3d
+    if (body.is_public !== undefined) updateData.is_public = body.is_public
+    if (body.view_mode !== undefined) updateData.view_mode = body.view_mode
+
     const { data: updatedList, error: updateError } = await supabase
       .from('lists')
-      .update({
-        title: body.title,
-        emoji: body.emoji,
-        emoji_3d: body.emoji_3d,
-        is_public: body.is_public,
-        view_mode: body.view_mode
-      })
+      .update(updateData)
       .eq('id', listId)
       .select(`
         *,

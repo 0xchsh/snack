@@ -115,7 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Get the session with timeout
         const { data: { session }, error } = await withTimeout(
           supabase.auth.getSession(),
-          3000 // 3 second timeout
+          2000 // 2 second timeout - more aggressive
         )
         
         if (!mounted) return
@@ -182,6 +182,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     getInitialSession()
 
+    // Failsafe timeout to prevent indefinite loading
+    const failsafeTimeout = setTimeout(() => {
+      if (mounted && loading) {
+        console.warn('useAuth: Failsafe timeout - forcing loading to false')
+        setLoading(false)
+      }
+    }, 5000) // 5 second failsafe
+
     // Listen for auth state changes
     const {
       data: { subscription },
@@ -219,6 +227,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     return () => {
       mounted = false
+      clearTimeout(failsafeTimeout)
       subscription.unsubscribe()
     }
   }, [])

@@ -122,7 +122,7 @@ export default function ProfilePage() {
               <p className="text-muted-foreground">{user.email}</p>
               <div className="mt-3">
                 <Link
-                  href={`/u/${user.username}`}
+                  href={`/${user.username}`}
                   className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors"
                   style={{ fontFamily: 'Open Runde' }}
                 >

@@ -25,6 +25,8 @@ export class SupabaseListDatabase {
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
+      
+      console.log('Raw query result:', { lists, error, userId })
 
       if (error) {
         console.error('Error fetching user lists:', error)
@@ -70,9 +72,25 @@ export class SupabaseListDatabase {
             console.warn('Failed to fetch links for list', list.id)
           }
 
+          // Handle emoji_3d which can be a string (JSON) or already an object
+          let emoji3d = null
+          if (list.emoji_3d) {
+            if (typeof list.emoji_3d === 'string') {
+              try {
+                emoji3d = JSON.parse(list.emoji_3d)
+              } catch (e) {
+                console.warn('Failed to parse emoji_3d for list', list.id)
+                emoji3d = null
+              }
+            } else {
+              // Already an object
+              emoji3d = list.emoji_3d
+            }
+          }
+
           return {
             ...list,
-            emoji_3d: list.emoji_3d ? JSON.parse(list.emoji_3d) : null,
+            emoji_3d: emoji3d,
             links,
             user: {
               id: list.user_id,
@@ -128,10 +146,26 @@ export class SupabaseListDatabase {
         .eq('id', list.user_id)
         .single()
 
+      // Handle emoji_3d which can be a string (JSON) or already an object
+      let emoji3d = null
+      if (list.emoji_3d) {
+        if (typeof list.emoji_3d === 'string') {
+          try {
+            emoji3d = JSON.parse(list.emoji_3d)
+          } catch (e) {
+            console.warn('Failed to parse emoji_3d for list', list.id)
+            emoji3d = null
+          }
+        } else {
+          // Already an object
+          emoji3d = list.emoji_3d
+        }
+      }
+
       // Transform the data to match our ListWithLinks type
       return {
         ...list,
-        emoji_3d: list.emoji_3d ? JSON.parse(list.emoji_3d) : null,
+        emoji_3d: emoji3d,
         links: list.links || [],
         user: {
           id: list.user_id,

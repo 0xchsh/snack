@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { fetchOGData } from '@/lib/og'
+import { fetchOpenGraphDataServer } from '@/lib/opengraph-io'
 
 // POST /api/lists/[id]/links - Add a link to a list
 export async function POST(
@@ -42,7 +42,7 @@ export async function POST(
     // Fetch OpenGraph data for the URL
     let ogData = null
     try {
-      ogData = await fetchOGData(body.url)
+      ogData = await fetchOpenGraphDataServer(body.url)
     } catch (error) {
       console.error('Error fetching OG data:', error)
       // Continue without OG data
@@ -59,29 +59,44 @@ export async function POST(
     
     const nextPosition = body.position !== undefined 
       ? body.position 
-      : (maxPositionData?.position ?? -1) + 1
+      : 0  // ALWAYS add new links to the top (position 0)
     
-    // If inserting at a specific position, shift other links
-    if (body.position !== undefined) {
-      await supabase
-        .from('links')
-        .update({ position: supabase.raw('position + 1') })
-        .eq('list_id', listId)
-        .gte('position', body.position)
+    // Always shift other links when adding a new link (since we always insert at top or specific position)
+    const shiftPosition = nextPosition
+    
+    // Get all links that need to be shifted
+    const { data: linksToShift } = await supabase
+      .from('links')
+      .select('id, position')
+      .eq('list_id', listId)
+      .gte('position', shiftPosition)
+    
+    // Update each link's position
+    if (linksToShift && linksToShift.length > 0) {
+      const updates = linksToShift.map(link => 
+        supabase
+          .from('links')
+          .update({ position: link.position + 1 })
+          .eq('id', link.id)
+      )
+      
+      await Promise.all(updates)
     }
     
     // Create the link
+    const linkData = {
+      list_id: listId,
+      url: body.url,
+      title: ogData?.title || body.title || new URL(body.url).hostname,
+      description: body.description || ogData?.description,
+      image_url: body.image_url || ogData?.image_url,
+      favicon_url: body.favicon_url || ogData?.favicon_url,
+      position: nextPosition
+    }
+    
     const { data: link, error: linkError } = await supabase
       .from('links')
-      .insert({
-        list_id: listId,
-        url: body.url,
-        title: body.title || ogData?.title || new URL(body.url).hostname,
-        description: body.description || ogData?.description,
-        image_url: body.image_url || ogData?.image_url,
-        favicon_url: body.favicon_url || ogData?.favicon_url,
-        position: nextPosition
-      })
+      .insert(linkData)
       .select()
       .single()
     

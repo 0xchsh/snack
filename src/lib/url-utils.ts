@@ -59,11 +59,13 @@ export function validateAndNormalizeUrl(url: string): {
 /**
  * Safely gets hostname from URL without throwing
  * @param url The URL string
- * @returns hostname or fallback
+ * @returns hostname or fallback (removes www. prefix)
  */
 export function getHostname(url: string): string {
   try {
-    return new URL(url).hostname
+    const hostname = new URL(url).hostname
+    // Remove www. prefix for cleaner display
+    return hostname.startsWith('www.') ? hostname.substring(4) : hostname
   } catch {
     return 'unknown'
   }

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
@@ -9,17 +9,13 @@ import { ListEditor } from '@/components/list-editor'
 import { PublicListView } from '@/components/public-list-view'
 import { CreateList } from '@/components/create-list'
 import { ListWithLinks, CreateListForm, LinkInsert } from '@/types'
-import { getRandomEmoji } from '@/lib/emoji'
 import { useAuth } from '@/hooks/useAuth'
+import { validateUsername } from '@/lib/username-utils'
 
-interface ListPageProps {
-  params: Promise<{
-    id: string
-  }>
-}
-
-export default function ListPage({ params }: ListPageProps) {
-  const { id } = use(params)
+export default function UserListPage() {
+  const params = useParams()
+  const username = params?.username as string
+  const listId = params?.listId as string
   const [currentList, setCurrentList] = useState<ListWithLinks | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -32,14 +28,25 @@ export default function ListPage({ params }: ListPageProps) {
   const currentUserId = user?.id || null
   const forcePublicView = searchParams.get('view') === 'public'
 
-  // Fetch list data from API
+  // Fetch list data from API using username and listId
   useEffect(() => {
+    if (!username || !listId) return
+
+    // Validate username format first
+    const validation = validateUsername(username)
+    if (!validation.valid) {
+      setError('Invalid username format')
+      setLoading(false)
+      return
+    }
+
     const fetchList = async () => {
       try {
         setLoading(true)
         setError(null)
         
-        const response = await fetch(`/api/lists/${id}`)
+        // Use new API endpoint that resolves by username and listId
+        const response = await fetch(`/api/users/${encodeURIComponent(username)}/lists/${encodeURIComponent(listId)}`)
         const data = await response.json()
         
         if (!response.ok) {
@@ -53,14 +60,6 @@ export default function ListPage({ params }: ListPageProps) {
           return
         }
         
-        // Redirect to the new URL structure if we have username
-        if (data.data?.user?.username) {
-          const queryParams = searchParams.toString()
-          const newUrl = `/${data.data.user.username}/${id}${queryParams ? `?${queryParams}` : ''}`
-          router.replace(newUrl)
-          return
-        }
-        
         setCurrentList(data.data)
       } catch (err) {
         console.error('Error fetching list:', err)
@@ -70,10 +69,8 @@ export default function ListPage({ params }: ListPageProps) {
       }
     }
     
-    if (id) {
-      fetchList()
-    }
-  }, [id])
+    fetchList()
+  }, [username, listId])
   
   // Determine if user can edit this list
   const canEdit = isAuthenticated && currentUserId === currentList?.user_id
@@ -129,7 +126,7 @@ export default function ListPage({ params }: ListPageProps) {
       const data = await response.json()
       
       // Re-fetch the list to get correct positions for all links
-      const listResponse = await fetch(`/api/lists/${currentList.id}`, {
+      const listResponse = await fetch(`/api/users/${username}/lists/${listId}`, {
         cache: 'no-store'
       })
       
@@ -201,7 +198,6 @@ export default function ListPage({ params }: ListPageProps) {
     }
   }
 
-
   const handleLogout = async () => {
     // TODO: Implement proper logout functionality
     router.push('/auth/sign-in')
@@ -235,12 +231,20 @@ export default function ListPage({ params }: ListPageProps) {
               : 'Something went wrong while loading this list. Please try again.'
             }
           </p>
-          <button
-            onClick={() => router.push('/')}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
-          >
-            Go Home
-          </button>
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={() => router.push(`/${username}`)}
+              className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors font-semibold"
+            >
+              Back to Profile
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
+            >
+              Go Home
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -297,21 +301,32 @@ export default function ListPage({ params }: ListPageProps) {
             </div>
             
             <div className="flex items-center gap-3">
-              <button
-                onClick={handleLogout}
+              <Link
+                href={`/${username}`}
                 className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
                 style={{ fontFamily: 'Open Runde' }}
               >
-                Logout
-              </button>
-              <button
-                onClick={() => setShowCreateList(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
-                style={{ fontFamily: 'Open Runde' }}
-              >
-                <Plus className="w-4 h-4" />
-                New List
-              </button>
+                Back to Profile
+              </Link>
+              {user && (
+                <>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
+                    style={{ fontFamily: 'Open Runde' }}
+                  >
+                    Logout
+                  </button>
+                  <button
+                    onClick={() => setShowCreateList(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+                    style={{ fontFamily: 'Open Runde' }}
+                  >
+                    <Plus className="w-4 h-4" />
+                    New List
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

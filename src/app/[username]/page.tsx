@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
-// import { User, Calendar, Bookmark, ArrowLeft, ExternalLink } from 'lucide-react'
+import { validateUsername } from '@/lib/username-utils'
 
 interface PublicProfile {
   user: {
@@ -33,7 +33,7 @@ interface PublicProfile {
   }
 }
 
-export default function PublicProfilePage() {
+export default function UsernamePage() {
   const params = useParams()
   const username = params?.username as string
   const { user } = useAuth()
@@ -43,6 +43,14 @@ export default function PublicProfilePage() {
 
   useEffect(() => {
     if (!username) return
+
+    // Validate username format first
+    const validation = validateUsername(username)
+    if (!validation.valid) {
+      setError('Invalid username format')
+      setLoading(false)
+      return
+    }
 
     const fetchProfile = async () => {
       try {
@@ -213,7 +221,7 @@ export default function PublicProfilePage() {
               {profile.lists.map((list) => (
                 <Link
                   key={list.id}
-                  href={`/demo?list=${list.id}&view=public`}
+                  href={`/${profile.user.username}/${list.id}`}
                   className="block"
                 >
                   <div className="relative bg-white rounded-2xl p-6 hover:shadow-lg hover:shadow-gray-100 transition-all duration-200 group border border-gray-100">

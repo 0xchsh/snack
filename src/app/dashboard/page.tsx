@@ -24,8 +24,12 @@ export default function DashboardPage() {
     setCreatingList(true)
     try {
       const newList = await createEmptyList()
-      // Navigate to the new list in demo page
-      router.push(`/demo?list=${newList.id}`)
+      // Navigate to the new list using the username
+      if (user?.username) {
+        router.push(`/${user.username}/${newList.id}`)
+      } else {
+        router.push(`/list/${newList.id}`)
+      }
     } catch (error) {
       console.error('Error creating list:', error)
     } finally {
@@ -131,7 +135,7 @@ export default function DashboardPage() {
             
             <div className="flex items-center gap-3">
               <Link
-                href={`/u/${user?.username || user?.id}`}
+                href={`/${user?.username || user?.id}`}
                 className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
                 style={{ fontFamily: 'Open Runde' }}
               >
@@ -438,7 +442,7 @@ function ListCard({ list, showActions = true, onDelete }: ListCardProps) {
   const handleView = (e: React.MouseEvent) => {
     e.preventDefault() // Prevent navigation from Link
     e.stopPropagation() // Stop event bubbling
-    router.push(`/list/${list.id}?view=public`)
+    router.push(`/${list.user?.username || 'list'}/${list.id}?view=public`)
   }
 
   return (
@@ -470,7 +474,7 @@ function ListCard({ list, showActions = true, onDelete }: ListCardProps) {
 
       {/* Clickable area for navigation */}
       <Link 
-        href={`/demo?list=${list.id}`}
+        href={`/${list.user?.username || 'list'}/${list.id}`}
         className="block cursor-pointer"
       >
         {/* Large Emoji */}

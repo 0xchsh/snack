@@ -54,11 +54,23 @@ export async function DELETE(
     
     // Update positions of remaining links
     if (linkToDelete) {
-      await supabase
+      // Get all links that need position update
+      const { data: linksToUpdate } = await supabase
         .from('links')
-        .update({ position: supabase.raw('position - 1') })
+        .select('id, position')
         .eq('list_id', listId)
         .gt('position', linkToDelete.position)
+        .order('position', { ascending: true })
+      
+      // Update each link's position
+      if (linksToUpdate && linksToUpdate.length > 0) {
+        for (const link of linksToUpdate) {
+          await supabase
+            .from('links')
+            .update({ position: link.position - 1 })
+            .eq('id', link.id)
+        }
+      }
     }
     
     return NextResponse.json({ success: true })
