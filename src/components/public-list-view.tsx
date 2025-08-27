@@ -244,10 +244,16 @@ export function PublicListView({ list }: PublicListViewProps) {
               )}
               
               <div className="flex items-center gap-3">
-                <button className="px-4 py-2 text-base font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full">
+                <button 
+                  onClick={user ? undefined : handleLogin}
+                  className="px-4 py-2 text-base font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
+                >
                   <span style={{ fontFamily: 'Open Runde' }}>Save</span>
                 </button>
-                <button className="px-4 py-2 text-base font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full">
+                <button 
+                  onClick={user ? undefined : handleLogin}
+                  className="px-4 py-2 text-base font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
+                >
                   <span style={{ fontFamily: 'Open Runde' }}>Share</span>
                 </button>
               </div>
@@ -402,7 +408,7 @@ function PublicLinkItem({
                 />
                 {/* Fallback content (hidden by default, shown when image fails) */}
                 <div 
-                  className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center absolute inset-0"
+                  className="w-full h-full bg-neutral-50 flex items-center justify-center absolute inset-0"
                   style={{ display: 'none' }}
                 >
                   <Favicon 
@@ -413,7 +419,7 @@ function PublicLinkItem({
                 </div>
               </>
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
+              <div className="w-full h-full bg-neutral-50 flex items-center justify-center">
                 <Favicon 
                   url={link.url}
                   size={24}
@@ -483,7 +489,7 @@ function PublicLinkItem({
               />
               {/* Fallback content (hidden by default, shown when image fails) */}
               <div 
-                className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center absolute inset-0"
+                className="w-full h-full bg-neutral-50 flex items-center justify-center absolute inset-0"
                 style={{ display: 'none' }}
               >
                 <Favicon 
@@ -495,7 +501,7 @@ function PublicLinkItem({
               </div>
             </>
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
+            <div className="w-full h-full bg-neutral-50 flex items-center justify-center">
               <Favicon 
                 url={link.url}
                 size={48}

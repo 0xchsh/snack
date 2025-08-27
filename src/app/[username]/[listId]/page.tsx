@@ -96,11 +96,19 @@ export default function UserListPage() {
       })
       
       if (!response.ok) {
-        throw new Error('Failed to update list')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `Failed to update list (${response.status})`)
       }
       
       const data = await response.json()
-      setCurrentList(data.data)
+      
+      // If the API returned updated data, use it
+      if (data.data) {
+        setCurrentList(data.data)
+      } else if (data.success) {
+        // Update succeeded but no data returned, just apply the updates locally
+        setCurrentList(prev => prev ? { ...prev, ...updates } : null)
+      }
     } catch (error) {
       console.error('Error updating list:', error)
       // Could add toast notification here
@@ -149,7 +157,8 @@ export default function UserListPage() {
       })
       
       if (!response.ok) {
-        throw new Error('Failed to remove link')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `Failed to remove link (${response.status})`)
       }
       
       setCurrentList(prev => prev ? {

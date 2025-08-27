@@ -99,27 +99,51 @@ export async function PATCH(
     if (body.is_public !== undefined) updateData.is_public = body.is_public
     if (body.view_mode !== undefined) updateData.view_mode = body.view_mode
 
-    const { data: updatedList, error: updateError } = await supabase
+    // Update the list
+    const { error: updateError } = await supabase
       .from('lists')
       .update(updateData)
       .eq('id', listId)
-      .select(`
-        *,
-        links (
-          *
-        )
-      `)
-      .single()
     
     if (updateError) {
       console.error('Error updating list:', updateError)
       return NextResponse.json({ error: updateError.message }, { status: 500 })
     }
+
+    // Fetch the updated list with links
+    const { data: updatedList, error: refetchError } = await supabase
+      .from('lists')
+      .select(`
+        *,
+        links (
+          *
+        ),
+        users!lists_user_id_fkey (
+          id,
+          username
+        )
+      `)
+      .eq('id', listId)
+      .single()
     
-    // Sort links by position
+    if (refetchError || !updatedList) {
+      console.error('Error fetching updated list:', refetchError)
+      // If refetch fails, at least return success since the update worked
+      // The frontend can refetch the list if needed
+      return NextResponse.json({ 
+        success: true, 
+        message: 'List updated successfully but failed to return updated data' 
+      })
+    }
+    
+    // Sort links by position and format response
     const listWithSortedLinks = {
       ...updatedList,
-      links: updatedList.links?.sort((a: any, b: any) => a.position - b.position) || []
+      links: updatedList.links?.sort((a: any, b: any) => a.position - b.position) || [],
+      user: updatedList.users ? {
+        id: updatedList.users.id,
+        username: updatedList.users.username
+      } : null
     }
     
     return NextResponse.json({ data: listWithSortedLinks })

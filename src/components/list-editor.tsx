@@ -87,6 +87,7 @@ export function ListEditor({
   const [isRefreshingOG, setIsRefreshingOG] = useState(false)
   const [showMoreMenu, setShowMoreMenu] = useState(false)
   const [loadingLinks, setLoadingLinks] = useState<string[]>([])
+  const [optimisticList, setOptimisticList] = useState<ListWithLinks>(list)
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -298,17 +299,17 @@ export function ListEditor({
       linksCount: list.links?.length || 0
     })
     
-    if (!isDragging || !list.links || !draggedItemId) {
+    if (!isDragging || !optimisticList.links || !draggedItemId) {
       cleanup()
       return
     }
     
-    const draggedIndex = list.links.findIndex(link => link.id === draggedItemId)
+    const draggedIndex = optimisticList.links.findIndex(link => link.id === draggedItemId)
     console.log('Drag indices:', { draggedIndex, dragOverIndex, viewMode })
     
     if (draggedIndex !== -1 && dragOverIndex !== null && draggedIndex !== dragOverIndex) {
       // Reorder the links
-      const newLinks = [...list.links]
+      const newLinks = [...optimisticList.links]
       const [draggedItem] = newLinks.splice(draggedIndex, 1)
       newLinks.splice(dragOverIndex, 0, draggedItem)
       
@@ -330,7 +331,7 @@ export function ListEditor({
     }
     
     cleanup()
-  }, [isDragging, list.links, draggedItemId, dragOverIndex, onReorderLinks, viewMode])
+  }, [isDragging, optimisticList.links, draggedItemId, dragOverIndex, onReorderLinks, viewMode])
   
   const cleanup = useCallback(() => {
     setIsDragging(false)
@@ -439,6 +440,9 @@ export function ListEditor({
         })
         
         if (validUrls.length > 0) {
+          // Add ghost loading placeholders immediately
+          setLoadingLinks(validUrls)
+          
           for (let i = 0; i < validUrls.length; i++) {
             const url = validUrls[i]
             if (url) {
@@ -446,6 +450,9 @@ export function ListEditor({
                 url,
                 title: url // Use URL as default title, it will be updated with OG data
               })
+              
+              // Remove from loading state as each one completes
+              setLoadingLinks(prev => prev.filter(loadingUrl => loadingUrl !== url))
             }
           }
         } else {
@@ -493,6 +500,33 @@ export function ListEditor({
     // This would need to be implemented with proper confirmation dialog
     // and call a delete handler passed from parent
   }
+
+  // Handle link deletion with optimistic UI updates
+  const handleDeleteLink = async (linkId: string) => {
+    // Store the original optimistic list for potential rollback
+    const originalOptimisticList = optimisticList
+    
+    // Optimistically remove the link from the UI immediately
+    const updatedLinks = (optimisticList.links || []).filter(link => link.id !== linkId)
+    const optimisticUpdate = { ...optimisticList, links: updatedLinks }
+    
+    // Update the optimistic state immediately
+    setOptimisticList(optimisticUpdate)
+    
+    try {
+      // Call the actual delete handler
+      await onRemoveLink?.(linkId)
+    } catch (error) {
+      // If delete fails, revert to original optimistic list
+      setOptimisticList(originalOptimisticList)
+      console.error('Failed to delete link:', error)
+    }
+  }
+
+  // Sync optimistic list with props when the parent component updates
+  useEffect(() => {
+    setOptimisticList(list)
+  }, [list])
 
   // Auto-refresh OG data on mount if any links are missing images
   useEffect(() => {
@@ -582,7 +616,10 @@ export function ListEditor({
       
       // If we have valid URLs, add them to the list
       if (validUrls.length > 0) {
-        // Add links sequentially (seamlessly, no UI indicators)
+        // Add ghost loading placeholders immediately
+        setLoadingLinks(validUrls)
+        
+        // Add links sequentially
         for (let i = 0; i < validUrls.length; i++) {
           const url = validUrls[i]
           if (url) {
@@ -590,6 +627,9 @@ export function ListEditor({
               url,
               title: url // Use URL as default title, it will be updated with OG data
             })
+            
+            // Remove from loading state as each one completes
+            setLoadingLinks(prev => prev.filter(loadingUrl => loadingUrl !== url))
           }
         }
         
@@ -727,12 +767,20 @@ export function ListEditor({
               </div>
               
               <button
-                onClick={handleAddLink}
-                disabled={!linkInput.trim()}
-                className="px-4 py-2 bg-primary hover:bg-primary/90 disabled:bg-primary/50 rounded-lg text-primary-foreground transition-colors flex items-center gap-2"
+                onClick={linkInput.trim() ? handleAddLink : pasteFromClipboard}
+                className="px-4 py-2 bg-primary hover:bg-primary/90 rounded-lg text-primary-foreground transition-colors flex items-center gap-2"
               >
-                <span className="font-medium">Add</span>
-                <span className="text-xs opacity-70">⌘⏎</span>
+                {linkInput.trim() ? (
+                  <>
+                    <span className="font-medium">Add</span>
+                    <span className="text-xs opacity-70">⌘⏎</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="font-medium">Paste</span>
+                    <span className="text-xs opacity-70">⌘V</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -789,7 +837,7 @@ export function ListEditor({
               <div className="relative" ref={moreMenuRef}>
                 <button
                   onClick={() => setShowMoreMenu(!showMoreMenu)}
-                  className="w-10 h-10 rounded-md flex items-center justify-center transition-colors bg-white text-foreground hover:bg-neutral-50"
+                  className="w-10 h-10 rounded-md flex items-center justify-center transition-colors bg-white text-foreground hover:bg-white"
                   title="More options"
                 >
                   <MoreHorizontal className="w-5 h-5" />
@@ -800,7 +848,7 @@ export function ListEditor({
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-neutral-200 py-2 z-50">
                   <button
                     onClick={pasteFromClipboard}
-                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-neutral-50 transition-colors"
+                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-white transition-colors"
                   >
                     <Clipboard className="w-4 h-4 text-muted-foreground" />
                     <span className="flex-1" style={{ fontFamily: 'Open Runde' }}>Paste clipboard</span>
@@ -810,7 +858,7 @@ export function ListEditor({
                   <button
                     onClick={refreshOGData}
                     disabled={isRefreshingOG}
-                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <RefreshCw className={`w-4 h-4 text-muted-foreground ${isRefreshingOG ? 'animate-spin' : ''}`} />
                     <span className="flex-1" style={{ fontFamily: 'Open Runde' }}>
@@ -820,7 +868,7 @@ export function ListEditor({
                   
                   <button
                     onClick={exportAsCSV}
-                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-neutral-50 transition-colors"
+                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-white transition-colors"
                   >
                     <FileText className="w-4 h-4 text-muted-foreground" />
                     <span className="flex-1" style={{ fontFamily: 'Open Runde' }}>Export to .csv</span>
@@ -828,7 +876,7 @@ export function ListEditor({
                   
                   <button
                     onClick={copyListLink}
-                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-neutral-50 transition-colors"
+                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-white transition-colors"
                   >
                     <Link2 className="w-4 h-4 text-muted-foreground" />
                     <span className="flex-1" style={{ fontFamily: 'Open Runde' }}>Copy link</span>
@@ -838,7 +886,7 @@ export function ListEditor({
                   
                   <button
                     onClick={deleteList}
-                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-neutral-50 transition-colors text-destructive"
+                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-white transition-colors text-destructive"
                   >
                     <Trash2 className="w-4 h-4" />
                     <span className="flex-1" style={{ fontFamily: 'Open Runde' }}>Delete list</span>
@@ -867,12 +915,12 @@ export function ListEditor({
             className="grid grid-cols-3 gap-6 w-full relative"
             id="drag-grid-container"
           >
-            {(list.links || []).map((link, index) => (
+            {(optimisticList.links || []).map((link, index) => (
               <div
                 key={link.id}
                 onMouseDown={(e) => handleMouseDown(e, link.id, index)}
                 className={`
-                  transition-all duration-300 ease-out cursor-move select-none
+                  transition-all duration-300 ease-out cursor-grab select-none
                   ${draggedItemId === link.id ? 'opacity-30' : 'opacity-100'}
                   ${dragOverIndex === index && draggedItemId !== link.id ? 
                     'transform scale-105 ring-2 ring-offset-2 rounded-xl' : ''}
@@ -881,14 +929,14 @@ export function ListEditor({
                 <LinkItem
                   link={link}
                   viewMode={viewMode}
-                  onRemove={() => onRemoveLink?.(link.id)}
+                  onRemove={() => handleDeleteLink(link.id)}
                 />
               </div>
             ))}
             
             {/* Floating Drag Preview */}
             {isDragging && draggedItemId && (() => {
-              const draggedLink = list.links?.find(l => l.id === draggedItemId)
+              const draggedLink = optimisticList.links?.find(l => l.id === draggedItemId)
               if (!draggedLink) return null
               
               return (
@@ -921,13 +969,13 @@ export function ListEditor({
           ))}
           {/* Draggable linear layout for menu and rows modes */}
           <div className="relative draggable-list-container">
-            {(list.links || []).map((link, index) => (
+            {(optimisticList.links || []).map((link, index) => (
               <div 
                 key={link.id}
                 onMouseDown={(e) => handleMouseDown(e, link.id, index)}
                 className={`
                   ${viewMode === 'rows' ? 'mb-6 last:mb-0' : 'mb-3 last:mb-0'}
-                  transition-all duration-300 ease-out cursor-move select-none
+                  transition-all duration-300 ease-out cursor-grab select-none
                   ${draggedItemId === link.id ? 'opacity-30' : 'opacity-100'}
                   ${dragOverIndex === index && draggedItemId !== link.id ? 
                     `transform translate-y-2 ring-2 ring-offset-1 ${
@@ -938,14 +986,14 @@ export function ListEditor({
                 <LinkItem
                   link={link}
                   viewMode={viewMode}
-                  onRemove={() => onRemoveLink?.(link.id)}
+                  onRemove={() => handleDeleteLink(link.id)}
                 />
               </div>
             ))}
             
             {/* Floating Drag Preview for linear layouts */}
             {isDragging && draggedItemId && viewMode !== 'grid' && (() => {
-              const draggedLink = list.links?.find(l => l.id === draggedItemId)
+              const draggedLink = optimisticList.links?.find(l => l.id === draggedItemId)
               if (!draggedLink) return null
               
               const width = viewMode === 'rows' ? '600px' : '400px'
@@ -974,7 +1022,7 @@ export function ListEditor({
         </div>
       )}
       
-      {(!list.links || list.links.length === 0) && loadingLinks.length === 0 && (
+      {(!optimisticList.links || optimisticList.links.length === 0) && loadingLinks.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
           <p style={{ fontFamily: 'Open Runde' }}>
             Add your first link to get started
@@ -1015,7 +1063,7 @@ function LinkItem({
     // Compact rows - smallest layout
     return (
       <div 
-        className="bg-neutral-100 rounded-xl p-3 hover:bg-neutral-200 transition-all group cursor-pointer relative"
+        className="bg-neutral-100 rounded-xl p-3 hover:bg-neutral-200 transition-all group cursor-grab relative"
         style={{ 
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
@@ -1046,8 +1094,14 @@ function LinkItem({
               <GripVertical className="w-3 h-3" />
             </div>
             <button
-              onClick={onRemove}
-              className="text-muted-foreground hover:text-destructive transition-colors p-1"
+              onClick={(e) => {
+                e.stopPropagation()
+                onRemove()
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation()
+              }}
+              className="text-muted-foreground hover:text-destructive transition-colors p-1 cursor-pointer"
               title="Delete link"
             >
               <Trash2 className="w-3 h-3" />
@@ -1062,7 +1116,7 @@ function LinkItem({
     // Larger cards as rows - medium layout
     return (
       <div 
-        className="bg-neutral-100 rounded-2xl p-4 hover:bg-neutral-200 transition-all group cursor-pointer relative"
+        className="bg-neutral-100 rounded-2xl p-4 hover:bg-neutral-200 transition-all group cursor-grab relative"
         style={{ 
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
@@ -1091,7 +1145,7 @@ function LinkItem({
                 />
                 {/* Fallback content (hidden by default, shown when image fails) */}
                 <div 
-                  className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center absolute inset-0"
+                  className="w-full h-full bg-neutral-50 flex items-center justify-center absolute inset-0"
                   style={{ display: 'none' }}
                 >
                   <Favicon 
@@ -1102,7 +1156,7 @@ function LinkItem({
                 </div>
               </>
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
+              <div className="w-full h-full bg-neutral-50 flex items-center justify-center">
                 <Favicon 
                   url={link.url}
                   size={24}
@@ -1141,8 +1195,14 @@ function LinkItem({
               <GripVertical className="w-4 h-4" />
             </div>
             <button
-              onClick={onRemove}
-              className="text-muted-foreground hover:text-destructive transition-colors p-2"
+              onClick={(e) => {
+                e.stopPropagation()
+                onRemove()
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation()
+              }}
+              className="text-muted-foreground hover:text-destructive transition-colors p-2 cursor-pointer"
               title="Delete link"
             >
               <Trash2 className="w-4 h-4" />
@@ -1157,7 +1217,7 @@ function LinkItem({
   
   return (
     <div 
-      className="bg-neutral-100 rounded-xl hover:bg-neutral-200 transition-all group overflow-hidden cursor-pointer"
+      className="bg-neutral-100 rounded-xl hover:bg-neutral-200 transition-all group overflow-hidden cursor-grab"
       style={{ 
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
@@ -1189,7 +1249,7 @@ function LinkItem({
               />
               {/* Fallback content (hidden by default, shown when image fails) */}
               <div 
-                className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center absolute inset-0"
+                className="w-full h-full bg-neutral-50 flex items-center justify-center absolute inset-0"
                 style={{ display: 'none' }}
               >
                 <Favicon 
@@ -1201,7 +1261,7 @@ function LinkItem({
               </div>
             </>
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
+            <div className="w-full h-full bg-neutral-50 flex items-center justify-center">
               <Favicon 
                 url={link.url}
                 size={48}
@@ -1214,8 +1274,14 @@ function LinkItem({
           {/* Actions overlay */}
           <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
             <button
-              onClick={onRemove}
-              className="bg-white/90 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-lg"
+              onClick={(e) => {
+                e.stopPropagation()
+                onRemove()
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation()
+              }}
+              className="bg-white/90 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-lg cursor-pointer"
               title="Delete link"
             >
               <Trash2 className="w-4 h-4" />
