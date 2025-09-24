@@ -221,7 +221,7 @@ export default function UsernamePage() {
               {profile.lists.map((list) => (
                 <Link
                   key={list.id}
-                  href={`/${profile.user.username}/${list.id}`}
+                  href={`/${profile.user.username}/${list.public_id || list.id}`}
                   className="block"
                 >
                   <div className="relative bg-white rounded-2xl p-6 hover:shadow-lg hover:shadow-gray-100 transition-all duration-200 group border border-gray-100">

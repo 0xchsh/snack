@@ -826,7 +826,7 @@ export function ListEditor({
             <div className="flex items-center gap-2">
               {/* View Button */}
               <button
-                onClick={() => window.open(`/${list.user?.username || 'list'}/${list.id}?view=public`, '_blank')}
+                onClick={() => window.open(`/${list.user?.username || 'list'}/${list.public_id || list.id}?view=public`, '_blank')}
                 className="w-10 h-10 rounded-md flex items-center justify-center transition-colors bg-white text-foreground hover:bg-blue-50 hover:text-blue-600"
                 title="View public list"
               >

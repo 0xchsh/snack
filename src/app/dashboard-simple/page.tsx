@@ -283,7 +283,7 @@ function ListCard({ list, onDelete }: { list: ListWithLinks; onDelete: (id: stri
       </button>
 
       <Link 
-        href={`/${list.user?.username || 'list'}/${list.id}`}
+        href={`/${list.user?.username || 'list'}/${list.public_id || list.id}`}
         className="block cursor-pointer"
       >
         <div className="flex items-center justify-center mb-6 pt-4">
