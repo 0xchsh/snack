@@ -125,7 +125,7 @@ export default function UsernamePage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <Link href={user ? "/dashboard" : "/"} className="flex items-center">
+              <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-3">
                 <Image
                   src="/images/logo.svg"
                   alt="Snack"
@@ -133,6 +133,12 @@ export default function UsernamePage() {
                   height={40}
                   className="w-10 h-10"
                 />
+                <h1 
+                  className="text-xl font-bold"
+                  style={{ fontFamily: 'Open Runde' }}
+                >
+                  Snack
+                </h1>
               </Link>
             </div>
             
@@ -215,7 +221,7 @@ export default function UsernamePage() {
               {profile.lists.map((list) => (
                 <Link
                   key={list.id}
-                  href={`/${profile.user.username}/${list.public_id || list.id}`}
+                  href={`/${profile.user.username}/${list.id}`}
                   className="block"
                 >
                   <div className="relative bg-white rounded-2xl p-6 hover:shadow-lg hover:shadow-gray-100 transition-all duration-200 group border border-gray-100">

@@ -74,8 +74,25 @@ export function PublicListView({ list }: PublicListViewProps) {
   // Get profile picture - use current user's profile picture if this is their list
   const profilePictureUrl = (user && list.user_id === user.id ? user.profile_picture_url : null) || null
 
-  const handleLinkClick = (linkId: string, url: string) => {
+  const handleLinkClick = async (linkId: string, url: string) => {
     setClickedLinks(prev => new Set(prev).add(linkId))
+    
+    // Track the click
+    try {
+      await fetch('/api/analytics/click', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          linkId: linkId,
+          listId: list.id
+        })
+      })
+    } catch (error) {
+      console.error('Failed to track click:', error)
+    }
+    
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
@@ -98,6 +115,27 @@ export function PublicListView({ list }: PublicListViewProps) {
     }, 100)
     return () => clearTimeout(timer)
   }, [])
+
+  // Track view when component mounts
+  useEffect(() => {
+    const trackView = async () => {
+      try {
+        await fetch('/api/analytics/view', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            listId: list.id
+          })
+        })
+      } catch (error) {
+        console.error('Failed to track view:', error)
+      }
+    }
+
+    trackView()
+  }, [list.id])
 
   return (
     <div className="min-h-screen bg-white">

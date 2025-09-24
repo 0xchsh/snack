@@ -24,11 +24,11 @@ export default function DashboardPage() {
     setCreatingList(true)
     try {
       const newList = await createEmptyList()
-      // Navigate to the new list using the username
+      // Navigate to the new list using the username and public_id
       if (user?.username) {
-        router.push(`/${user.username}/${newList.id}`)
+        router.push(`/${user.username}/${newList.public_id || newList.id}`)
       } else {
-        router.push(`/list/${newList.id}`)
+        router.push(`/list/${newList.public_id || newList.id}`)
       }
     } catch (error) {
       console.error('Error creating list:', error)
@@ -468,7 +468,7 @@ function ListCard({ list, showActions = true, onDelete }: ListCardProps) {
 
       {/* Clickable area for navigation */}
       <Link 
-        href={`/${list.user?.username || 'list'}/${list.id}`}
+        href={`/${list.user?.username || 'list'}/${list.public_id || list.id}`}
         className="block cursor-pointer"
       >
         {/* Large Emoji */}

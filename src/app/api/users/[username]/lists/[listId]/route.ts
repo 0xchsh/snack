@@ -39,10 +39,12 @@ export async function GET(
     const isOwner = currentUser?.id === user.id
 
     // Fetch the list with links, checking ownership and visibility
+    // Use public_id for URL-friendly short IDs
     const { data: list, error: listError } = await supabase
       .from('lists')
       .select(`
         id,
+        public_id,
         user_id,
         title,
         description,
@@ -65,7 +67,7 @@ export async function GET(
           updated_at
         )
       `)
-      .eq('id', listId)
+      .eq('public_id', listId)
       .eq('user_id', user.id) // Ensure the list belongs to the specified user
       .single()
 

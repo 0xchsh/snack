@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { User, CreditCard, Shield, Camera, Mail, Edit, Trash2, ArrowLeft, ExternalLink, Eye, EyeOff } from 'lucide-react'
+import { User, CreditCard, Shield, Camera, Mail, Edit, Trash2, ArrowLeft, ExternalLink, Eye, EyeOff, Bookmark } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 type ProfileTab = 'account' | 'billing' | 'security'
@@ -109,8 +109,8 @@ export default function ProfilePage() {
               }`}
               style={{ fontFamily: 'Open Runde' }}
             >
-              <CreditCard className="w-4 h-4" />
-              Billing
+              <Eye className="w-4 h-4" />
+              Analytics
             </button>
             <button
               onClick={() => setActiveTab('security')}
@@ -471,18 +471,159 @@ function AccountTab({ user }: { user: any }) {
 }
 
 function BillingTab({ user }: { user: any }) {
+  const [analytics, setAnalytics] = useState<{
+    totalViews: number
+    totalClicks: number
+    totalSaves: number
+    topLists: Array<{
+      id: string
+      title: string
+      emoji: string
+      view_count: number
+      click_count: number
+      save_count: number
+    }>
+  } | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const response = await fetch('/api/analytics/stats')
+        if (response.ok) {
+          const data = await response.json()
+          setAnalytics(data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch analytics:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchAnalytics()
+  }, [])
+
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8">
       <div>
         <h2 
           className="text-2xl font-bold mb-2"
           style={{ fontFamily: 'Open Runde' }}
         >
-          Billing & Subscription
+          Analytics & Insights
         </h2>
         <p className="text-muted-foreground">
-          Manage your subscription, payment methods, and billing history.
+          Track your list performance and engagement metrics.
         </p>
+      </div>
+
+      {/* Analytics Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white border border-border rounded-xl p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-medium text-muted-foreground">Total Views</h3>
+            <Eye className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <div className="text-3xl font-bold" style={{ fontFamily: 'Open Runde' }}>
+            {loading ? (
+              <div className="h-8 w-20 bg-neutral-100 animate-pulse rounded"></div>
+            ) : (
+              analytics?.totalViews.toLocaleString() || '0'
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white border border-border rounded-xl p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-medium text-muted-foreground">Link Clicks</h3>
+            <ExternalLink className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <div className="text-3xl font-bold" style={{ fontFamily: 'Open Runde' }}>
+            {loading ? (
+              <div className="h-8 w-20 bg-neutral-100 animate-pulse rounded"></div>
+            ) : (
+              analytics?.totalClicks.toLocaleString() || '0'
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white border border-border rounded-xl p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-medium text-muted-foreground">Total Saves</h3>
+            <Bookmark className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <div className="text-3xl font-bold" style={{ fontFamily: 'Open Runde' }}>
+            {loading ? (
+              <div className="h-8 w-20 bg-neutral-100 animate-pulse rounded"></div>
+            ) : (
+              analytics?.totalSaves.toLocaleString() || '0'
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Top 5 Most Popular Lists */}
+      <div className="bg-white border border-border rounded-xl p-6">
+        <h3 className="font-semibold mb-6" style={{ fontFamily: 'Open Runde' }}>
+          Your Top 5 Most Popular Lists
+        </h3>
+        
+        {loading ? (
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-neutral-200 rounded"></div>
+                  <div className="h-4 w-32 bg-neutral-200 rounded"></div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="h-4 w-16 bg-neutral-200 rounded"></div>
+                  <div className="h-4 w-16 bg-neutral-200 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : analytics?.topLists && analytics.topLists.length > 0 ? (
+          <div className="space-y-3">
+            {analytics.topLists.map((list, index) => (
+              <div key={list.id} className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full text-sm font-bold text-primary">
+                    {index + 1}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{list.emoji}</span>
+                    <Link 
+                      href={`/${user?.username}/${list.public_id || list.id}`}
+                      className="font-semibold hover:text-primary transition-colors"
+                    >
+                      {list.title}
+                    </Link>
+                  </div>
+                </div>
+                <div className="flex gap-6 text-sm">
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Eye className="w-4 h-4" />
+                    <span>{list.view_count.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <ExternalLink className="w-4 h-4" />
+                    <span>{list.click_count.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Bookmark className="w-4 h-4" />
+                    <span>{list.save_count.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            No list data available yet. Share your lists to start tracking analytics!
+          </div>
+        )}
       </div>
 
       {/* Current Plan */}
@@ -491,32 +632,8 @@ function BillingTab({ user }: { user: any }) {
         <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
           <div>
             <div className="font-semibold text-lg">Free Plan</div>
-            <div className="text-muted-foreground text-sm">Up to 5 lists, basic features</div>
+            <div className="text-muted-foreground text-sm">Unlimited lists with analytics tracking</div>
           </div>
-          <button className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold">
-            Upgrade to Pro
-          </button>
-        </div>
-      </div>
-
-      {/* Payment Methods */}
-      <div className="bg-white border border-border rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold" style={{ fontFamily: 'Open Runde' }}>Payment Methods</h3>
-          <button className="px-4 py-2 text-sm font-semibold text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors">
-            Add Payment Method
-          </button>
-        </div>
-        <div className="text-center py-8 text-muted-foreground">
-          No payment methods added yet.
-        </div>
-      </div>
-
-      {/* Billing History */}
-      <div className="bg-white border border-border rounded-xl p-6">
-        <h3 className="font-semibold mb-4" style={{ fontFamily: 'Open Runde' }}>Billing History</h3>
-        <div className="text-center py-8 text-muted-foreground">
-          No billing history available.
         </div>
       </div>
     </div>
