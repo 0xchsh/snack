@@ -10,18 +10,11 @@
         "API_KEY": "${MAGIC_API_KEY}"
       }
     },
-    "Figma MCP": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "figma-developer-mcp",
-        "--figma-api-key=${FIGMA_API_KEY}",
-        "--stdio"
-      ]
+    "figma-remote-mcp": {
+      "url": "https://mcp.figma.com/mcp"
     },
     "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"]
+      "url": "https://mcp.context7.com/mcp"
     },
     "og-mcp": {
       "command": "opengraph-io-mcp",
