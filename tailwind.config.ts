@@ -17,7 +17,8 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ['Open Runde', 'system-ui', 'sans-serif'],
+        sans: ['Geist', 'ui-sans-serif', 'sans-serif', 'system-ui'],
+        mono: ['Geist Mono', 'monospace'],
       },
       colors: {
         border: "var(--border)",
