@@ -38,18 +38,65 @@ export function normalizeUrl(url: string): string {
  * @param url The URL string to process
  * @returns Object with success status and normalized URL or error
  */
-export function validateAndNormalizeUrl(url: string): { 
+export function validateAndNormalizeUrl(url: string): {
   isValid: boolean
   normalizedUrl?: string
-  error?: string 
+  error?: string
 } {
   if (!url || !url.trim()) {
     return { isValid: false, error: 'URL cannot be empty' }
   }
 
   const normalized = normalizeUrl(url)
-  
+
   if (!isValidUrl(normalized)) {
+    return { isValid: false, error: 'Invalid URL format' }
+  }
+
+  // Only accept HTTP/HTTPS URLs (reject file paths, etc.)
+  try {
+    const urlObj = new URL(normalized)
+
+    // Check protocol
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+      return { isValid: false, error: 'Only HTTP/HTTPS URLs are supported' }
+    }
+
+    // Check hostname has valid structure
+    const hostname = urlObj.hostname
+
+    // Hostname must not be empty
+    if (!hostname || hostname.length === 0) {
+      return { isValid: false, error: 'Invalid hostname' }
+    }
+
+    // Hostname must not be localhost, IP address, or single word
+    // Must have at least one dot (domain.tld)
+    if (!hostname.includes('.')) {
+      return { isValid: false, error: 'Invalid domain format' }
+    }
+
+    // Get TLD (everything after last dot)
+    const parts = hostname.split('.')
+    const tld = parts[parts.length - 1]
+
+    // TLD must be at least 2 characters and contain only letters
+    if (!tld || tld.length < 2 || !/^[a-zA-Z]+$/.test(tld)) {
+      return { isValid: false, error: 'Invalid top-level domain' }
+    }
+
+    // Hostname must not start/end with dot or hyphen
+    if (hostname.startsWith('.') || hostname.endsWith('.') ||
+        hostname.startsWith('-') || hostname.endsWith('-')) {
+      return { isValid: false, error: 'Invalid hostname format' }
+    }
+
+    // Each part must be valid (no empty parts between dots)
+    if (parts.some(part => !part || part.length === 0)) {
+      return { isValid: false, error: 'Invalid domain structure' }
+    }
+
+  } catch {
     return { isValid: false, error: 'Invalid URL format' }
   }
 

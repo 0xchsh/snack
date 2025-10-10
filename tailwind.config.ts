@@ -16,6 +16,27 @@ const config: Config = {
       },
     },
     extend: {
+      spacing: {
+        'nav-x': '1.5rem', // 24px - horizontal nav padding
+        'nav-y': '1.5rem', // 24px - vertical nav padding
+        'nav-x-mobile': '1rem', // 16px - mobile horizontal padding
+        'nav-y-mobile': '0.75rem', // 12px - mobile vertical padding
+      },
+      width: {
+        'logo-app': '1.5rem', // 24px - app logo size
+        'logo-marketing': '2.5rem', // 40px - marketing logo size
+        'icon-button': '2.625rem', // 42px - icon button size
+        'container-app': '64rem', // 1024px - max-width for app content
+        'container-marketing': '80rem', // 1280px - max-width for marketing
+      },
+      height: {
+        'logo-app': '1.5rem', // 24px
+        'logo-marketing': '2.5rem', // 40px
+        'icon-button': '2.625rem', // 42px
+      },
+      gap: {
+        'nav': '0.75rem', // 12px - gap between nav items
+      },
       fontFamily: {
         sans: ['Geist', 'ui-sans-serif', 'sans-serif', 'system-ui'],
         mono: ['Geist Mono', 'monospace'],

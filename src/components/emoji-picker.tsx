@@ -1,8 +1,10 @@
 'use client'
 
 import { useRef, useEffect, useState } from 'react'
-import { Picker, EmojiType } from 'ms-3d-emoji-picker'
+import data from '@emoji-mart/data'
+import Picker from '@emoji-mart/react'
 import { Emoji3D } from '@/types'
+import { useTheme } from 'next-themes'
 
 interface EmojiPickerProps {
   isOpen: boolean
@@ -12,23 +14,27 @@ interface EmojiPickerProps {
   onClose: () => void
 }
 
-export function EmojiPicker({ 
-  isOpen, 
-  triggerRef, 
-  currentEmoji: _currentEmoji, 
-  onSelectEmoji, 
-  onClose 
+export function EmojiPicker({
+  isOpen,
+  triggerRef,
+  currentEmoji: _currentEmoji,
+  onSelectEmoji,
+  onClose
 }: EmojiPickerProps) {
+  const { theme, resolvedTheme } = useTheme()
   const [position, setPosition] = useState({ top: 0, left: 0 })
   const pickerRef = useRef<HTMLDivElement>(null)
+
+  // Determine the actual theme to use (resolvedTheme handles 'system')
+  const actualTheme = resolvedTheme || theme || 'light'
 
   useEffect(() => {
     if (isOpen && triggerRef.current) {
       const triggerRect = triggerRef.current.getBoundingClientRect()
       const viewportWidth = window.innerWidth
       const viewportHeight = window.innerHeight
-      const pickerWidth = 400 // Approximate picker width
-      const pickerHeight = 500 // Approximate picker height
+      const pickerWidth = 352 // emoji-mart default width
+      const pickerHeight = 435 // emoji-mart default height
 
       let left = triggerRect.left
       let top = triggerRect.bottom + 8
@@ -37,7 +43,7 @@ export function EmojiPicker({
       if (left + pickerWidth > viewportWidth - 16) {
         left = viewportWidth - pickerWidth - 16
       }
-      
+
       if (top + pickerHeight > viewportHeight - 16) {
         top = triggerRect.top - pickerHeight - 8
       }
@@ -50,15 +56,13 @@ export function EmojiPicker({
     }
   }, [isOpen, triggerRef])
 
-  const handle3DEmojiSelect = (selectedEmoji: EmojiType) => {
-    // Since the 3D emoji picker only provides URLs and numeric names,
-    // we'll use a default emoji unicode and rely on the 3D image
+  const handleEmojiSelect = (emoji: any) => {
     const emoji3D: Emoji3D = {
-      unicode: '✨', // Default emoji as fallback since 3D picker doesn't provide Unicode
-      url: selectedEmoji.url,
-      name: selectedEmoji.name
+      unicode: emoji.native,
+      url: '', // No URL needed for native emojis
+      name: emoji.name
     }
-    
+
     onSelectEmoji(emoji3D)
     onClose()
   }
@@ -70,12 +74,12 @@ export function EmojiPicker({
   return (
     <>
       {/* Backdrop */}
-      <div 
-        className="fixed inset-0 z-40" 
+      <div
+        className="fixed inset-0 z-40"
         onClick={onClose}
       />
-      
-      {/* Just the 3D Picker */}
+
+      {/* Emoji Mart Picker */}
       <div
         ref={pickerRef}
         className="fixed z-50"
@@ -85,8 +89,11 @@ export function EmojiPicker({
         }}
       >
         <Picker
-          isOpen={true}
-          handleEmojiSelect={handle3DEmojiSelect}
+          data={data}
+          onEmojiSelect={handleEmojiSelect}
+          theme={actualTheme}
+          previewPosition="none"
+          skinTonePosition="search"
         />
       </div>
     </>

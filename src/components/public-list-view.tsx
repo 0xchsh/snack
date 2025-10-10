@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Copy, Clock, Link as LinkIcon, Eye, Bookmark } from 'lucide-react'
+import { Copy, Clock, Link as LinkIcon, Eye, Bookmark, Edit, BarChart3 } from 'lucide-react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -10,6 +10,7 @@ import { ListWithLinks, Link as LinkType } from '@/types'
 import { getHostname } from '@/lib/url-utils'
 import { Favicon } from './favicon'
 import { useAuth } from '@/hooks/useAuth'
+import { Header } from './header'
 
 type ViewMode = 'menu' | 'rows' | 'grid'
 
@@ -138,227 +139,156 @@ export function PublicListView({ list }: PublicListViewProps) {
   }, [list.id])
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <div className="border-b border-border bg-white">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/images/logo.svg"
-                alt="Snack"
-                width={40}
-                height={40}
-                className="w-10 h-10"
-              />
-            </Link>
-            
-            {user ? (
-              <button
-                onClick={() => router.push('/dashboard')}
-                className="px-4 py-2 text-sm font-medium bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-                style={{ fontFamily: 'Open Runde' }}
+    <div className="min-h-screen bg-background">
+      {isOwner ? (
+        <Header
+          logoHref="/dashboard"
+          username={user?.username}
+          buttons={[
+            {
+              type: 'custom',
+              label: 'Edit',
+              icon: <Edit className="w-4 h-4" />,
+              onClick: () => {
+                const username = user?.username || list.user?.username
+                router.push(`/${username}/${list.public_id || list.id}`)
+              },
+              className: "flex items-center gap-2 px-4 py-2 text-base font-medium border border-border text-muted-foreground hover:text-foreground transition-colors rounded-sm"
+            },
+            {
+              type: 'custom',
+              label: 'Stats',
+              icon: <BarChart3 className="w-4 h-4" />,
+              onClick: () => {
+                // TODO: Navigate to stats view
+                console.log('View stats')
+              },
+              className: "flex items-center gap-2 px-4 py-2 text-base font-medium border border-border text-muted-foreground hover:text-foreground transition-colors rounded-sm"
+            },
+            {
+              type: 'copy',
+              onClick: async () => {
+                const url = `${window.location.origin}/${list.user?.username}/${list.public_id || list.id}`
+                await navigator.clipboard.writeText(url)
+              }
+            }
+          ]}
+        />
+      ) : (
+        <Header
+          logoHref="/"
+          username={user?.username}
+          buttons={user ? [
+            {
+              type: 'custom',
+              label: 'Dashboard',
+              onClick: () => router.push('/dashboard'),
+              className: "px-4 py-2 text-base font-medium bg-primary text-primary-foreground rounded-sm hover:bg-primary/90 transition-colors"
+            }
+          ] : [
+            {
+              type: 'custom',
+              label: 'Make a Snack',
+              onClick: handleLogin,
+              className: "px-4 py-2 text-base font-medium bg-primary text-primary-foreground rounded-sm hover:bg-primary/90 transition-colors"
+            }
+          ]}
+        />
+      )}
+      
+      <div className="mx-auto py-12 max-w-[560px]">
+        <div className="flex flex-col gap-6">
+          {/* Emoji */}
+          <div className="w-12 h-12">
+            <span className="text-5xl">{list.emoji}</span>
+          </div>
+
+          {/* Title and Creator */}
+          <div className="flex flex-col gap-4">
+            <h1 className="text-xl font-normal text-foreground break-words leading-[1.5]">
+              {list.title || 'Untitled List'}
+            </h1>
+
+            {/* Creator */}
+            {list.user?.username && (
+              <Link
+                href={`/${list.user.username}`}
+                className="flex items-center gap-1.5 hover:text-foreground transition-colors text-base w-fit"
               >
-                Dashboard
-              </button>
-            ) : (
-              <button
-                onClick={handleLogin}
-                className="px-4 py-2 text-sm font-medium bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-                style={{ fontFamily: 'Open Runde' }}
-              >
-                Make a Snack
-              </button>
+                <div className="w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center overflow-hidden">
+                  {profilePictureUrl ? (
+                    <Image
+                      src={profilePictureUrl}
+                      alt={`${displayName}'s profile`}
+                      width={16}
+                      height={16}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                        if (fallback) {
+                          fallback.style.display = 'flex'
+                        }
+                      }}
+                    />
+                  ) : null}
+                  <span
+                    className="text-white text-[8px] font-bold"
+                    style={{ display: profilePictureUrl ? 'none' : 'flex' }}
+                  >
+                    {displayInitial}
+                  </span>
+                </div>
+                <span className="font-medium text-neutral-600">{displayName}</span>
+              </Link>
             )}
           </div>
-        </div>
-      </div>
-      
-      <div className="container mx-auto px-4 py-12">
-        <div className={`${viewMode === 'grid' ? 'w-full' : 'max-w-2xl mx-auto'} space-y-8`}>
-          {/* List Header */}
-          <div className={`${viewMode === 'grid' ? 'max-w-2xl mx-auto' : ''} space-y-6`}>
-            {/* Emoji */}
-            <div className="w-16 h-16 bg-neutral-100 rounded-2xl flex items-center justify-center text-3xl shadow-sm">
-              {list.emoji_3d?.url ? (
-                <Image
-                  src={list.emoji_3d.url}
-                  alt={list.emoji_3d.name || 'emoji'}
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 object-contain"
-                  unoptimized
-                />
-              ) : (
-                <span>{list.emoji}</span>
-              )}
-            </div>
-            
-            {/* Title */}
-            <h1 
-              className="text-6xl font-bold text-foreground capitalize break-words max-w-2xl"
-              style={{ 
-                fontFamily: 'Open Runde',
-                letterSpacing: '-2.24px',
-                lineHeight: '100%'
-              }}
-            >
-              {list.title}
-            </h1>
-            
-            {/* Creator and buttons */}
-            <div className="flex items-center justify-between">
-              {list.user?.username ? (
-                <Link 
-                  href={`/${list.user.username}`}
-                  className="flex items-center gap-2 bg-neutral-100 rounded-full px-4 py-2 hover:bg-neutral-200 transition-colors"
-                >
-                  <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center overflow-hidden">
-                    {profilePictureUrl ? (
-                      <Image
-                        src={profilePictureUrl}
-                        alt={`${displayName}'s profile`}
-                        width={20}
-                        height={20}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          // Hide failed image and show fallback
-                          e.currentTarget.style.display = 'none'
-                          const fallback = e.currentTarget.nextElementSibling as HTMLElement
-                          if (fallback) {
-                            fallback.style.display = 'flex'
-                          }
-                        }}
-                      />
-                    ) : null}
-                    <span 
-                      className="text-white text-xs font-bold"
-                      style={{ display: profilePictureUrl ? 'none' : 'flex' }}
-                    >
-                      {displayInitial}
-                    </span>
-                  </div>
-                  <span 
-                    className="text-foreground font-semibold text-base"
-                    style={{ fontFamily: 'Open Runde' }}
-                  >
-                    {displayName}
-                  </span>
-                </Link>
-              ) : (
-                <div className="flex items-center gap-2 bg-neutral-100 rounded-full px-4 py-2">
-                  <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center overflow-hidden">
-                    {profilePictureUrl ? (
-                      <Image
-                        src={profilePictureUrl}
-                        alt={`${displayName}'s profile`}
-                        width={20}
-                        height={20}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          // Hide failed image and show fallback
-                          e.currentTarget.style.display = 'none'
-                          const fallback = e.currentTarget.nextElementSibling as HTMLElement
-                          if (fallback) {
-                            fallback.style.display = 'flex'
-                          }
-                        }}
-                      />
-                    ) : null}
-                    <span 
-                      className="text-white text-xs font-bold"
-                      style={{ display: profilePictureUrl ? 'none' : 'flex' }}
-                    >
-                      {displayInitial}
-                    </span>
-                  </div>
-                  <span 
-                    className="text-foreground font-semibold text-base"
-                    style={{ fontFamily: 'Open Runde' }}
-                  >
-                    {displayName}
-                  </span>
-                </div>
-              )}
-              
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={user ? undefined : handleLogin}
-                  className="px-4 py-2 text-base font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
-                >
-                  <span style={{ fontFamily: 'Open Runde' }}>Save</span>
-                </button>
-                <button 
-                  onClick={user ? undefined : handleLogin}
-                  className="px-4 py-2 text-base font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full"
-                >
-                  <span style={{ fontFamily: 'Open Runde' }}>Share</span>
-                </button>
-              </div>
+
+          {/* Stats */}
+          <div className="flex items-start justify-between">
+            {/* Left: Today */}
+            <div className="bg-muted rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-muted-foreground" />
+              <span className="text-base text-muted-foreground">Today</span>
             </div>
 
-            {/* Stats - Split between left and right */}
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <div className="flex items-center gap-1" style={{ fontFamily: 'Open Runde' }}>
-                <Clock className="w-4 h-4" />
-                <span>Last updated 6 hours ago</span>
+            {/* Right: Links, Views, Saves */}
+            <div className="flex items-center gap-3">
+              <div className="bg-muted rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
+                <LinkIcon className="w-4 h-4 text-muted-foreground" />
+                <span className="text-base text-muted-foreground">{list.links?.length || 0}</span>
               </div>
-              
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1" style={{ fontFamily: 'Open Runde' }}>
-                  <LinkIcon className="w-4 h-4" />
-                  <span>{list.links?.length || 0}</span>
-                </div>
-                <div className="flex items-center gap-1" style={{ fontFamily: 'Open Runde' }}>
-                  <Eye className="w-4 h-4" />
-                  <span>0</span>
-                </div>
-                <div className="flex items-center gap-1" style={{ fontFamily: 'Open Runde' }}>
-                  <Bookmark className="w-4 h-4" />
-                  <span>{formatCount(list.save_count || 0)}</span>
-                </div>
+              <div className="bg-muted rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
+                <Eye className="w-4 h-4 text-muted-foreground" />
+                <span className="text-base text-muted-foreground">69K</span>
+              </div>
+              <div className="bg-muted rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
+                <Bookmark className="w-4 h-4 text-muted-foreground" />
+                <span className="text-base text-muted-foreground">{formatCount(list.save_count || 0)}</span>
               </div>
             </div>
           </div>
 
           {/* Links List */}
-          {viewMode === 'grid' ? (
-            <div className="grid grid-cols-3 gap-6">
-              {list.links?.map((link, index) => (
+          <div className="space-y-0">
+            {list.links && list.links.length > 0 ? (
+              list.links.map((link, index) => (
                 <PublicLinkItem
                   key={link.id}
                   link={link}
                   onClick={() => handleLinkClick(link.id, link.url)}
                   isClicked={clickedLinks.has(link.id)}
                   index={index}
-                  viewMode={viewMode}
+                  viewMode="menu"
                   hasAnimated={hasAnimated}
                 />
-              ))}
-            </div>
-          ) : (
-            <div className={viewMode === 'rows' ? 'space-y-6' : 'space-y-3'}>
-              {list.links?.map((link, index) => (
-                <PublicLinkItem
-                  key={link.id}
-                  link={link}
-                  onClick={() => handleLinkClick(link.id, link.url)}
-                  isClicked={clickedLinks.has(link.id)}
-                  index={index}
-                  viewMode={viewMode}
-                  hasAnimated={hasAnimated}
-                />
-              ))}
-            </div>
-          )}
-          
-          {(!list.links || list.links.length === 0) && (
-            <div className="py-12 text-muted-foreground text-center">
-              <p style={{ fontFamily: 'Open Runde' }}>
-                This list is empty
-              </p>
-            </div>
-          )}
+              ))
+            ) : (
+              <div className="py-12 text-muted-foreground text-center">
+                <p>This list is empty</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -384,34 +314,30 @@ function PublicLinkItem({
 }: PublicLinkItemProps) {
   
   if (viewMode === 'menu') {
-    // Compact rows - smallest layout (exact match to edit view)
+    // Public list view layout with domain on right
     return (
-      <motion.div
-        initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={hasAnimated ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
-        className="bg-neutral-100 rounded-xl p-3 hover:bg-neutral-200 transition-all cursor-pointer group"
+      <div
+        className="flex items-center justify-between py-3 hover:bg-accent/50 transition-colors group cursor-pointer border-b border-border last:border-0"
         onClick={onClick}
       >
-        <div className="flex items-center gap-3">
-          <div className="w-5 h-5 rounded-md overflow-hidden bg-muted flex-shrink-0">
-            <Favicon 
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="w-4 h-4 rounded-sm overflow-hidden flex-shrink-0">
+            <Favicon
               url={link.url}
-              size={20}
-              className="rounded-md"
+              size={16}
+              className="rounded-sm"
             />
           </div>
-          
-          <div className="flex-1 min-w-0">
-            <h3 
-              className="text-sm font-semibold text-foreground truncate"
-              style={{ fontFamily: 'Open Runde' }}
-            >
-              {link.title || getHostname(link.url)}
-            </h3>
-          </div>
+
+          <span className="text-base text-foreground truncate">
+            {link.title || getHostname(link.url)}
+          </span>
         </div>
-      </motion.div>
+
+        <span className="text-sm text-muted-foreground ml-4 flex-shrink-0">
+          {getHostname(link.url)}
+        </span>
+      </div>
     )
   }
 
@@ -422,11 +348,11 @@ function PublicLinkItem({
         initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={hasAnimated ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
-        className="bg-neutral-100 rounded-2xl p-4 hover:bg-neutral-200 transition-all cursor-pointer group"
+        className="bg-muted rounded-2xl p-4 hover:bg-accent transition-all cursor-pointer group"
         onClick={onClick}
       >
         <div className="flex items-center gap-4">
-          <div className="w-[100px] h-14 rounded-xl overflow-hidden bg-neutral-200 flex-shrink-0 relative">
+          <div className="w-[100px] h-14 rounded-xl overflow-hidden bg-accent flex-shrink-0 relative">
             {link.image_url ? (
               <>
                 <Image 
@@ -445,11 +371,11 @@ function PublicLinkItem({
                   }}
                 />
                 {/* Fallback content (hidden by default, shown when image fails) */}
-                <div 
-                  className="w-full h-full bg-neutral-50 flex items-center justify-center absolute inset-0"
+                <div
+                  className="w-full h-full bg-background flex items-center justify-center absolute inset-0"
                   style={{ display: 'none' }}
                 >
-                  <Favicon 
+                  <Favicon
                     url={link.url}
                     size={24}
                     className="rounded-md"
@@ -457,7 +383,7 @@ function PublicLinkItem({
                 </div>
               </>
             ) : (
-              <div className="w-full h-full bg-neutral-50 flex items-center justify-center">
+              <div className="w-full h-full bg-background flex items-center justify-center">
                 <Favicon 
                   url={link.url}
                   size={24}
@@ -501,12 +427,12 @@ function PublicLinkItem({
       initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={hasAnimated ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
-      className="bg-neutral-100 rounded-xl hover:bg-neutral-200 transition-all cursor-pointer group overflow-hidden"
+      className="bg-muted rounded-xl hover:bg-accent transition-all cursor-pointer group overflow-hidden"
       onClick={onClick}
     >
       <div className="space-y-4">
         {/* OG Image Preview */}
-        <div className="aspect-video bg-neutral-200 relative">
+        <div className="aspect-video bg-accent relative">
           {link.image_url ? (
             <>
               <Image 
@@ -526,25 +452,25 @@ function PublicLinkItem({
                 }}
               />
               {/* Fallback content (hidden by default, shown when image fails) */}
-              <div 
-                className="w-full h-full bg-neutral-50 flex items-center justify-center absolute inset-0"
+              <div
+                className="w-full h-full bg-background flex items-center justify-center absolute inset-0"
                 style={{ display: 'none' }}
               >
-                <Favicon 
+                <Favicon
                   url={link.url}
                   size={48}
                   className="rounded-lg"
-                  fallbackClassName="bg-white/20 rounded-lg"
+                  fallbackClassName="bg-muted/20 rounded-lg"
                 />
               </div>
             </>
           ) : (
-            <div className="w-full h-full bg-neutral-50 flex items-center justify-center">
+            <div className="w-full h-full bg-background flex items-center justify-center">
               <Favicon 
                 url={link.url}
                 size={48}
                 className="rounded-lg"
-                fallbackClassName="bg-white/20 rounded-lg"
+                fallbackClassName="bg-muted/20 rounded-lg"
               />
             </div>
           )}

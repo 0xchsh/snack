@@ -1,40 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
+import { ThemeToggle } from '@/components/theme-toggle'
 
-export default function SignUpPage() {
+export default function SignInPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const { signUp, signInWithGoogle } = useAuth()
+  const router = useRouter()
+  const { user, loading, signIn, signInWithGoogle } = useAuth()
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!loading && user) {
+      router.push('/dashboard')
+    }
+  }, [user, loading, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError('')
-    setSuccess('')
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      setIsLoading(false)
-      return
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
-      setIsLoading(false)
-      return
-    }
 
     try {
-      await signUp(email, password)
-      // For mock auth, signUp redirects to dashboard automatically
-      // We don't show success message since user will be redirected
+      await signIn(email, password, '/dashboard')
+      // signIn function handles the redirect, so we don't need router.push here
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       setIsLoading(false)
@@ -52,13 +46,38 @@ export default function SignUpPage() {
     }
   }
 
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // If already authenticated, show redirecting message
+  if (user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-background">
+      <div className="flex items-center justify-center px-4 py-12">
+        <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground">Create Account</h1>
+          <h1 className="text-3xl font-bold text-foreground">Sign In</h1>
           <p className="mt-2 text-muted-foreground">
-            Join Snack to start curating amazing links
+            Welcome back to Snack
           </p>
         </div>
 
@@ -66,12 +85,6 @@ export default function SignUpPage() {
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
               {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
-              {success}
             </div>
           )}
 
@@ -101,24 +114,7 @@ export default function SignUpPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="Create a password"
-              minLength={6}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-2">
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="Confirm your password"
-              minLength={6}
+              placeholder="Enter your password"
             />
           </div>
 
@@ -127,7 +123,7 @@ export default function SignUpPage() {
             disabled={isLoading}
             className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Creating Account...' : 'Create Account'}
+            {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 
@@ -136,7 +132,7 @@ export default function SignUpPage() {
             <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-muted-foreground">Or continue with</span>
+            <span className="px-2 bg-background text-muted-foreground">Or continue with</span>
           </div>
         </div>
 
@@ -145,7 +141,7 @@ export default function SignUpPage() {
           disabled={isLoading}
           className="w-full border border-border text-foreground py-3 rounded-lg font-semibold hover:bg-accent transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {!isLoading && (
+{!isLoading && (
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -157,12 +153,13 @@ export default function SignUpPage() {
         </button>
 
         <p className="text-center text-muted-foreground">
-          Already have an account?{' '}
-          <Link href="/auth/sign-in" className="text-primary hover:underline">
-            Sign in
+          Don&apos;t have an account?{' '}
+          <Link href="/auth/sign-up" className="text-primary hover:underline">
+            Sign up
           </Link>
         </p>
       </div>
+    </div>
     </div>
   )
 }

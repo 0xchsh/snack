@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import { List, Link2, Eye, Bookmark } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 interface PublicProfile {
   user: {
@@ -19,13 +21,14 @@ interface PublicProfile {
   }
   lists: Array<{
     id: string
+    public_id: string | null
     title: string
     description: string | null
     emoji: string | null
     emoji_3d: any | null
     save_count: number
     created_at: string
-    links?: Array<{ count: number }>
+    links: Array<{ count: number }>
   }>
   stats: {
     total_public_lists: number
@@ -76,7 +79,7 @@ export default function UsernamePage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           <p className="text-muted-foreground">Loading profile...</p>
@@ -88,7 +91,7 @@ export default function UsernamePage() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold text-foreground">Profile Not Found</h1>
           <p className="text-muted-foreground">{error}</p>
@@ -119,171 +122,126 @@ export default function UsernamePage() {
   })
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b border-border bg-white">
-        <div className="container mx-auto px-4 py-4">
+      <div className="bg-background">
+        <div className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <Link href={user ? "/dashboard" : "/"} className="flex items-center">
-                <Image
-                  src="/images/logo.svg"
-                  alt="Snack"
-                  width={40}
-                  height={40}
-                  className="w-10 h-10"
-                />
-              </Link>
-            </div>
-            
+            <Link href={user ? "/dashboard" : "/"} className="flex items-center">
+              <Image
+                src="/images/logo.svg"
+                alt="Snack"
+                width={24}
+                height={24}
+                className="w-6 h-6"
+              />
+            </Link>
+
             <div className="flex items-center gap-3">
-              <Link
-                href="/"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
-                style={{ fontFamily: 'Open Runde' }}
-              >
-                <span>←</span>
-                Back to Home
-              </Link>
+              <ThemeToggle />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
-        {/* Profile Header */}
-        <div className="flex items-start gap-8 mb-12">
-          {/* Profile Picture */}
-          <div className="flex-shrink-0">
-            <div className="w-32 h-32 rounded-full bg-neutral-100 flex items-center justify-center overflow-hidden">
-              {profile.user.profile_picture_url ? (
-                <Image
-                  src={profile.user.profile_picture_url}
-                  alt={displayName}
-                  width={128}
-                  height={128}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="text-4xl">👤</div>
-              )}
-            </div>
-          </div>
-          
-          {/* User Info */}
-          <div className="flex-1">
-            <h1 
-              className="text-4xl font-bold text-foreground mb-2"
-              style={{ fontFamily: 'Open Runde' }}
-            >
-              {displayName}
-            </h1>
-            <p className="text-xl text-muted-foreground mb-4">@{profile.user.username}</p>
-            
-            {profile.user.bio && (
-              <p className="text-lg text-foreground mb-6 max-w-2xl">
-                {profile.user.bio}
-              </p>
+      <div className="mx-auto py-12 max-w-[560px]">
+        <div className="flex flex-col gap-6">
+          {/* Profile Picture - 48px */}
+          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+            {profile.user.profile_picture_url ? (
+              <Image
+                src={profile.user.profile_picture_url}
+                alt={displayName}
+                width={48}
+                height={48}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="text-2xl">👤</div>
             )}
+          </div>
 
-            <div className="flex items-center gap-8 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <span>📅</span>
-                <span>Joined {joinDate}</span>
+          {/* Username and Join Date */}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-start text-xl font-normal leading-[1.5]">
+              <span className="text-neutral-400">@</span>
+              <span className="text-foreground">{profile.user.username}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <p className="text-base font-normal text-neutral-400">
+                Joined {joinDate}
+              </p>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="flex items-start justify-between">
+            <div className="bg-neutral-50 dark:bg-neutral-900 rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
+              <List className="w-4 h-4 text-neutral-400" />
+              <span className="text-base text-neutral-400">{profile.stats.total_public_lists} lists</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="bg-neutral-50 dark:bg-neutral-900 rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
+                <Link2 className="w-4 h-4 text-neutral-400" />
+                <span className="text-base text-neutral-400">100</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span>🔖</span>
-                <span>{profile.stats.total_saves_received} saves received</span>
+              <div className="bg-neutral-50 dark:bg-neutral-900 rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
+                <Eye className="w-4 h-4 text-neutral-400" />
+                <span className="text-base text-neutral-400">6.9K</span>
+              </div>
+              <div className="bg-neutral-50 dark:bg-neutral-900 rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
+                <Bookmark className="w-4 h-4 text-neutral-400" />
+                <span className="text-base text-neutral-400">69K</span>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Lists Section */}
-        <div>
-          <div className="flex items-center justify-between mb-8">
-            <h2 
-              className="text-2xl font-bold text-foreground"
-              style={{ fontFamily: 'Open Runde' }}
-            >
-              Public Lists ({profile.stats.total_public_lists})
-            </h2>
-          </div>
-
-          {profile.lists.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {profile.lists.map((list) => (
-                <Link
-                  key={list.id}
-                  href={`/${profile.user.username}/${list.public_id || list.id}`}
-                  className="block"
-                >
-                  <div className="relative bg-white rounded-2xl p-6 hover:shadow-lg hover:shadow-gray-100 transition-all duration-200 group border border-gray-100">
-                    {/* Large Emoji */}
-                    <div className="flex items-center justify-center mb-6 pt-4">
-                      <div className="w-32 h-32 flex items-center justify-center">
-                        {list.emoji_3d?.url ? (
-                          <Image
-                            src={list.emoji_3d.url}
-                            alt={list.emoji_3d.name || 'emoji'}
-                            width={120}
-                            height={120}
-                            className="w-28 h-28 object-contain group-hover:scale-105 transition-transform duration-200"
-                            unoptimized
-                            onError={(e) => {
-                              // Hide the failed image and show fallback emoji
-                              const target = e.currentTarget as HTMLImageElement
-                              target.style.display = 'none'
-                              const fallback = target.nextElementSibling as HTMLElement
-                              if (fallback) {
-                                fallback.style.display = 'block'
-                              }
-                            }}
-                          />
-                        ) : null}
-                        <span 
-                          className="text-7xl"
-                          style={{ display: list.emoji_3d?.url ? 'none' : 'block' }}
-                        >
-                          {list.emoji || '🥨'}
+          {/* Lists */}
+          <div className="flex flex-col gap-3">
+            {profile.lists.length > 0 ? (
+              profile.lists.map((list, index) => {
+                const linkCount = list.links?.[0]?.count || 0
+                return (
+                  <div key={list.id}>
+                    <Link
+                      href={`/${profile.user.username}/${list.public_id || list.id}`}
+                      className="flex items-center justify-between hover:bg-accent/50 transition-colors group cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+                          {list.emoji_3d?.url ? (
+                            <Image
+                              src={list.emoji_3d.url}
+                              alt={list.emoji_3d.name || 'emoji'}
+                              width={16}
+                              height={16}
+                              className="w-4 h-4 object-contain"
+                              unoptimized
+                            />
+                          ) : (
+                            <span className="text-base">{list.emoji || '📋'}</span>
+                          )}
+                        </div>
+                        <span className="text-base text-foreground truncate">
+                          {list.title || 'Untitled List'}
                         </span>
                       </div>
-                    </div>
-
-                    {/* List Info */}
-                    <div className="text-center pb-2">
-                      <h3 
-                        className="font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors"
-                        style={{ fontFamily: 'Open Runde' }}
-                      >
-                        {list.title}
-                      </h3>
-                      <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                        <span>{list.links?.[0]?.count || 0} links</span>
-                        <span>•</span>
-                        <span>{list.save_count} saves</span>
-                      </div>
-                    </div>
+                      <span className="text-base text-neutral-400 ml-4 flex-shrink-0">
+                        {linkCount} {linkCount === 1 ? 'link' : 'links'}
+                      </span>
+                    </Link>
+                    {index < profile.lists.length - 1 && (
+                      <div className="border-b border-border" />
+                    )}
                   </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-neutral-100 flex items-center justify-center">
-                <span>🔖</span>
+                )
+              })
+            ) : (
+              <div className="text-center py-16">
+                <p className="text-muted-foreground">No public lists yet</p>
               </div>
-              <h3 
-                className="text-lg font-semibold text-foreground mb-2"
-                style={{ fontFamily: 'Open Runde' }}
-              >
-                No public lists yet
-              </h3>
-              <p className="text-muted-foreground">
-                {displayName} hasn't shared any public lists yet.
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

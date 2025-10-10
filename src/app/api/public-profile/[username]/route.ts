@@ -41,6 +41,7 @@ export async function GET(
       .from('lists')
       .select(`
         id,
+        public_id,
         title,
         description,
         emoji,

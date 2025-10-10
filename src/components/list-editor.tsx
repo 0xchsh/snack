@@ -24,11 +24,11 @@ type ViewMode = 'menu' | 'rows' | 'grid'
 function GhostLinkItem({ viewMode }: { viewMode: ViewMode }) {
   if (viewMode === 'menu') {
     return (
-      <div className="bg-neutral-100 rounded-xl p-3 animate-pulse">
+      <div className="bg-muted rounded-xl p-3 animate-pulse">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 rounded-md bg-neutral-200 flex-shrink-0"></div>
+          <div className="w-5 h-5 rounded-md bg-accent flex-shrink-0"></div>
           <div className="flex-1">
-            <div className="h-4 bg-neutral-200 rounded w-3/4"></div>
+            <div className="h-4 bg-accent rounded w-3/4"></div>
           </div>
         </div>
       </div>
@@ -37,12 +37,12 @@ function GhostLinkItem({ viewMode }: { viewMode: ViewMode }) {
 
   if (viewMode === 'rows') {
     return (
-      <div className="bg-neutral-100 rounded-2xl p-4 animate-pulse">
+      <div className="bg-muted rounded-2xl p-4 animate-pulse">
         <div className="flex items-center gap-4">
-          <div className="w-20 h-11 rounded-xl bg-neutral-200 flex-shrink-0"></div>
+          <div className="w-20 h-11 rounded-xl bg-accent flex-shrink-0"></div>
           <div className="flex-1">
-            <div className="h-5 bg-neutral-200 rounded w-3/4 mb-2"></div>
-            <div className="h-4 bg-neutral-200 rounded w-1/2"></div>
+            <div className="h-5 bg-accent rounded w-3/4 mb-2"></div>
+            <div className="h-4 bg-accent rounded w-1/2"></div>
           </div>
         </div>
       </div>
@@ -51,13 +51,13 @@ function GhostLinkItem({ viewMode }: { viewMode: ViewMode }) {
 
   // Grid layout
   return (
-    <div className="bg-neutral-100 rounded-xl animate-pulse overflow-hidden">
-      <div className="aspect-video bg-neutral-200"></div>
+    <div className="bg-muted rounded-xl animate-pulse overflow-hidden">
+      <div className="aspect-video bg-accent"></div>
       <div className="px-4 pb-4 pt-4 space-y-2">
-        <div className="h-4 bg-neutral-200 rounded w-3/4"></div>
+        <div className="h-4 bg-accent rounded w-3/4"></div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-sm bg-neutral-200 flex-shrink-0"></div>
-          <div className="h-3 bg-neutral-200 rounded w-1/2"></div>
+          <div className="w-4 h-4 rounded-sm bg-accent flex-shrink-0"></div>
+          <div className="h-3 bg-accent rounded w-1/2"></div>
         </div>
       </div>
     </div>
@@ -71,7 +71,7 @@ export function ListEditor({
   onRemoveLink, 
   onReorderLinks 
 }: ListEditorProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>((list.view_mode as ViewMode) || 'menu')
+  const [viewMode] = useState<ViewMode>('menu') // Fixed to menu view only
   const [isEditingTitle, setIsEditingTitle] = useState(!list.title) // Start editing if title is empty
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [title, setTitle] = useState(list.title || '') // Ensure title is never undefined
@@ -234,15 +234,8 @@ export function ListEditor({
       y: e.clientY - dragOffset.current.y
     })
     
-    // Find which item we're hovering over based on current view mode
-    let containerSelector: string
-    if (viewMode === 'grid') {
-      containerSelector = '#drag-grid-container'
-    } else {
-      containerSelector = '.draggable-list-container'
-    }
-    
-    const container = document.querySelector(containerSelector)
+    // Find which item we're hovering over (menu view only)
+    const container = document.querySelector('.draggable-list-container')
     if (!container) return
     
     const items = container.children
@@ -255,26 +248,17 @@ export function ListEditor({
       if (item.classList.contains('fixed')) continue
       
       const rect = item.getBoundingClientRect()
-      
-      if (viewMode === 'grid') {
-        // Grid: check if mouse is within the grid cell bounds
-        if (e.clientX >= rect.left && e.clientX <= rect.right &&
-            e.clientY >= rect.top && e.clientY <= rect.bottom) {
-          newHoverIndex = i
-          break
-        }
-      } else {
-        // Linear layouts: check if mouse is in the vertical range
-        const midY = rect.top + rect.height / 2
-        if (e.clientY <= midY) {
-          newHoverIndex = i
-          break
-        }
+
+      // Menu view: check if mouse is in the vertical range
+      const midY = rect.top + rect.height / 2
+      if (e.clientY <= midY) {
+        newHoverIndex = i
+        break
       }
     }
-    
-    // For linear layouts, if we're past all items, set to last position
-    if (newHoverIndex === null && viewMode !== 'grid' && items.length > 0) {
+
+    // If we're past all items, set to last position
+    if (newHoverIndex === null && items.length > 0) {
       const lastItem = items[items.length - 1] as HTMLElement
       if (!lastItem.classList.contains('fixed')) {
         const lastRect = lastItem.getBoundingClientRect()
@@ -442,23 +426,22 @@ export function ListEditor({
         if (validUrls.length > 0) {
           // Add ghost loading placeholders immediately
           setLoadingLinks(validUrls)
-          
+
           for (let i = 0; i < validUrls.length; i++) {
             const url = validUrls[i]
             if (url) {
-              await onAddLink?.({ 
+              await onAddLink?.({
                 url,
                 title: url // Use URL as default title, it will be updated with OG data
               })
-              
+
               // Remove from loading state as each one completes
               setLoadingLinks(prev => prev.filter(loadingUrl => loadingUrl !== url))
             }
           }
-        } else {
-          // If no valid URLs found, show the text in input for manual editing
-          setLinkInput(text)
         }
+        // If no valid URLs found, silently ignore the paste
+        // (don't put non-URL text in the input field)
       }
     } catch (error) {
       console.error('Failed to read clipboard:', error)
@@ -647,380 +630,126 @@ export function ListEditor({
     }
   }, [list.id, onAddLink])
 
-  // Handle view mode change and save to database
-  const handleViewModeChange = async (newViewMode: ViewMode) => {
-    setViewMode(newViewMode)
-    
-    // Save the view mode to the database
-    if (onUpdateList) {
-      try {
-        await onUpdateList({ view_mode: newViewMode })
-        console.log('View mode updated to:', newViewMode)
-      } catch (error) {
-        console.error('Failed to update view mode:', error)
-        // Optionally revert the local state if the update fails
-        // setViewMode(viewMode)
-      }
-    }
-  }
+  // Removed view mode change handler - fixed to menu view only
 
   return (
-    <div className={`${viewMode === 'grid' ? 'w-full' : 'max-w-2xl mx-auto'} space-y-8`}>
-      {/* Header */}
-      <div className={`${viewMode === 'grid' ? 'max-w-2xl mx-auto' : ''} space-y-8`}>
-        {/* Icon & Title */}
-        <div className="space-y-6">
+    <div className="space-y-6">
+      {/* Emoji + Title */}
+      <div className="flex items-start gap-4">
+        <button
+          ref={emojiButtonRef}
+          onClick={() => setShowEmojiPicker(true)}
+          className="w-[62px] h-[62px] flex items-center justify-center bg-background border border-border rounded-xl text-3xl hover:border-muted-foreground transition-colors flex-shrink-0"
+        >
+          <span>{currentEmoji3D.unicode}</span>
+        </button>
+
+        {isEditingTitle ? (
+          <input
+            ref={titleTextareaRef as any}
+            value={title}
+            onChange={(e) => setTitle(e.target.value.slice(0, 60))}
+            onBlur={handleTitleSave}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                handleTitleSave()
+              }
+            }}
+            placeholder="Untitled List"
+            className="flex-1 text-3xl font-normal text-foreground bg-background border border-border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder:text-muted-foreground break-all"
+            maxLength={60}
+            autoFocus
+          />
+        ) : (
           <button
-            ref={emojiButtonRef}
-            onClick={() => setShowEmojiPicker(true)}
-            className="w-16 h-16 bg-neutral-100 hover:bg-neutral-200 rounded-2xl flex items-center justify-center text-3xl transition-colors"
+            onClick={() => setIsEditingTitle(true)}
+            className="flex-1 text-left text-3xl font-normal text-foreground bg-background border border-border rounded-xl px-4 py-3 hover:border-muted-foreground transition-colors break-all hyphens-auto"
           >
-            {currentEmoji3D.url ? (
-              <Image
-                src={currentEmoji3D.url}
-                alt={currentEmoji3D.name || 'emoji'}
-                width={40}
-                height={40}
-                className="w-10 h-10 object-contain"
-                unoptimized
-              />
-            ) : (
-              <span>{currentEmoji3D.unicode}</span>
-            )}
+            {list.title || <span className="text-muted-foreground">Untitled List</span>}
           </button>
-          
-          {isEditingTitle ? (
-            <textarea
-              ref={titleTextareaRef}
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value.slice(0, 60))
-                adjustTextareaHeight()
-              }}
-              onBlur={handleTitleSave}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  handleTitleSave()
-                }
-              }}
-              placeholder="Untitled List"
-              className="text-6xl font-bold text-foreground bg-transparent border-none outline-none capitalize w-full max-w-2xl resize-none placeholder:text-muted-foreground break-words overflow-hidden"
-              style={{ 
-                fontFamily: 'Open Runde',
-                letterSpacing: '-2.24px',
-                lineHeight: '100%',
-                wordBreak: 'break-word',
-                whiteSpace: 'pre-wrap',
-                overflowWrap: 'break-word',
-                minHeight: '1em'
-              }}
-              maxLength={60}
-              rows={1}
-              autoFocus
-            />
-          ) : (
-            <h1 
-              onClick={() => setIsEditingTitle(true)}
-              className="text-6xl font-bold text-foreground cursor-pointer capitalize hover:text-muted-foreground transition-colors max-w-2xl break-words"
-              style={{ 
-                fontFamily: 'Open Runde',
-                letterSpacing: '-2.24px',
-                lineHeight: '100%'
-              }}
-            >
-              {list.title || <span className="text-muted-foreground">Untitled List</span>}
-            </h1>
-          )}
-        </div>
-
-        {/* Input and Controls Card */}
-        <div className="bg-neutral-100 rounded-2xl p-6">
-          {/* Add Link Input */}
-          <div className="mb-6">
-            {linkError && (
-              <div className="mb-3 text-sm text-destructive" style={{ fontFamily: 'Open Runde' }}>
-                {linkError}
-              </div>
-            )}
-            <div className="bg-white rounded-xl p-4 flex items-center justify-between">
-              <div className="flex-1">
-                <textarea
-                  value={linkInput}
-                  onChange={(e) => {
-                    setLinkInput(e.target.value)
-                    if (linkError) {
-                      setLinkError('')
-                    }
-                  }}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Paste a link or multiple links"
-                  className="w-full bg-transparent resize-none border-none outline-none text-muted-foreground placeholder:text-muted-foreground"
-                  style={{ 
-                    fontFamily: 'Open Runde',
-                    fontSize: '16px',
-                    fontWeight: 500,
-                    letterSpacing: '-0.32px'
-                  }}
-                  rows={1}
-                />
-              </div>
-              
-              <button
-                onClick={linkInput.trim() ? handleAddLink : pasteFromClipboard}
-                className="px-4 py-2 bg-primary hover:bg-primary/90 rounded-lg text-primary-foreground transition-colors flex items-center gap-2"
-              >
-                {linkInput.trim() ? (
-                  <>
-                    <span className="font-medium">Add</span>
-                    <span className="text-xs opacity-70">⌘⏎</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="font-medium">Paste</span>
-                    <span className="text-xs opacity-70">⌘V</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* View Mode Toggle */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleViewModeChange('menu')}
-                className={`w-10 h-10 rounded-md flex items-center justify-center transition-colors ${
-                  viewMode === 'menu' 
-                    ? 'bg-white text-foreground' 
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-              
-              <button
-                onClick={() => handleViewModeChange('rows')}
-                className={`w-10 h-10 rounded-md flex items-center justify-center transition-colors ${
-                  viewMode === 'rows' 
-                    ? 'bg-white text-foreground' 
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <List className="w-5 h-5" />
-              </button>
-              
-              <button
-                onClick={() => handleViewModeChange('grid')}
-                className={`w-10 h-10 rounded-md flex items-center justify-center transition-colors ${
-                  viewMode === 'grid' 
-                    ? 'bg-white text-foreground' 
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Grid3X3 className="w-5 h-5" />
-              </button>
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2">
-              {/* View Button */}
-              <button
-                onClick={() => window.open(`/${list.user?.username || 'list'}/${list.public_id || list.id}?view=public`, '_blank')}
-                className="w-10 h-10 rounded-md flex items-center justify-center transition-colors bg-white text-foreground hover:bg-blue-50 hover:text-blue-600"
-                title="View public list"
-              >
-                <Eye className="w-5 h-5" />
-              </button>
-              
-              {/* More Options Menu */}
-              <div className="relative" ref={moreMenuRef}>
-                <button
-                  onClick={() => setShowMoreMenu(!showMoreMenu)}
-                  className="w-10 h-10 rounded-md flex items-center justify-center transition-colors bg-white text-foreground hover:bg-white"
-                  title="More options"
-                >
-                  <MoreHorizontal className="w-5 h-5" />
-                </button>
-              
-              {/* Dropdown Menu */}
-              {showMoreMenu && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-neutral-200 py-2 z-50">
-                  <button
-                    onClick={pasteFromClipboard}
-                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-white transition-colors"
-                  >
-                    <Clipboard className="w-4 h-4 text-muted-foreground" />
-                    <span className="flex-1" style={{ fontFamily: 'Open Runde' }}>Paste clipboard</span>
-                    <span className="text-xs text-muted-foreground">⌘V</span>
-                  </button>
-                  
-                  <button
-                    onClick={refreshOGData}
-                    disabled={isRefreshingOG}
-                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <RefreshCw className={`w-4 h-4 text-muted-foreground ${isRefreshingOG ? 'animate-spin' : ''}`} />
-                    <span className="flex-1" style={{ fontFamily: 'Open Runde' }}>
-                      {isRefreshingOG ? 'Refreshing...' : 'Refresh images'}
-                    </span>
-                  </button>
-                  
-                  <button
-                    onClick={exportAsCSV}
-                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-white transition-colors"
-                  >
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                    <span className="flex-1" style={{ fontFamily: 'Open Runde' }}>Export to .csv</span>
-                  </button>
-                  
-                  <button
-                    onClick={copyListLink}
-                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-white transition-colors"
-                  >
-                    <Link2 className="w-4 h-4 text-muted-foreground" />
-                    <span className="flex-1" style={{ fontFamily: 'Open Runde' }}>Copy link</span>
-                  </button>
-                  
-                  <div className="my-2 border-t border-neutral-200" />
-                  
-                  <button
-                    onClick={deleteList}
-                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-white transition-colors text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    <span className="flex-1" style={{ fontFamily: 'Open Runde' }}>Delete list</span>
-                  </button>
-                </div>
-              )}
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Links List */}
-      {viewMode === 'grid' ? (
-        <div className="space-y-6">
-          {/* Ghost loading placeholders */}
-          {loadingLinks.length > 0 && (
-            <div className="grid grid-cols-3 gap-6">
-              {loadingLinks.map((url, index) => (
-                <GhostLinkItem key={`ghost-${url}-${index}`} viewMode={viewMode} />
-              ))}
-            </div>
-          )}
-          {/* Custom Draggable CSS Grid Layout */}
-          <div 
-            className="grid grid-cols-3 gap-6 w-full relative"
-            id="drag-grid-container"
-          >
-            {(optimisticList.links || []).map((link, index) => (
-              <div
-                key={link.id}
-                onMouseDown={(e) => handleMouseDown(e, link.id, index)}
-                className={`
-                  transition-all duration-300 ease-out cursor-grab select-none
-                  ${draggedItemId === link.id ? 'opacity-30' : 'opacity-100'}
-                  ${dragOverIndex === index && draggedItemId !== link.id ? 
-                    'transform scale-105 ring-2 ring-offset-2 rounded-xl' : ''}
-                `}
-              >
-                <LinkItem
-                  link={link}
-                  viewMode={viewMode}
-                  onRemove={() => handleDeleteLink(link.id)}
-                />
-              </div>
-            ))}
-            
-            {/* Floating Drag Preview */}
-            {isDragging && draggedItemId && (() => {
-              const draggedLink = optimisticList.links?.find(l => l.id === draggedItemId)
-              if (!draggedLink) return null
-              
-              return (
-                <div
-                  className="fixed z-50 pointer-events-none"
-                  style={{
-                    left: `${draggedItemPosition.x}px`,
-                    top: `${draggedItemPosition.y}px`,
-                    width: '320px',
-                    transform: 'rotate(2deg) scale(1.03)',
-                    filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.25))',
-                    opacity: 0.95
-                  }}
-                >
-                  <LinkItem
-                    link={draggedLink}
-                    viewMode={viewMode}
-                    onRemove={() => {}}
-                  />
-                </div>
-              )
-            })()}
-          </div>
+      {/* Link count and Paste button */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-muted-foreground bg-muted px-3 py-2 rounded-sm">
+          <Link2 className="w-4 h-4" />
+          <span className="text-base">{optimisticList.links?.length || 0} links</span>
         </div>
-      ) : (
-        <div className={viewMode === 'rows' ? 'space-y-6' : 'space-y-3'}>
-          {/* Ghost loading placeholders */}
-          {loadingLinks.map((url, index) => (
-            <GhostLinkItem key={`ghost-${url}-${index}`} viewMode={viewMode} />
-          ))}
-          {/* Draggable linear layout for menu and rows modes */}
-          <div className="relative draggable-list-container">
-            {(optimisticList.links || []).map((link, index) => (
-              <div 
-                key={link.id}
-                onMouseDown={(e) => handleMouseDown(e, link.id, index)}
-                className={`
-                  ${viewMode === 'rows' ? 'mb-6 last:mb-0' : 'mb-3 last:mb-0'}
-                  transition-all duration-300 ease-out cursor-grab select-none
-                  ${draggedItemId === link.id ? 'opacity-30' : 'opacity-100'}
-                  ${dragOverIndex === index && draggedItemId !== link.id ? 
-                    `transform translate-y-2 ring-2 ring-offset-1 ${
-                      viewMode === 'rows' ? 'rounded-2xl' : 'rounded-xl'
-                    }` : ''}
-                `}
-              >
-                <LinkItem
-                  link={link}
-                  viewMode={viewMode}
-                  onRemove={() => handleDeleteLink(link.id)}
-                />
-              </div>
-            ))}
-            
-            {/* Floating Drag Preview for linear layouts */}
-            {isDragging && draggedItemId && viewMode !== 'grid' && (() => {
-              const draggedLink = optimisticList.links?.find(l => l.id === draggedItemId)
-              if (!draggedLink) return null
-              
-              const width = viewMode === 'rows' ? '600px' : '400px'
-              
-              return (
-                <div
-                  className="fixed z-50 pointer-events-none"
-                  style={{
-                    left: `${draggedItemPosition.x}px`,
-                    top: `${draggedItemPosition.y}px`,
-                    width: width,
-                    transform: 'rotate(1deg) scale(1.02)',
-                    filter: 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.2))',
-                    opacity: 0.95
-                  }}
-                >
-                  <LinkItem
-                    link={draggedLink}
-                    viewMode={viewMode}
-                    onRemove={() => {}}
-                  />
-                </div>
-              )
-            })()}
-          </div>
+
+        <button
+          onClick={pasteFromClipboard}
+          className="flex items-center gap-2 px-4 py-2 border border-border rounded-sm text-base text-muted-foreground hover:text-foreground hover:border-muted-foreground transition-colors"
+        >
+          <span>Paste links</span>
+          <span className="text-sm">⌘V</span>
+        </button>
+      </div>
+
+      {/* Error message */}
+      {linkError && (
+        <div className="text-sm text-destructive">
+          {linkError}
         </div>
       )}
+
+      {/* Links List - Menu View Only */}
+      <div className="space-y-3">
+        {/* Ghost loading placeholders */}
+        {loadingLinks.map((url, index) => (
+          <GhostLinkItem key={`ghost-${url}-${index}`} viewMode="menu" />
+        ))}
+
+        {/* Draggable list */}
+        <div className="relative draggable-list-container">
+          {(optimisticList.links || []).map((link, index) => (
+            <div
+              key={link.id}
+              onMouseDown={(e) => handleMouseDown(e, link.id, index)}
+              className={`
+                mb-3 last:mb-0
+                transition-all duration-300 ease-out cursor-grab select-none
+                ${draggedItemId === link.id ? 'opacity-30' : 'opacity-100'}
+                ${dragOverIndex === index && draggedItemId !== link.id ?
+                  'transform translate-y-2 ring-1 ring-foreground rounded-xl' : ''}
+              `}
+            >
+              <LinkItem
+                link={link}
+                viewMode="menu"
+                onRemove={() => handleDeleteLink(link.id)}
+              />
+            </div>
+          ))}
+
+          {/* Floating Drag Preview */}
+          {isDragging && draggedItemId && (() => {
+            const draggedLink = optimisticList.links?.find(l => l.id === draggedItemId)
+            if (!draggedLink) return null
+
+            return (
+              <div
+                className="fixed z-50 pointer-events-none"
+                style={{
+                  left: `${draggedItemPosition.x}px`,
+                  top: `${draggedItemPosition.y}px`,
+                  width: '400px',
+                  transform: 'rotate(1deg) scale(1.02)',
+                  filter: 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.2))',
+                  opacity: 0.95
+                }}
+              >
+                <LinkItem
+                  link={draggedLink}
+                  viewMode="menu"
+                  onRemove={() => {}}
+                />
+              </div>
+            )
+          })()}
+        </div>
+      </div>
       
       {(!optimisticList.links || optimisticList.links.length === 0) && loadingLinks.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
@@ -1060,38 +789,26 @@ function LinkItem({
   onRemove
 }: LinkItemProps) {
   if (viewMode === 'menu') {
-    // Compact rows - smallest layout
+    // Compact rows - clean list layout
     return (
-      <div 
-        className="bg-neutral-100 rounded-xl p-3 hover:bg-neutral-200 transition-all group cursor-grab relative"
-        style={{ 
-          backfaceVisibility: 'hidden',
-          WebkitBackfaceVisibility: 'hidden',
-          transformOrigin: 'center',
-          willChange: 'transform'
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-5 h-5 rounded-md overflow-hidden bg-muted flex-shrink-0">
-            <Favicon 
+      <div>
+        <div className="flex items-center gap-3 px-2 py-3 hover:bg-accent/50 transition-colors group cursor-grab">
+          <div className="w-5 h-5 flex-shrink-0">
+            <Favicon
               url={link.url}
               size={20}
-              className="rounded-md"
             />
           </div>
-          
+
           <div className="flex-1 min-w-0">
-            <h3 
-              className="text-sm font-semibold text-foreground truncate"
-              style={{ fontFamily: 'Open Runde' }}
-            >
+            <h3 className="text-base text-foreground truncate">
               {link.title || getHostname(link.url)}
             </h3>
           </div>
-          
+
           <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-            <div className="text-muted-foreground/50 p-1" title="Drag to reorder">
-              <GripVertical className="w-3 h-3" />
+            <div className="text-muted-foreground p-1" title="Drag to reorder">
+              <GripVertical className="w-4 h-4" />
             </div>
             <button
               onClick={(e) => {
@@ -1101,13 +818,14 @@ function LinkItem({
               onMouseDown={(e) => {
                 e.stopPropagation()
               }}
-              className="text-muted-foreground hover:text-destructive transition-colors p-1 cursor-pointer"
+              className="text-red-600 hover:text-red-700 transition-colors p-1 cursor-pointer"
               title="Delete link"
             >
-              <Trash2 className="w-3 h-3" />
+              <Trash2 className="w-4 h-4" />
             </button>
           </div>
         </div>
+        <div className="border-b border-dashed border-border" />
       </div>
     )
   }
@@ -1115,8 +833,8 @@ function LinkItem({
   if (viewMode === 'rows') {
     // Larger cards as rows - medium layout
     return (
-      <div 
-        className="bg-neutral-100 rounded-2xl p-4 hover:bg-neutral-200 transition-all group cursor-grab relative"
+      <div
+        className="bg-muted rounded-2xl p-4 hover:bg-accent transition-all group cursor-grab relative"
         style={{ 
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
@@ -1125,7 +843,7 @@ function LinkItem({
         }}
       >
         <div className="flex items-center gap-4">
-          <div className="w-[100px] h-14 rounded-xl overflow-hidden bg-neutral-200 flex-shrink-0 relative">
+          <div className="w-[100px] h-14 rounded-xl overflow-hidden bg-accent flex-shrink-0 relative">
             {link.image_url ? (
               <>
                 <Image 
@@ -1144,11 +862,11 @@ function LinkItem({
                   }}
                 />
                 {/* Fallback content (hidden by default, shown when image fails) */}
-                <div 
-                  className="w-full h-full bg-neutral-50 flex items-center justify-center absolute inset-0"
+                <div
+                  className="w-full h-full bg-background flex items-center justify-center absolute inset-0"
                   style={{ display: 'none' }}
                 >
-                  <Favicon 
+                  <Favicon
                     url={link.url}
                     size={24}
                     className="rounded-md"
@@ -1156,7 +874,7 @@ function LinkItem({
                 </div>
               </>
             ) : (
-              <div className="w-full h-full bg-neutral-50 flex items-center justify-center">
+              <div className="w-full h-full bg-background flex items-center justify-center">
                 <Favicon 
                   url={link.url}
                   size={24}
@@ -1214,10 +932,10 @@ function LinkItem({
   }
 
   // Grid layout - largest cards with OG images
-  
+
   return (
-    <div 
-      className="bg-neutral-100 rounded-xl hover:bg-neutral-200 transition-all group overflow-hidden cursor-grab"
+    <div
+      className="bg-muted rounded-xl hover:bg-accent transition-all group overflow-hidden cursor-grab"
       style={{ 
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
@@ -1228,7 +946,7 @@ function LinkItem({
     >
       <div className="space-y-4">
         {/* OG Image Preview */}
-        <div className="aspect-video bg-neutral-200 relative">
+        <div className="aspect-video bg-accent relative">
           {link.image_url ? (
             <>
               <Image 
@@ -1248,29 +966,29 @@ function LinkItem({
                 }}
               />
               {/* Fallback content (hidden by default, shown when image fails) */}
-              <div 
-                className="w-full h-full bg-neutral-50 flex items-center justify-center absolute inset-0"
+              <div
+                className="w-full h-full bg-background flex items-center justify-center absolute inset-0"
                 style={{ display: 'none' }}
               >
-                <Favicon 
+                <Favicon
                   url={link.url}
                   size={48}
                   className="rounded-lg"
-                  fallbackClassName="bg-white/20 rounded-lg"
+                  fallbackClassName="bg-muted/20 rounded-lg"
                 />
               </div>
             </>
           ) : (
-            <div className="w-full h-full bg-neutral-50 flex items-center justify-center">
-              <Favicon 
+            <div className="w-full h-full bg-background flex items-center justify-center">
+              <Favicon
                 url={link.url}
                 size={48}
                 className="rounded-lg"
-                fallbackClassName="bg-white/20 rounded-lg"
+                fallbackClassName="bg-muted/20 rounded-lg"
               />
             </div>
           )}
-          
+
           {/* Actions overlay */}
           <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
             <button
@@ -1281,7 +999,7 @@ function LinkItem({
               onMouseDown={(e) => {
                 e.stopPropagation()
               }}
-              className="bg-white/90 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-lg cursor-pointer"
+              className="bg-background/90 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-lg cursor-pointer"
               title="Delete link"
             >
               <Trash2 className="w-4 h-4" />

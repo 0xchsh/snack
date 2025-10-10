@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { User, CreditCard, Shield, Camera, Mail, Edit, Trash2, ArrowLeft, ExternalLink, Eye, EyeOff, Bookmark } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 type ProfileTab = 'account' | 'billing' | 'security'
 
@@ -23,7 +24,7 @@ export default function ProfilePage() {
   // Show loading state while mounting or checking auth
   if (!mounted || loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           <p className="text-muted-foreground">Loading profile...</p>
@@ -35,7 +36,7 @@ export default function ProfilePage() {
   // Redirect to sign-in if not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold text-foreground">Access Denied</h1>
           <p className="text-muted-foreground">You need to be signed in to view your profile.</p>
@@ -52,24 +53,23 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b border-border bg-white">
-        <div className="container mx-auto px-4 py-4">
+      <div className="border-b border-border bg-background">
+        <div className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <Link href="/dashboard" className="flex items-center">
-                <Image
-                  src="/images/logo.svg"
-                  alt="Snack"
-                  width={40}
-                  height={40}
-                  className="w-10 h-10"
-                />
-              </Link>
-            </div>
-            
+            <Link href="/dashboard" className="flex items-center">
+              <Image
+                src="/images/logo.svg"
+                alt="Snack"
+                width={24}
+                height={24}
+                className="w-6 h-6"
+              />
+            </Link>
+
             <div className="flex items-center gap-3">
+              <ThemeToggle />
               <Link
                 href="/dashboard"
                 className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
@@ -87,12 +87,12 @@ export default function ProfilePage() {
       <div className="container mx-auto px-6 py-8">
         {/* Navigation Tabs */}
         <div className="flex items-center justify-center mb-12">
-          <div className="flex items-center bg-neutral-100 rounded-full p-1">
+          <div className="flex items-center bg-muted rounded-full p-1">
             <button
               onClick={() => setActiveTab('account')}
               className={`flex items-center gap-2 px-6 py-3 font-semibold text-sm transition-colors rounded-full ${
-                activeTab === 'account' 
-                  ? 'text-foreground bg-white shadow-sm' 
+                activeTab === 'account'
+                  ? 'text-foreground bg-background shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
               style={{ fontFamily: 'Open Runde' }}
@@ -103,8 +103,8 @@ export default function ProfilePage() {
             <button
               onClick={() => setActiveTab('billing')}
               className={`flex items-center gap-2 px-6 py-3 font-semibold text-sm transition-colors rounded-full ${
-                activeTab === 'billing' 
-                  ? 'text-foreground bg-white shadow-sm' 
+                activeTab === 'billing'
+                  ? 'text-foreground bg-background shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
               style={{ fontFamily: 'Open Runde' }}
@@ -115,8 +115,8 @@ export default function ProfilePage() {
             <button
               onClick={() => setActiveTab('security')}
               className={`flex items-center gap-2 px-6 py-3 font-semibold text-sm transition-colors rounded-full ${
-                activeTab === 'security' 
-                  ? 'text-foreground bg-white shadow-sm' 
+                activeTab === 'security'
+                  ? 'text-foreground bg-background shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
               style={{ fontFamily: 'Open Runde' }}
@@ -304,10 +304,10 @@ function AccountTab({ user }: { user: any }) {
       )}
 
       {/* Profile Picture Section */}
-      <div className="bg-white border border-border rounded-xl p-6">
+      <div className="bg-background border border-border rounded-xl p-6">
         <div className="flex items-center gap-6">
           <div className="relative">
-            <div className="w-20 h-20 rounded-full bg-neutral-100 flex items-center justify-center overflow-hidden">
+            <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden">
               {currentUser.profile_picture_url ? (
                 <Image
                   src={currentUser.profile_picture_url}
@@ -355,7 +355,7 @@ function AccountTab({ user }: { user: any }) {
       </div>
 
       {/* Personal Information */}
-      <div className="bg-white border border-border rounded-xl p-6">
+      <div className="bg-background border border-border rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="font-semibold mb-1" style={{ fontFamily: 'Open Runde' }}>Personal Information</h3>
@@ -384,7 +384,7 @@ function AccountTab({ user }: { user: any }) {
                 disabled={isSaving}
               />
             ) : (
-              <div className="px-4 py-3 bg-neutral-50 rounded-lg text-foreground">
+              <div className="px-4 py-3 bg-muted rounded-lg text-foreground">
                 {currentUser.first_name || 'Not set'}
               </div>
             )}
@@ -402,7 +402,7 @@ function AccountTab({ user }: { user: any }) {
                 disabled={isSaving}
               />
             ) : (
-              <div className="px-4 py-3 bg-neutral-50 rounded-lg text-foreground">
+              <div className="px-4 py-3 bg-muted rounded-lg text-foreground">
                 {currentUser.last_name || 'Not set'}
               </div>
             )}
@@ -421,7 +421,7 @@ function AccountTab({ user }: { user: any }) {
                 required
               />
             ) : (
-              <div className="px-4 py-3 bg-neutral-50 rounded-lg text-foreground">
+              <div className="px-4 py-3 bg-muted rounded-lg text-foreground">
                 @{currentUser.username}
               </div>
             )}
@@ -440,7 +440,7 @@ function AccountTab({ user }: { user: any }) {
                 required
               />
             ) : (
-              <div className="px-4 py-3 bg-neutral-50 rounded-lg text-foreground">
+              <div className="px-4 py-3 bg-muted rounded-lg text-foreground">
                 {currentUser.email}
               </div>
             )}
@@ -456,10 +456,10 @@ function AccountTab({ user }: { user: any }) {
             >
               {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
-            <button 
+            <button
               onClick={handleCancel}
               disabled={isSaving}
-              className="px-6 py-2 text-muted-foreground border border-border rounded-lg hover:bg-neutral-50 transition-colors font-semibold disabled:opacity-50"
+              className="px-6 py-2 text-muted-foreground border border-border rounded-lg hover:bg-muted transition-colors font-semibold disabled:opacity-50"
             >
               Cancel
             </button>
@@ -520,42 +520,42 @@ function BillingTab({ user }: { user: any }) {
 
       {/* Analytics Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white border border-border rounded-xl p-6">
+        <div className="bg-background border border-border rounded-xl p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-medium text-muted-foreground">Total Views</h3>
             <Eye className="w-5 h-5 text-muted-foreground" />
           </div>
           <div className="text-3xl font-bold" style={{ fontFamily: 'Open Runde' }}>
             {loading ? (
-              <div className="h-8 w-20 bg-neutral-100 animate-pulse rounded"></div>
+              <div className="h-8 w-20 bg-muted animate-pulse rounded"></div>
             ) : (
               analytics?.totalViews.toLocaleString() || '0'
             )}
           </div>
         </div>
 
-        <div className="bg-white border border-border rounded-xl p-6">
+        <div className="bg-background border border-border rounded-xl p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-medium text-muted-foreground">Link Clicks</h3>
             <ExternalLink className="w-5 h-5 text-muted-foreground" />
           </div>
           <div className="text-3xl font-bold" style={{ fontFamily: 'Open Runde' }}>
             {loading ? (
-              <div className="h-8 w-20 bg-neutral-100 animate-pulse rounded"></div>
+              <div className="h-8 w-20 bg-muted animate-pulse rounded"></div>
             ) : (
               analytics?.totalClicks.toLocaleString() || '0'
             )}
           </div>
         </div>
 
-        <div className="bg-white border border-border rounded-xl p-6">
+        <div className="bg-background border border-border rounded-xl p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-medium text-muted-foreground">Total Saves</h3>
             <Bookmark className="w-5 h-5 text-muted-foreground" />
           </div>
           <div className="text-3xl font-bold" style={{ fontFamily: 'Open Runde' }}>
             {loading ? (
-              <div className="h-8 w-20 bg-neutral-100 animate-pulse rounded"></div>
+              <div className="h-8 w-20 bg-muted animate-pulse rounded"></div>
             ) : (
               analytics?.totalSaves.toLocaleString() || '0'
             )}
@@ -564,7 +564,7 @@ function BillingTab({ user }: { user: any }) {
       </div>
 
       {/* Top 5 Most Popular Lists */}
-      <div className="bg-white border border-border rounded-xl p-6">
+      <div className="bg-background border border-border rounded-xl p-6">
         <h3 className="font-semibold mb-6" style={{ fontFamily: 'Open Runde' }}>
           Your Top 5 Most Popular Lists
         </h3>
@@ -572,14 +572,14 @@ function BillingTab({ user }: { user: any }) {
         {loading ? (
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg animate-pulse">
+              <div key={i} className="flex items-center justify-between p-4 bg-muted rounded-lg animate-pulse">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-neutral-200 rounded"></div>
-                  <div className="h-4 w-32 bg-neutral-200 rounded"></div>
+                  <div className="w-8 h-8 bg-accent rounded"></div>
+                  <div className="h-4 w-32 bg-accent rounded"></div>
                 </div>
                 <div className="flex gap-4">
-                  <div className="h-4 w-16 bg-neutral-200 rounded"></div>
-                  <div className="h-4 w-16 bg-neutral-200 rounded"></div>
+                  <div className="h-4 w-16 bg-accent rounded"></div>
+                  <div className="h-4 w-16 bg-accent rounded"></div>
                 </div>
               </div>
             ))}
@@ -587,7 +587,7 @@ function BillingTab({ user }: { user: any }) {
         ) : analytics?.topLists && analytics.topLists.length > 0 ? (
           <div className="space-y-3">
             {analytics.topLists.map((list, index) => (
-              <div key={list.id} className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors">
+              <div key={list.id} className="flex items-center justify-between p-4 bg-muted rounded-lg hover:bg-accent transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full text-sm font-bold text-primary">
                     {index + 1}
@@ -627,9 +627,9 @@ function BillingTab({ user }: { user: any }) {
       </div>
 
       {/* Current Plan */}
-      <div className="bg-white border border-border rounded-xl p-6">
+      <div className="bg-background border border-border rounded-xl p-6">
         <h3 className="font-semibold mb-4" style={{ fontFamily: 'Open Runde' }}>Current Plan</h3>
-        <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
+        <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
           <div>
             <div className="font-semibold text-lg">Free Plan</div>
             <div className="text-muted-foreground text-sm">Unlimited lists with analytics tracking</div>

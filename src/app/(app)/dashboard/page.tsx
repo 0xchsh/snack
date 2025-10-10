@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { List, Plus } from 'lucide-react'
+import { List, Plus, Bookmark, BarChart3 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useLists } from '@/hooks/useLists'
-import { DashboardHeader } from '@/components/dashboard-header'
+import { PrimaryNav, AppContainer } from '@/components/primitives'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { ListWithLinks } from '@/types'
 
@@ -60,14 +60,32 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader
-        activeTab={tab === 'stats' ? 'stats' : 'saved'}
-        savedCount={lists.length}
-        statsCount={lists.length}
-        username={user.username}
-      />
+      {/* Secondary Navigation - Tabs */}
+      <div className="border-b border-border">
+        <AppContainer variant="app">
+          <div className="py-3">
+            <PrimaryNav
+              tabs={[
+                {
+                  label: 'Saved',
+                  icon: <Bookmark className="w-3.5 h-3.5" />,
+                  href: '/dashboard?tab=saved',
+                  isActive: tab === 'saved' || !tab
+                },
+                {
+                  label: 'Stats',
+                  icon: <BarChart3 className="w-3.5 h-3.5" />,
+                  href: '/dashboard?tab=stats',
+                  isActive: tab === 'stats'
+                }
+              ]}
+            />
+          </div>
+        </AppContainer>
+      </div>
 
-      <div className="container mx-auto px-6 py-8 max-w-[640px]">
+      <AppContainer variant="app">
+        <div className="py-8">
         {tab === 'your-lists' || !tab ? (
           <>
             {/* Breadcrumb */}
@@ -80,16 +98,16 @@ export default function DashboardPage() {
 
             {/* Header with count and create button */}
             <div className="flex items-center justify-between mb-12">
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2 text-muted-foreground bg-muted px-3 py-2 rounded-sm">
                 <List className="w-4 h-4" />
                 <span className="text-base">{lists.length} lists</span>
               </div>
               <button
                 onClick={handleCreateList}
                 disabled={creatingList}
-                className="flex items-center gap-2 px-3 py-2 bg-secondary text-foreground hover:bg-accent transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-3 py-2 bg-secondary text-foreground hover:bg-accent transition-colors disabled:opacity-50 rounded-sm border border-border"
               >
-                <span className="text-sm">Create list</span>
+                <span className="text-sm font-[400]">Create list</span>
                 <Plus className="w-4 h-4" />
               </button>
             </div>
@@ -121,15 +139,7 @@ export default function DashboardPage() {
                       className="flex items-center justify-between py-3 hover:bg-accent/50 transition-colors group"
                     >
                       <div className="flex items-center gap-3">
-                        {list.emoji_3d?.url ? (
-                          <img
-                            src={list.emoji_3d.url}
-                            alt={list.emoji_3d.name || 'emoji'}
-                            className="w-5 h-5 object-contain"
-                          />
-                        ) : (
-                          <span className="text-base">{list.emoji || '📋'}</span>
-                        )}
+                        <span className="text-base">{list.emoji || '📋'}</span>
                         <span className="text-base text-foreground group-hover:text-primary transition-colors">
                           {list.title || 'Untitled List'}
                         </span>
@@ -189,15 +199,7 @@ export default function DashboardPage() {
                 <div key={list.id}>
                   <div className="flex items-center justify-between py-3">
                     <div className="flex items-center gap-3">
-                      {list.emoji_3d?.url ? (
-                        <img
-                          src={list.emoji_3d.url}
-                          alt={list.emoji_3d.name || 'emoji'}
-                          className="w-5 h-5 object-contain"
-                        />
-                      ) : (
-                        <span className="text-base">{list.emoji || '📋'}</span>
-                      )}
+                      <span className="text-base">{list.emoji || '📋'}</span>
                       <span className="text-base text-foreground">
                         {list.title || 'Untitled List'}
                       </span>
@@ -216,7 +218,8 @@ export default function DashboardPage() {
             </div>
           </>
         ) : null}
-      </div>
+        </div>
+      </AppContainer>
     </div>
   )
 }

@@ -228,29 +228,7 @@ export default function UsernamePage() {
                     {/* Large Emoji */}
                     <div className="flex items-center justify-center mb-6 pt-4">
                       <div className="w-32 h-32 flex items-center justify-center">
-                        {list.emoji_3d?.url ? (
-                          <Image
-                            src={list.emoji_3d.url}
-                            alt={list.emoji_3d.name || 'emoji'}
-                            width={120}
-                            height={120}
-                            className="w-28 h-28 object-contain group-hover:scale-105 transition-transform duration-200"
-                            unoptimized
-                            onError={(e) => {
-                              // Hide the failed image and show fallback emoji
-                              const target = e.currentTarget as HTMLImageElement
-                              target.style.display = 'none'
-                              const fallback = target.nextElementSibling as HTMLElement
-                              if (fallback) {
-                                fallback.style.display = 'block'
-                              }
-                            }}
-                          />
-                        ) : null}
-                        <span 
-                          className="text-7xl"
-                          style={{ display: list.emoji_3d?.url ? 'none' : 'block' }}
-                        >
+                        <span className="text-7xl">
                           {list.emoji || '🥨'}
                         </span>
                       </div>

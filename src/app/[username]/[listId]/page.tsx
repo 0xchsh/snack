@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, Copy, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Copy, ExternalLink, Eye, MoreHorizontal } from 'lucide-react'
+import { TopBar, BrandMark, PageActions, AppContainer } from '@/components/primitives'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { ListEditor } from '@/components/list-editor'
 import { PublicListView } from '@/components/public-list-view'
 import { CreateList } from '@/components/create-list'
@@ -20,6 +22,8 @@ export default function UserListPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showCreateList, setShowCreateList] = useState(false)
+  const [isListPublic, setIsListPublic] = useState(true)
+  const [isListPaid, setIsListPaid] = useState(false)
   const { user } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -215,7 +219,7 @@ export default function UserListPage() {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           <p className="text-muted-foreground">Loading list...</p>
@@ -227,13 +231,13 @@ export default function UserListPage() {
   // Show error state
   if (error || !currentList) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold text-foreground">
             {error === 'List not found' ? 'List not found' : 'Unable to load list'}
           </h1>
           <p className="text-muted-foreground">
-            {error === 'This list is private' 
+            {error === 'This list is private'
               ? 'This list is private and you don\'t have access to it.'
               : error === 'List not found'
               ? 'The list you\'re looking for doesn\'t exist or has been deleted.'
@@ -266,51 +270,50 @@ export default function UserListPage() {
 
   // Show editable view for authenticated owners (when not forced to public view)
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <div className="border-b border-border bg-white">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            {/* Back button */}
-            <Link 
-              href="/dashboard" 
-              className="navigation-button flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors bg-neutral-100 rounded-full no-underline"
-              style={{ fontFamily: 'Open Runde' }}
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Link>
-            
-            {/* Copy and View buttons */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={async () => {
-                  const url = `${window.location.origin}/${username}/${listId}?view=public`
-                  await navigator.clipboard.writeText(url)
-                }}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full border-0 outline-none"
-                style={{ fontFamily: 'Open Runde' }}
-              >
-                Copy
-                <Copy className="w-4 h-4" />
-              </button>
-              <Link
-                href={`/${username}/${listId}?view=public`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="navigation-button flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors bg-neutral-100 rounded-full no-underline"
-                style={{ fontFamily: 'Open Runde' }}
-              >
-                View
-                <ExternalLink className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-background">
+      <TopBar variant="app">
+        <TopBar.Left>
+          <BrandMark variant="app" href="/dashboard" />
+        </TopBar.Left>
+
+        <TopBar.Right>
+          <button
+            onClick={() => {
+              const url = `${window.location.origin}/${username}/${currentList.public_id || listId}?view=public`
+              window.open(url, '_blank')
+            }}
+            className="w-icon-button h-icon-button rounded-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors inline-flex items-center justify-center"
+            aria-label="Preview public view"
+          >
+            <Eye className="w-5 h-5" />
+          </button>
+          <button
+            onClick={async () => {
+              const url = `${window.location.origin}/${username}/${currentList.public_id || listId}`
+              await navigator.clipboard.writeText(url)
+            }}
+            className="w-icon-button h-icon-button rounded-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors inline-flex items-center justify-center"
+            aria-label="Copy link"
+          >
+            <Copy className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => {
+              // TODO: Implement menu dropdown
+              console.log('Open menu')
+            }}
+            className="w-icon-button h-icon-button rounded-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors inline-flex items-center justify-center"
+            aria-label="More options"
+          >
+            <MoreHorizontal className="w-5 h-5" />
+          </button>
+          <ThemeToggle />
+        </TopBar.Right>
+      </TopBar>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-12">
+      <AppContainer variant="app">
+        <div className="py-8">
         <ListEditor
           list={currentList}
           onUpdateList={handleUpdateList}
@@ -318,7 +321,8 @@ export default function UserListPage() {
           onRemoveLink={handleRemoveLink}
           onReorderLinks={handleReorderLinks}
         />
-      </div>
+        </div>
+      </AppContainer>
 
       {showCreateList && (
         <CreateList
