@@ -6,11 +6,13 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Script from 'next/script'
 import { ListWithLinks, Link as LinkType } from '@/types'
 import { getHostname } from '@/lib/url-utils'
 import { Favicon } from './favicon'
 import { useAuth } from '@/hooks/useAuth'
 import { Header } from './header'
+import { generateListMetadata } from '@/lib/json-ld'
 
 type ViewMode = 'menu' | 'rows' | 'grid'
 
@@ -33,9 +35,13 @@ export function PublicListView({ list }: PublicListViewProps) {
   const [hasAnimated, setHasAnimated] = useState(false)
   const router = useRouter()
   const { user } = useAuth()
-  
+
   // Get view mode from list data, default to 'menu' if not set
   const viewMode: ViewMode = (list.view_mode as ViewMode) || 'menu'
+
+  // Generate metadata for LLM consumption
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://snack.com'
+  const metadata = generateListMetadata(list, baseUrl)
   
   // Debug logging to see what data we have
   console.log('PublicListView debug:', {
@@ -138,8 +144,62 @@ export function PublicListView({ list }: PublicListViewProps) {
     trackView()
   }, [list.id])
 
+  // Update document meta tags dynamically
+  useEffect(() => {
+    // Update document title
+    document.title = metadata.title
+
+    // Helper function to set or update meta tags
+    const setMetaTag = (name: string, content: string, property = false) => {
+      const attr = property ? 'property' : 'name'
+      let meta = document.querySelector(`meta[${attr}="${name}"]`)
+      if (!meta) {
+        meta = document.createElement('meta')
+        meta.setAttribute(attr, name)
+        document.head.appendChild(meta)
+      }
+      meta.setAttribute('content', content)
+    }
+
+    // Set primary meta tags
+    setMetaTag('title', metadata.title)
+    setMetaTag('description', metadata.description)
+    if (metadata.keywords) {
+      setMetaTag('keywords', metadata.keywords)
+    }
+
+    // Set Open Graph tags
+    setMetaTag('og:type', metadata.type, true)
+    setMetaTag('og:url', metadata.url, true)
+    setMetaTag('og:title', metadata.title, true)
+    setMetaTag('og:description', metadata.description, true)
+    setMetaTag('og:site_name', metadata.siteName, true)
+    if (metadata.image) {
+      setMetaTag('og:image', metadata.image, true)
+    }
+
+    // Set Twitter tags
+    setMetaTag('twitter:card', 'summary_large_image', true)
+    setMetaTag('twitter:url', metadata.url, true)
+    setMetaTag('twitter:title', metadata.title, true)
+    setMetaTag('twitter:description', metadata.description, true)
+    setMetaTag('twitter:creator', metadata.creator, true)
+    if (metadata.image) {
+      setMetaTag('twitter:image', metadata.image, true)
+    }
+  }, [metadata])
+
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      {/* JSON-LD Structured Data for LLM Consumption */}
+      <Script
+        id="list-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(metadata.jsonLd),
+        }}
+      />
+      <div className="min-h-screen bg-background">
       {isOwner ? (
         <Header
           logoHref="/dashboard"
@@ -291,7 +351,8 @@ export function PublicListView({ list }: PublicListViewProps) {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 
