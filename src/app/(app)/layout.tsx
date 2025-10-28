@@ -1,10 +1,11 @@
 'use client'
 
+import Link from 'next/link'
+import { Bookmark, BarChart3 } from 'lucide-react'
 import { TopBar, BrandMark, UserMenu } from '@/components/primitives'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Settings } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 
 /**
@@ -20,6 +21,8 @@ export default function AppLayout({
 }) {
   const { user, loading, signOut } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const activeTab = searchParams?.get('tab')
 
   useEffect(() => {
     if (!loading && !user) {
@@ -65,18 +68,34 @@ export default function AppLayout({
         </TopBar.Left>
 
         <TopBar.Right>
-          <ThemeToggle />
-          <button
-            className="w-icon-button h-icon-button rounded-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors inline-flex items-center justify-center"
-            aria-label="Settings"
+          <Link
+            href="/dashboard?tab=saved"
+            className={`w-icon-button h-icon-button rounded-sm inline-flex items-center justify-center transition-colors ${
+              activeTab === 'saved'
+                ? 'bg-secondary text-foreground'
+                : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+            }`}
+            aria-label="Saved lists"
           >
-            <Settings className="w-5 h-5" />
-          </button>
+            <Bookmark className="w-4 h-4" />
+          </Link>
+          <Link
+            href="/dashboard?tab=stats"
+            className={`w-icon-button h-icon-button rounded-sm inline-flex items-center justify-center transition-colors ${
+              activeTab === 'stats'
+                ? 'bg-secondary text-foreground'
+                : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+            }`}
+            aria-label="Stats"
+          >
+            <BarChart3 className="w-4 h-4" />
+          </Link>
           <UserMenu
             user={user}
             onLogout={handleLogout}
             username={user.user_metadata?.username}
           />
+          <ThemeToggle />
         </TopBar.Right>
       </TopBar>
 

@@ -13,43 +13,43 @@ export async function GET(
     // Get current user (optional for public lists)
     const { data: { user } } = await supabase.auth.getUser()
     
-    // Fetch the list with links and user information
+    // Fetch the list with links
     const { data: list, error } = await supabase
       .from('lists')
       .select(`
         *,
         links (
           *
-        ),
-        users!lists_user_id_fkey (
-          id,
-          username
         )
       `)
       .eq('id', listId)
       .single()
-    
+
     if (error || !list) {
       return NextResponse.json({ error: 'List not found' }, { status: 404 })
     }
-    
+
     // Check if user has permission to view the list
     if (!list.is_public && list.user_id !== user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
-    
+
+    // Fetch user data separately
+    const { data: userData } = await supabase
+      .from('users')
+      .select('id, username')
+      .eq('id', list.user_id)
+      .single()
+
     // Sort links by position and format response
     const listWithSortedLinks = {
       ...list,
       links: list.links?.sort((a: any, b: any) => a.position - b.position) || [],
-      user: list.users ? {
-        id: list.users.id,
-        username: list.users.username
+      user: userData ? {
+        id: userData.id,
+        username: userData.username
       } : null
     }
-    
-    // Remove the nested users object from the response
-    delete (listWithSortedLinks as any).users
     
     return NextResponse.json({ data: listWithSortedLinks })
   } catch (error) {
@@ -117,32 +117,35 @@ export async function PATCH(
         *,
         links (
           *
-        ),
-        users!lists_user_id_fkey (
-          id,
-          username
         )
       `)
       .eq('id', listId)
       .single()
-    
+
     if (refetchError || !updatedList) {
       console.error('Error fetching updated list:', refetchError)
       // If refetch fails, at least return success since the update worked
       // The frontend can refetch the list if needed
-      return NextResponse.json({ 
-        success: true, 
-        message: 'List updated successfully but failed to return updated data' 
+      return NextResponse.json({
+        success: true,
+        message: 'List updated successfully but failed to return updated data'
       })
     }
-    
+
+    // Fetch user data separately
+    const { data: userData } = await supabase
+      .from('users')
+      .select('id, username')
+      .eq('id', updatedList.user_id)
+      .single()
+
     // Sort links by position and format response
     const listWithSortedLinks = {
       ...updatedList,
       links: updatedList.links?.sort((a: any, b: any) => a.position - b.position) || [],
-      user: updatedList.users ? {
-        id: updatedList.users.id,
-        username: updatedList.users.username
+      user: userData ? {
+        id: userData.id,
+        username: userData.username
       } : null
     }
     

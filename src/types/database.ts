@@ -55,9 +55,6 @@ export interface Database {
           view_mode: string
           is_public: boolean
           save_count: number // Counter cache for performance
-          ai_summary: string | null // AI-generated summary for LLM consumption
-          ai_themes: string[] | null // Array of key themes/topics
-          ai_generated_at: string | null // Timestamp when AI summary was generated
           created_at: string
           updated_at: string
         }
@@ -72,9 +69,6 @@ export interface Database {
           view_mode?: string
           is_public?: boolean
           save_count?: number
-          ai_summary?: string | null
-          ai_themes?: string[] | null
-          ai_generated_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -87,9 +81,6 @@ export interface Database {
           view_mode?: string
           is_public?: boolean
           save_count?: number
-          ai_summary?: string | null
-          ai_themes?: string[] | null
-          ai_generated_at?: string | null
           updated_at?: string
         }
       }

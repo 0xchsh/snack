@@ -199,13 +199,13 @@ export default function UsernamePage() {
           {/* Lists */}
           <div className="flex flex-col gap-3">
             {profile.lists.length > 0 ? (
-              profile.lists.map((list, index) => {
+              profile.lists.map((list) => {
                 const linkCount = list.links?.[0]?.count || 0
                 return (
                   <div key={list.id}>
                     <Link
                       href={`/${profile.user.username}/${list.public_id || list.id}`}
-                      className="flex items-center justify-between hover:bg-accent/50 transition-colors group cursor-pointer"
+                      className="flex items-center justify-between px-3 py-3 bg-muted hover:bg-muted/80 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-lg group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
@@ -230,9 +230,6 @@ export default function UsernamePage() {
                         {linkCount} {linkCount === 1 ? 'link' : 'links'}
                       </span>
                     </Link>
-                    {index < profile.lists.length - 1 && (
-                      <div className="border-b border-border" />
-                    )}
                   </div>
                 )
               })

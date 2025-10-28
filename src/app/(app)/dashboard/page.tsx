@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { List, Plus, Bookmark, BarChart3 } from 'lucide-react'
+import { List, Plus } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useLists } from '@/hooks/useLists'
-import { PrimaryNav, AppContainer } from '@/components/primitives'
+import { AppContainer } from '@/components/primitives'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { ListWithLinks } from '@/types'
 
@@ -19,10 +19,31 @@ export default function DashboardPage() {
   const { lists, loading: listsLoading, createEmptyList } = useLists()
   const [mounted, setMounted] = useState(false)
   const [creatingList, setCreatingList] = useState(false)
+  const [analyticsData, setAnalyticsData] = useState<{
+    totalViews: number
+    totalClicks: number
+    listStats: Record<string, { views: number; clicks: number }>
+  } | null>(null)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Fetch analytics data when on stats tab
+  useEffect(() => {
+    if (tab === 'stats' && user) {
+      fetch('/api/analytics/stats')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setAnalyticsData(data.data)
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching analytics:', error)
+        })
+    }
+  }, [tab, user])
 
   const handleCreateList = async () => {
     setCreatingList(true)
@@ -60,30 +81,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Secondary Navigation - Tabs */}
-      <div className="border-b border-border">
-        <AppContainer variant="app">
-          <div className="py-3">
-            <PrimaryNav
-              tabs={[
-                {
-                  label: 'Saved',
-                  icon: <Bookmark className="w-3.5 h-3.5" />,
-                  href: '/dashboard?tab=saved',
-                  isActive: tab === 'saved' || !tab
-                },
-                {
-                  label: 'Stats',
-                  icon: <BarChart3 className="w-3.5 h-3.5" />,
-                  href: '/dashboard?tab=stats',
-                  isActive: tab === 'stats'
-                }
-              ]}
-            />
-          </div>
-        </AppContainer>
-      </div>
-
       <AppContainer variant="app">
         <div className="py-8">
         {tab === 'your-lists' || !tab ? (
@@ -113,7 +110,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Lists */}
-            <div className="space-y-0">
+            <div className="space-y-3">
               {lists.length === 0 ? (
                 <div className="text-center py-16">
                   <div className="w-16 h-16 bg-secondary flex items-center justify-center text-2xl mx-auto mb-4">
@@ -132,11 +129,11 @@ export default function DashboardPage() {
                   </button>
                 </div>
               ) : (
-                lists.map((list, index) => (
+                lists.map((list) => (
                   <div key={list.id}>
                     <Link
                       href={`/${user.username}/${list.public_id || list.id}`}
-                      className="flex items-center justify-between py-3 hover:bg-accent/50 transition-colors group"
+                      className="flex items-center justify-between px-3 py-3 bg-muted hover:bg-muted/80 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-lg group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-base">{list.emoji || '📋'}</span>
@@ -148,9 +145,6 @@ export default function DashboardPage() {
                         {list.links?.length || 0} links
                       </span>
                     </Link>
-                    {index < lists.length - 1 && (
-                      <div className="border-b border-border" />
-                    )}
                   </div>
                 ))
               )}
@@ -188,33 +182,37 @@ export default function DashboardPage() {
                 <div className="text-sm text-muted-foreground">links</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-foreground">6.9k</div>
+                <div className="text-2xl font-bold text-foreground">
+                  {analyticsData ? analyticsData.totalViews.toLocaleString() : '0'}
+                </div>
                 <div className="text-sm text-muted-foreground">views</div>
               </div>
             </div>
 
             {/* Per-list stats */}
-            <div className="space-y-0">
-              {lists.map((list, index) => (
-                <div key={list.id}>
-                  <div className="flex items-center justify-between py-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-base">{list.emoji || '📋'}</span>
-                      <span className="text-base text-foreground">
-                        {list.title || 'Untitled List'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>🔗 {list.links?.length || 0}</span>
-                      <span>👁️ 69k</span>
-                      <span>👥 4.2k</span>
+            <div className="space-y-3">
+              {lists.map((list) => {
+                const listId = list.public_id || list.id
+                const stats = analyticsData?.listStats[listId] || { views: 0, clicks: 0 }
+
+                return (
+                  <div key={list.id}>
+                    <div className="flex items-center justify-between px-3 py-3 bg-muted hover:bg-muted/80 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-lg">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="text-base">{list.emoji || '📋'}</span>
+                        <span className="text-base text-foreground truncate">
+                          {list.title || 'Untitled List'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground flex-shrink-0">
+                        <span>🔗 {list.links?.length || 0}</span>
+                        <span>👁️ {stats.views.toLocaleString()}</span>
+                        <span>👥 {stats.clicks.toLocaleString()}</span>
+                      </div>
                     </div>
                   </div>
-                  {index < lists.length - 1 && (
-                    <div className="border-b border-border" />
-                  )}
-                </div>
-              ))}
+                )
+              })}
             </div>
           </>
         ) : null}

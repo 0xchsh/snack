@@ -24,11 +24,11 @@ type ViewMode = 'menu' | 'rows' | 'grid'
 function GhostLinkItem({ viewMode }: { viewMode: ViewMode }) {
   if (viewMode === 'menu') {
     return (
-      <div className="bg-muted rounded-xl p-3 animate-pulse">
+      <div className="bg-muted rounded-lg px-3 py-3 animate-pulse">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 rounded-md bg-accent flex-shrink-0"></div>
+          <div className="w-5 h-5 rounded-md bg-accent flex-shrink-0" />
           <div className="flex-1">
-            <div className="h-4 bg-accent rounded w-3/4"></div>
+            <div className="h-4 bg-accent rounded w-3/4" />
           </div>
         </div>
       </div>
@@ -91,7 +91,7 @@ export function ListEditor({
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [isDragging, setIsDragging] = useState(false)
-  const [draggedItemPosition, setDraggedItemPosition] = useState({ x: 0, y: 0 })
+  const [draggedItemPosition, setDraggedItemPosition] = useState({ x: 0, y: 0, width: 0 })
   const dragStartPosition = useRef({ x: 0, y: 0 })
   const dragOffset = useRef({ x: 0, y: 0 })
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
@@ -218,7 +218,8 @@ export function ListEditor({
     setIsDragging(true)
     setDraggedItemPosition({
       x: e.clientX - dragOffset.current.x,
-      y: e.clientY - dragOffset.current.y
+      y: e.clientY - dragOffset.current.y,
+      width: rect.width
     })
     
     document.body.style.cursor = 'grabbing'
@@ -229,10 +230,11 @@ export function ListEditor({
     if (!isDragging || !draggedItemId) return
     
     // Update drag preview position
-    setDraggedItemPosition({
+    setDraggedItemPosition(prev => ({
       x: e.clientX - dragOffset.current.x,
-      y: e.clientY - dragOffset.current.y
-    })
+      y: e.clientY - dragOffset.current.y,
+      width: prev.width
+    }))
     
     // Find which item we're hovering over (menu view only)
     const container = document.querySelector('.draggable-list-container')
@@ -321,6 +323,7 @@ export function ListEditor({
     setIsDragging(false)
     setDraggedItemId(null)
     setDragOverIndex(null)
+    setDraggedItemPosition({ x: 0, y: 0, width: 0 })
     document.body.style.cursor = 'auto'
     document.body.style.userSelect = 'auto'
   }, [])
@@ -405,7 +408,22 @@ export function ListEditor({
   // Paste from clipboard
   const pasteFromClipboard = async () => {
     setShowMoreMenu(false)
-    
+
+    // Check if we're on mobile (where clipboard API is more restricted)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
+    if (isMobile) {
+      // On mobile, focus the hidden paste input to trigger the keyboard and paste
+      const pasteInput = document.getElementById('mobile-paste-input') as HTMLInputElement
+      if (pasteInput) {
+        pasteInput.focus()
+        pasteInput.select()
+        // Show a helpful message
+        setLinkError('Tap and hold in the text field that appeared, then select "Paste"')
+      }
+      return
+    }
+
     try {
       const text = await navigator.clipboard.readText()
       if (text) {
@@ -414,7 +432,7 @@ export function ListEditor({
           .split(/[\n,\s]+/)
           .map(url => url.trim())
           .filter(url => url)
-        
+
         const validUrls: string[] = []
         urls.forEach(url => {
           const { isValid, normalizedUrl } = validateAndNormalizeUrl(url)
@@ -422,7 +440,7 @@ export function ListEditor({
             validUrls.push(normalizedUrl)
           }
         })
-        
+
         if (validUrls.length > 0) {
           // Add ghost loading placeholders immediately
           setLoadingLinks(validUrls)
@@ -445,11 +463,7 @@ export function ListEditor({
       }
     } catch (error) {
       console.error('Failed to read clipboard:', error)
-      if (error instanceof DOMException && error.name === 'NotAllowedError') {
-        setLinkError('Clipboard access denied. Please allow clipboard permissions in your browser settings and try again.')
-      } else {
-        setLinkError('Failed to access clipboard. Please try again.')
-      }
+      // Don't show error for desktop - they can try Cmd+V
     }
   }
 
@@ -694,25 +708,77 @@ export function ListEditor({
         </div>
       )}
 
+      {/* Hidden paste input for mobile */}
+      <input
+        id="mobile-paste-input"
+        type="text"
+        className="sr-only"
+        placeholder="Paste your links here"
+        onPaste={async (e) => {
+          e.preventDefault()
+          const text = e.clipboardData.getData('text')
+          if (text) {
+            // Hide the input and clear error
+            const input = e.target as HTMLInputElement
+            input.blur()
+            input.value = ''
+            setLinkError('')
+
+            // Parse URLs from pasted text
+            const urls = text
+              .split(/[\n,\s]+/)
+              .map(url => url.trim())
+              .filter(url => url)
+
+            const validUrls: string[] = []
+            urls.forEach(url => {
+              const { isValid, normalizedUrl } = validateAndNormalizeUrl(url)
+              if (isValid && normalizedUrl) {
+                validUrls.push(normalizedUrl)
+              }
+            })
+
+            if (validUrls.length > 0) {
+              // Add ghost loading placeholders immediately
+              setLoadingLinks(validUrls)
+
+              for (let i = 0; i < validUrls.length; i++) {
+                const url = validUrls[i]
+                if (url) {
+                  await onAddLink?.({
+                    url,
+                    title: url
+                  })
+
+                  // Remove from loading state as each one completes
+                  setLoadingLinks(prev => prev.filter(loadingUrl => loadingUrl !== url))
+                }
+              }
+            }
+          }
+        }}
+        style={{ position: 'absolute', left: '-9999px', opacity: 0 }}
+      />
+
       {/* Links List - Menu View Only */}
-      <div className="space-y-3">
+      <div className="flex flex-col gap-3">
         {/* Ghost loading placeholders */}
         {loadingLinks.map((url, index) => (
           <GhostLinkItem key={`ghost-${url}-${index}`} viewMode="menu" />
         ))}
 
         {/* Draggable list */}
-        <div className="relative draggable-list-container">
+        <div className="relative draggable-list-container flex flex-col gap-3">
           {(optimisticList.links || []).map((link, index) => (
             <div
               key={link.id}
+              data-link-id={link.id}
               onMouseDown={(e) => handleMouseDown(e, link.id, index)}
               className={`
-                mb-3 last:mb-0
-                transition-all duration-300 ease-out cursor-grab select-none
+                transition-all duration-300 ease-out select-none
                 ${draggedItemId === link.id ? 'opacity-30' : 'opacity-100'}
                 ${dragOverIndex === index && draggedItemId !== link.id ?
-                  'transform translate-y-2 ring-1 ring-foreground rounded-xl' : ''}
+                  'transform translate-y-2 ring-1 ring-foreground rounded-lg' : ''}
               `}
             >
               <LinkItem
@@ -734,7 +800,7 @@ export function ListEditor({
                 style={{
                   left: `${draggedItemPosition.x}px`,
                   top: `${draggedItemPosition.y}px`,
-                  width: '400px',
+                  width: `${draggedItemPosition.width || 0}px`,
                   transform: 'rotate(1deg) scale(1.02)',
                   filter: 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.2))',
                   opacity: 0.95
@@ -791,41 +857,38 @@ function LinkItem({
   if (viewMode === 'menu') {
     // Compact rows - clean list layout
     return (
-      <div>
-        <div className="flex items-center gap-3 px-2 py-3 hover:bg-accent/50 transition-colors group cursor-grab">
-          <div className="w-5 h-5 flex-shrink-0">
-            <Favicon
-              url={link.url}
-              size={20}
-            />
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <h3 className="text-base text-foreground truncate">
-              {link.title || getHostname(link.url)}
-            </h3>
-          </div>
-
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-            <div className="text-muted-foreground p-1" title="Drag to reorder">
-              <GripVertical className="w-4 h-4" />
-            </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onRemove()
-              }}
-              onMouseDown={(e) => {
-                e.stopPropagation()
-              }}
-              className="text-red-600 hover:text-red-700 transition-colors p-1 cursor-pointer"
-              title="Delete link"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
+      <div className="flex items-center gap-3 px-3 py-3 bg-muted hover:bg-muted/80 transition-transform transform hover:scale-[0.99] active:scale-[0.97] group cursor-grab rounded-lg select-none">
+        <div className="w-5 h-5 flex-shrink-0">
+          <Favicon
+            url={link.url}
+            size={20}
+          />
         </div>
-        <div className="border-b border-dashed border-border" />
+
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base text-foreground truncate">
+            {link.title || getHostname(link.url)}
+          </h3>
+        </div>
+
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 ml-auto">
+          <div className="text-muted-foreground p-1 cursor-grab" title="Drag to reorder">
+            <GripVertical className="w-4 h-4" />
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove()
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation()
+            }}
+            className="text-red-600 hover:text-red-700 transition-colors p-1 cursor-pointer"
+            title="Delete link"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     )
   }
@@ -1035,4 +1098,3 @@ function LinkItem({
     </div>
   )
 }
-

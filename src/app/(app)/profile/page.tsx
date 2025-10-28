@@ -4,9 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { User, CreditCard, Shield, Camera, Mail, Edit, Trash2, ArrowLeft, ExternalLink, Eye, EyeOff, Bookmark } from 'lucide-react'
+import { User, CreditCard, Shield, Camera, Mail, Edit, Trash2, ExternalLink, Eye, EyeOff, Bookmark } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
-import { ThemeToggle } from '@/components/theme-toggle'
 
 type ProfileTab = 'account' | 'billing' | 'security'
 
@@ -54,36 +53,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border bg-background">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <Link href="/dashboard" className="flex items-center">
-              <Image
-                src="/images/logo.svg"
-                alt="Snack"
-                width={24}
-                height={24}
-                className="w-6 h-6"
-              />
-            </Link>
-
-            <div className="flex items-center gap-3">
-              <ThemeToggle />
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
-                style={{ fontFamily: 'Open Runde' }}
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Dashboard
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
       <div className="container mx-auto px-6 py-8">
         {/* Navigation Tabs */}
         <div className="flex items-center justify-center mb-12">
@@ -295,9 +264,9 @@ function AccountTab({ user }: { user: any }) {
       {/* Status Message */}
       {message && (
         <div className={`p-4 rounded-lg ${
-          message.type === 'success' 
-            ? 'bg-green-50 border border-green-200 text-green-800' 
-            : 'bg-red-50 border border-red-200 text-red-800'
+          message.type === 'success'
+            ? 'bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
+            : 'bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
         }`}>
           {message.text}
         </div>
@@ -656,19 +625,19 @@ function SecurityTab({ user }: { user: any }) {
       </div>
 
       {/* Account Deletion */}
-      <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+      <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-xl p-6">
         <div className="flex items-start gap-4">
-          <div className="p-2 bg-red-100 rounded-lg">
-            <Trash2 className="w-5 h-5 text-red-600" />
+          <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
+            <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-red-900 mb-2" style={{ fontFamily: 'Open Runde' }}>
+            <h3 className="font-semibold text-red-900 dark:text-red-200 mb-2" style={{ fontFamily: 'Open Runde' }}>
               Delete Account
             </h3>
-            <p className="text-red-700 text-sm mb-4">
+            <p className="text-red-700 dark:text-red-300 text-sm mb-4">
               Permanently delete your account and all associated data. This action cannot be undone.
             </p>
-            <button className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold">
+            <button className="px-6 py-2 bg-red-600 dark:bg-red-700 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors font-semibold">
               Delete Account
             </button>
           </div>

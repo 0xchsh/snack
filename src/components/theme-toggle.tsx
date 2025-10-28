@@ -14,13 +14,14 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="inline-flex items-center justify-center w-[42px] h-[42px] border border-border rounded-sm text-muted-foreground hover:text-foreground transition-colors"
+      className="inline-flex items-center justify-center w-icon-button h-icon-button rounded-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       aria-label="Toggle theme"
+      aria-pressed={theme === 'dark'}
     >
       {theme === 'light' ? (
-        <Sun className="w-5 h-5" />
+        <Sun className="w-5 h-5" strokeWidth={2} />
       ) : (
-        <Moon className="w-5 h-5" />
+        <Moon className="w-5 h-5" strokeWidth={2} />
       )}
     </button>
   )
