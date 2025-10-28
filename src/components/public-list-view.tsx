@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, memo } from 'react'
 import { Copy, Clock, Link as LinkIcon, Eye, Bookmark, Edit, BarChart3 } from 'lucide-react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
@@ -31,23 +31,13 @@ function formatCount(count: number): string {
 export function PublicListView({ list }: PublicListViewProps) {
   const [clickedLinks, setClickedLinks] = useState<Set<string>>(new Set())
   const [hasAnimated, setHasAnimated] = useState(false)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const router = useRouter()
   const { user } = useAuth()
-  
+
   // Get view mode from list data, default to 'menu' if not set
   const viewMode: ViewMode = (list.view_mode as ViewMode) || 'menu'
-  
-  // Debug logging to see what data we have
-  console.log('PublicListView debug:', {
-    listUser: list.user,
-    currentUser: user,
-    listUserId: list.user_id,
-    currentUserId: user?.id,
-    isOwner: user && list.user_id === user.id,
-    viewMode,
-    listViewMode: list.view_mode
-  })
-  
+
   // Get display name - prioritize current user's data for their own lists
   const isOwner = user && list.user_id === user.id
   
@@ -91,7 +81,7 @@ export function PublicListView({ list }: PublicListViewProps) {
         })
       })
     } catch (error) {
-      console.error('Failed to track click:', error)
+      // Silently fail - analytics shouldn't block UX
     }
     
     window.open(url, '_blank', 'noopener,noreferrer')
@@ -108,6 +98,19 @@ export function PublicListView({ list }: PublicListViewProps) {
   const handleLogin = () => {
     router.push('/auth/sign-in')
   }
+
+  // Check for reduced motion preference
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setPrefersReducedMotion(mediaQuery.matches)
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches)
+    }
+
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [])
 
   // Set hasAnimated to true after initial render
   useEffect(() => {
@@ -131,7 +134,7 @@ export function PublicListView({ list }: PublicListViewProps) {
           })
         })
       } catch (error) {
-        console.error('Failed to track view:', error)
+        // Silently fail - analytics shouldn't block UX
       }
     }
 
@@ -160,8 +163,7 @@ export function PublicListView({ list }: PublicListViewProps) {
               label: 'Stats',
               icon: <BarChart3 className="w-4 h-4" />,
               onClick: () => {
-                // TODO: Navigate to stats view
-                console.log('View stats')
+                router.push('/dashboard?tab=stats')
               },
               className: "flex items-center gap-2 px-4 py-2 text-base font-medium border border-border text-muted-foreground hover:text-foreground transition-colors rounded-sm"
             },
@@ -196,8 +198,8 @@ export function PublicListView({ list }: PublicListViewProps) {
         />
       )}
       
-      <div className="mx-auto py-12 max-w-[560px]">
-        <div className="flex flex-col gap-6">
+      <div className="mx-auto py-6 md:py-12 max-w-[560px] px-4 md:px-0">
+        <div className="flex flex-col gap-4 md:gap-6">
           {/* Emoji */}
           <div className="w-12 h-12">
             <span className="text-5xl">{list.emoji}</span>
@@ -245,26 +247,26 @@ export function PublicListView({ list }: PublicListViewProps) {
           </div>
 
           {/* Stats */}
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             {/* Left: Today */}
             <div className="bg-muted rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-muted-foreground" />
-              <span className="text-base text-muted-foreground">Today</span>
+              <span className="text-sm sm:text-base text-muted-foreground">Today</span>
             </div>
 
             {/* Right: Links, Views, Saves */}
-            <div className="flex items-center gap-3">
-              <div className="bg-muted rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <div className="bg-muted rounded-md px-2.5 sm:px-3 py-1.5 h-9 flex items-center gap-1.5">
                 <LinkIcon className="w-4 h-4 text-muted-foreground" />
-                <span className="text-base text-muted-foreground">{list.links?.length || 0}</span>
+                <span className="text-sm sm:text-base text-muted-foreground">{list.links?.length || 0}</span>
               </div>
-              <div className="bg-muted rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
+              <div className="bg-muted rounded-md px-2.5 sm:px-3 py-1.5 h-9 flex items-center gap-1.5">
                 <Eye className="w-4 h-4 text-muted-foreground" />
-                <span className="text-base text-muted-foreground">69K</span>
+                <span className="text-sm sm:text-base text-muted-foreground">69K</span>
               </div>
-              <div className="bg-muted rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
+              <div className="bg-muted rounded-md px-2.5 sm:px-3 py-1.5 h-9 flex items-center gap-1.5">
                 <Bookmark className="w-4 h-4 text-muted-foreground" />
-                <span className="text-base text-muted-foreground">{formatCount(list.save_count || 0)}</span>
+                <span className="text-sm sm:text-base text-muted-foreground">{formatCount(list.save_count || 0)}</span>
               </div>
             </div>
           </div>
@@ -281,6 +283,7 @@ export function PublicListView({ list }: PublicListViewProps) {
                   index={index}
                   viewMode="menu"
                   hasAnimated={hasAnimated}
+                  prefersReducedMotion={prefersReducedMotion}
                 />
               ))
             ) : (
@@ -302,15 +305,17 @@ interface PublicLinkItemProps {
   index: number
   viewMode: ViewMode
   hasAnimated: boolean
+  prefersReducedMotion: boolean
 }
 
-function PublicLinkItem({ 
-  link, 
-  onClick, 
-  isClicked, 
+const PublicLinkItem = memo(function PublicLinkItem({
+  link,
+  onClick,
+  isClicked,
   index,
   viewMode,
-  hasAnimated
+  hasAnimated,
+  prefersReducedMotion
 }: PublicLinkItemProps) {
   
   if (viewMode === 'menu') {
@@ -345,9 +350,9 @@ function PublicLinkItem({
     // Larger cards as rows - medium layout (exact match to edit view)
     return (
       <motion.div
-        initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+        initial={hasAnimated || prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={hasAnimated ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
+        transition={hasAnimated || prefersReducedMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
         className="bg-muted rounded-2xl p-4 hover:bg-accent transition-all cursor-pointer group"
         onClick={onClick}
       >
@@ -424,9 +429,9 @@ function PublicLinkItem({
   // Grid layout - largest cards (exact match to edit view)
   return (
     <motion.div
-      initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+      initial={hasAnimated || prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={hasAnimated ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
+      transition={hasAnimated || prefersReducedMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
       className="bg-muted rounded-xl hover:bg-accent transition-all cursor-pointer group overflow-hidden"
       onClick={onClick}
     >
@@ -503,4 +508,4 @@ function PublicLinkItem({
       </div>
     </motion.div>
   )
-}
+})

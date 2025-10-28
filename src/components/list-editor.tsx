@@ -92,11 +92,22 @@ export function ListEditor({
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [draggedItemPosition, setDraggedItemPosition] = useState({ x: 0, y: 0, width: 0 })
+  const [isMobile, setIsMobile] = useState(false)
   const dragStartPosition = useRef({ x: 0, y: 0 })
   const dragOffset = useRef({ x: 0, y: 0 })
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
   const titleTextareaRef = useRef<HTMLTextAreaElement>(null)
   const moreMenuRef = useRef<HTMLDivElement>(null)
+  const mobilePasteInputRef = useRef<HTMLInputElement>(null)
+
+  // Detect mobile device on mount
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+      setIsMobile(isMobileDevice)
+    }
+    checkMobile()
+  }, [])
 
   // Auto-resize textarea based on content
   const adjustTextareaHeight = useCallback(() => {
@@ -405,66 +416,69 @@ export function ListEditor({
     URL.revokeObjectURL(url)
   }
 
-  // Paste from clipboard
+  // Helper function to process pasted URLs (shared by desktop and mobile)
+  const processPastedText = async (text: string) => {
+    if (!text) return
+
+    // Clear any previous errors
+    setLinkError('')
+
+    // Parse URLs from clipboard and add them directly
+    const urls = text
+      .split(/[\n,\s]+/)
+      .map(url => url.trim())
+      .filter(url => url)
+
+    const validUrls: string[] = []
+    urls.forEach(url => {
+      const { isValid, normalizedUrl } = validateAndNormalizeUrl(url)
+      if (isValid && normalizedUrl) {
+        validUrls.push(normalizedUrl)
+      }
+    })
+
+    if (validUrls.length > 0) {
+      // Add ghost loading placeholders immediately
+      setLoadingLinks(validUrls)
+
+      for (let i = 0; i < validUrls.length; i++) {
+        const url = validUrls[i]
+        if (url) {
+          await onAddLink?.({
+            url,
+            title: url // Use URL as default title, it will be updated with OG data
+          })
+
+          // Remove from loading state as each one completes
+          setLoadingLinks(prev => prev.filter(loadingUrl => loadingUrl !== url))
+        }
+      }
+    }
+  }
+
+  // Paste from clipboard (desktop only - mobile uses visible input)
   const pasteFromClipboard = async () => {
     setShowMoreMenu(false)
 
-    // Check if we're on mobile (where clipboard API is more restricted)
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-
-    if (isMobile) {
-      // On mobile, focus the hidden paste input to trigger the keyboard and paste
-      const pasteInput = document.getElementById('mobile-paste-input') as HTMLInputElement
-      if (pasteInput) {
-        pasteInput.focus()
-        pasteInput.select()
-        // Show a helpful message
-        setLinkError('Tap and hold in the text field that appeared, then select "Paste"')
-      }
-      return
-    }
-
     try {
       const text = await navigator.clipboard.readText()
-      if (text) {
-        // Parse URLs from clipboard and add them directly (don't put in input field)
-        const urls = text
-          .split(/[\n,\s]+/)
-          .map(url => url.trim())
-          .filter(url => url)
-
-        const validUrls: string[] = []
-        urls.forEach(url => {
-          const { isValid, normalizedUrl } = validateAndNormalizeUrl(url)
-          if (isValid && normalizedUrl) {
-            validUrls.push(normalizedUrl)
-          }
-        })
-
-        if (validUrls.length > 0) {
-          // Add ghost loading placeholders immediately
-          setLoadingLinks(validUrls)
-
-          for (let i = 0; i < validUrls.length; i++) {
-            const url = validUrls[i]
-            if (url) {
-              await onAddLink?.({
-                url,
-                title: url // Use URL as default title, it will be updated with OG data
-              })
-
-              // Remove from loading state as each one completes
-              setLoadingLinks(prev => prev.filter(loadingUrl => loadingUrl !== url))
-            }
-          }
-        }
-        // If no valid URLs found, silently ignore the paste
-        // (don't put non-URL text in the input field)
-      }
+      await processPastedText(text)
     } catch (error) {
-      console.error('Failed to read clipboard:', error)
-      // Don't show error for desktop - they can try Cmd+V
+      // Silently ignore clipboard errors - user can try Cmd+V
     }
+  }
+
+  // Handle mobile paste input
+  const handleMobilePaste = async (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    const text = e.clipboardData.getData('text')
+
+    // Clear the input immediately
+    if (mobilePasteInputRef.current) {
+      mobilePasteInputRef.current.value = ''
+    }
+
+    await processPastedText(text)
   }
 
   // Copy public list link
@@ -685,20 +699,34 @@ export function ListEditor({
         )}
       </div>
 
-      {/* Link count and Paste button */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-muted-foreground bg-muted px-3 py-2 rounded-sm">
+      {/* Link count and Paste button/input */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-muted-foreground bg-muted px-3 py-2 rounded-sm flex-shrink-0">
           <Link2 className="w-4 h-4" />
           <span className="text-base">{optimisticList.links?.length || 0} links</span>
         </div>
 
-        <button
-          onClick={pasteFromClipboard}
-          className="flex items-center gap-2 px-4 py-2 border border-border rounded-sm text-base text-muted-foreground hover:text-foreground hover:border-muted-foreground transition-colors"
-        >
-          <span>Paste links</span>
-          <span className="text-sm">⌘V</span>
-        </button>
+        {/* Desktop: Paste button */}
+        {!isMobile && (
+          <button
+            onClick={pasteFromClipboard}
+            className="flex items-center gap-2 px-4 py-2 border border-border rounded-sm text-base text-muted-foreground hover:text-foreground hover:border-muted-foreground transition-colors flex-shrink-0"
+          >
+            <span>Paste links</span>
+            <span className="text-sm">⌘V</span>
+          </button>
+        )}
+
+        {/* Mobile: Visible paste input */}
+        {isMobile && (
+          <input
+            ref={mobilePasteInputRef}
+            type="text"
+            placeholder="Paste link(s) here"
+            onPaste={handleMobilePaste}
+            className="flex-1 px-4 py-2 border border-border rounded-sm text-base bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-muted-foreground transition-colors min-w-0"
+          />
+        )}
       </div>
 
       {/* Error message */}
@@ -707,58 +735,6 @@ export function ListEditor({
           {linkError}
         </div>
       )}
-
-      {/* Hidden paste input for mobile */}
-      <input
-        id="mobile-paste-input"
-        type="text"
-        className="sr-only"
-        placeholder="Paste your links here"
-        onPaste={async (e) => {
-          e.preventDefault()
-          const text = e.clipboardData.getData('text')
-          if (text) {
-            // Hide the input and clear error
-            const input = e.target as HTMLInputElement
-            input.blur()
-            input.value = ''
-            setLinkError('')
-
-            // Parse URLs from pasted text
-            const urls = text
-              .split(/[\n,\s]+/)
-              .map(url => url.trim())
-              .filter(url => url)
-
-            const validUrls: string[] = []
-            urls.forEach(url => {
-              const { isValid, normalizedUrl } = validateAndNormalizeUrl(url)
-              if (isValid && normalizedUrl) {
-                validUrls.push(normalizedUrl)
-              }
-            })
-
-            if (validUrls.length > 0) {
-              // Add ghost loading placeholders immediately
-              setLoadingLinks(validUrls)
-
-              for (let i = 0; i < validUrls.length; i++) {
-                const url = validUrls[i]
-                if (url) {
-                  await onAddLink?.({
-                    url,
-                    title: url
-                  })
-
-                  // Remove from loading state as each one completes
-                  setLoadingLinks(prev => prev.filter(loadingUrl => loadingUrl !== url))
-                }
-              }
-            }
-          }
-        }}
-        style={{ position: 'absolute', left: '-9999px', opacity: 0 }}
-      />
 
       {/* Links List - Menu View Only */}
       <div className="flex flex-col gap-3">
