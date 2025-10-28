@@ -198,7 +198,7 @@ export function PublicListView({ list }: PublicListViewProps) {
         />
       )}
       
-      <div className="mx-auto py-6 md:py-12 max-w-[560px] px-4 md:px-0">
+      <div className="mx-auto py-6 md:py-12 max-w-container-app px-4 md:px-0">
         <div className="flex flex-col gap-4 md:gap-6">
           {/* Emoji */}
           <div className="w-12 h-12">
