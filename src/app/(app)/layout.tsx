@@ -6,7 +6,7 @@ import { TopBar, BrandMark, UserMenu } from '@/components/primitives'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 
 /**
  * App Layout
@@ -14,7 +14,7 @@ import { useEffect } from 'react'
  * Used for authenticated app pages: dashboard, profile, lists
  * Requires authentication and shows user menu
  */
-export default function AppLayout({
+function AppLayoutContent({
   children,
 }: {
   children: React.ReactNode
@@ -103,5 +103,24 @@ export default function AppLayout({
         {children}
       </main>
     </>
+  )
+}
+
+export default function AppLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
+      <AppLayoutContent>{children}</AppLayoutContent>
+    </Suspense>
   )
 }
