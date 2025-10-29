@@ -307,13 +307,15 @@ export default function ListPage({ params }: ListPageProps) {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
-        <ListEditor
-          list={currentList}
-          onUpdateList={handleUpdateList}
-          onAddLink={handleAddLink}
-          onRemoveLink={handleRemoveLink}
-          onReorderLinks={handleReorderLinks}
-        />
+        <div className="max-w-[560px] w-full mx-auto">
+          <ListEditor
+            list={currentList}
+            onUpdateList={handleUpdateList}
+            onAddLink={handleAddLink}
+            onRemoveLink={handleRemoveLink}
+            onReorderLinks={handleReorderLinks}
+          />
+        </div>
       </div>
 
       {showCreateList && (

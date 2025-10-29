@@ -12,7 +12,7 @@ import { Favicon } from './favicon'
 import { useAuth } from '@/hooks/useAuth'
 import { Header } from './header'
 
-type ViewMode = 'menu' | 'rows' | 'grid'
+type ViewMode = 'row' | 'card'
 
 interface PublicListViewProps {
   list: ListWithLinks
@@ -35,8 +35,8 @@ export function PublicListView({ list }: PublicListViewProps) {
   const router = useRouter()
   const { user } = useAuth()
 
-  // Get view mode from list data, default to 'menu' if not set
-  const viewMode: ViewMode = (list.view_mode as ViewMode) || 'menu'
+  // Get view mode from list data, default to 'row' if not set
+  const viewMode: ViewMode = (list.view_mode as ViewMode) || 'row'
 
   // Get display name - prioritize current user's data for their own lists
   const isOwner = user && list.user_id === user.id
@@ -62,8 +62,8 @@ export function PublicListView({ list }: PublicListViewProps) {
     displayInitial = displayName.startsWith('@') ? displayName[1]?.toUpperCase() : displayName[0]?.toUpperCase() || 'U'
   }
   
-  // Get profile picture - use current user's profile picture if this is their list
-  const profilePictureUrl = (user && list.user_id === user.id ? user.profile_picture_url : null) || null
+  // Get profile picture - use current user's profile picture if this is their list, otherwise use list user's picture
+  const profilePictureUrl = (user && list.user_id === user.id ? user.profile_picture_url : list.user?.profile_picture_url) || null
 
   const handleLinkClick = async (linkId: string, url: string) => {
     setClickedLinks(prev => new Set(prev).add(linkId))
@@ -156,7 +156,7 @@ export function PublicListView({ list }: PublicListViewProps) {
                 const username = user?.username || list.user?.username
                 router.push(`/${username}/${list.public_id || list.id}`)
               },
-              className: "flex items-center gap-2 px-4 py-2 text-base font-medium border border-border text-muted-foreground hover:text-foreground transition-colors rounded-sm"
+              className: "flex items-center gap-2 px-4 py-2 text-base font-medium border border-border text-muted-foreground hover:text-foreground transition-colors rounded-md"
             },
             {
               type: 'custom',
@@ -165,7 +165,7 @@ export function PublicListView({ list }: PublicListViewProps) {
               onClick: () => {
                 router.push('/dashboard?tab=stats')
               },
-              className: "flex items-center gap-2 px-4 py-2 text-base font-medium border border-border text-muted-foreground hover:text-foreground transition-colors rounded-sm"
+              className: "flex items-center gap-2 px-4 py-2 text-base font-medium border border-border text-muted-foreground hover:text-foreground transition-colors rounded-md"
             },
             {
               type: 'copy',
@@ -185,20 +185,20 @@ export function PublicListView({ list }: PublicListViewProps) {
               type: 'custom',
               label: 'Dashboard',
               onClick: () => router.push('/dashboard'),
-              className: "px-4 py-2 text-base font-medium bg-primary text-primary-foreground rounded-sm hover:bg-primary/90 transition-colors"
+              className: "px-4 py-2 text-base font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
             }
           ] : [
             {
               type: 'custom',
               label: 'Make a Snack',
               onClick: handleLogin,
-              className: "px-4 py-2 text-base font-medium bg-primary text-primary-foreground rounded-sm hover:bg-primary/90 transition-colors"
+              className: "px-4 py-2 text-base font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
             }
           ]}
         />
       )}
       
-      <div className="mx-auto py-6 md:py-12 max-w-container-app px-4 md:px-0">
+      <div className="mx-auto py-6 md:py-12 max-w-[560px] px-4 md:px-0">
         <div className="flex flex-col gap-4 md:gap-6">
           {/* Emoji */}
           <div className="w-12 h-12">
@@ -272,7 +272,7 @@ export function PublicListView({ list }: PublicListViewProps) {
           </div>
 
           {/* Links List */}
-          <div className="space-y-0">
+          <div className={viewMode === 'card' ? 'space-y-6' : 'space-y-3'}>
             {list.links && list.links.length > 0 ? (
               list.links.map((link, index) => (
                 <PublicLinkItem
@@ -281,7 +281,7 @@ export function PublicListView({ list }: PublicListViewProps) {
                   onClick={() => handleLinkClick(link.id, link.url)}
                   isClicked={clickedLinks.has(link.id)}
                   index={index}
-                  viewMode="menu"
+                  viewMode={viewMode}
                   hasAnimated={hasAnimated}
                   prefersReducedMotion={prefersReducedMotion}
                 />
@@ -318,7 +318,7 @@ const PublicLinkItem = memo(function PublicLinkItem({
   prefersReducedMotion
 }: PublicLinkItemProps) {
   
-  if (viewMode === 'menu') {
+  if (viewMode === 'row') {
     // Public list view layout with domain on right
     return (
       <div
@@ -346,165 +346,89 @@ const PublicLinkItem = memo(function PublicLinkItem({
     )
   }
 
-  if (viewMode === 'rows') {
-    // Larger cards as rows - medium layout (exact match to edit view)
-    return (
-      <motion.div
-        initial={hasAnimated || prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={hasAnimated || prefersReducedMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
-        className="bg-muted rounded-2xl p-4 hover:bg-accent transition-all cursor-pointer group"
-        onClick={onClick}
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-[100px] h-14 rounded-xl overflow-hidden bg-accent flex-shrink-0 relative">
-            {link.image_url ? (
-              <>
-                <Image 
-                  src={link.image_url} 
-                  alt="" 
-                  fill
-                  className="object-cover"
-                  onError={(e) => {
-                    // Hide the failed image
-                    e.currentTarget.style.display = 'none'
-                    // Show the fallback div
-                    const fallback = e.currentTarget.nextElementSibling as HTMLElement
-                    if (fallback) {
-                      fallback.style.display = 'flex'
-                    }
-                  }}
-                />
-                {/* Fallback content (hidden by default, shown when image fails) */}
-                <div
-                  className="w-full h-full bg-background flex items-center justify-center absolute inset-0"
-                  style={{ display: 'none' }}
-                >
-                  <Favicon
-                    url={link.url}
-                    size={24}
-                    className="rounded-md"
-                  />
-                </div>
-              </>
-            ) : (
-              <div className="w-full h-full bg-background flex items-center justify-center">
-                <Favicon 
-                  url={link.url}
-                  size={24}
-                  className="rounded-md"
-                />
-              </div>
-            )}
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <h3 
-              className="text-lg font-semibold text-foreground truncate"
-              style={{ fontFamily: 'Open Runde' }}
-            >
-              {link.title || getHostname(link.url)}
-            </h3>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="w-4 h-4 rounded-sm overflow-hidden bg-muted flex-shrink-0">
-                <Favicon 
-                  url={link.url}
-                  size={16}
-                  className="rounded-sm"
-                />
-              </div>
-              <p 
-                className="text-sm text-muted-foreground/80 truncate"
-                style={{ fontFamily: 'Open Runde' }}
-              >
-                {getHostname(link.url)}
-              </p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    )
-  }
-
-  // Grid layout - largest cards (exact match to edit view)
+  // Card layout - largest cards with OG images (exact match to edit view)
   return (
     <motion.div
       initial={hasAnimated || prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={hasAnimated || prefersReducedMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
-      className="bg-muted rounded-xl hover:bg-accent transition-all cursor-pointer group overflow-hidden"
+      className="flex flex-col gap-3 cursor-pointer group"
       onClick={onClick}
     >
-      <div className="space-y-4">
-        {/* OG Image Preview */}
-        <div className="aspect-video bg-accent relative">
-          {link.image_url ? (
-            <>
-              <Image 
-                src={link.image_url} 
-                alt={link.title || ''} 
-                fill
-                className="object-cover"
-                unoptimized
-                onError={(e) => {
-                  // Hide the failed image
-                  e.currentTarget.style.display = 'none'
-                  // Show the fallback div
-                  const fallback = e.currentTarget.nextElementSibling as HTMLElement
-                  if (fallback) {
-                    fallback.style.display = 'flex'
-                  }
-                }}
-              />
-              {/* Fallback content (hidden by default, shown when image fails) */}
-              <div
-                className="w-full h-full bg-background flex items-center justify-center absolute inset-0"
-                style={{ display: 'none' }}
-              >
-                <Favicon
-                  url={link.url}
-                  size={48}
-                  className="rounded-lg"
-                  fallbackClassName="bg-muted/20 rounded-lg"
+      {/* OG Image Preview */}
+      <div className="aspect-video bg-accent relative rounded-md overflow-hidden">
+        {link.image_url ? (
+          <>
+            <Image
+              src={link.image_url}
+              alt={link.title || ''}
+              fill
+              className="object-cover"
+              unoptimized
+              onError={(e) => {
+                // Hide the failed image
+                e.currentTarget.style.display = 'none'
+                // Show the fallback div
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                if (fallback) {
+                  fallback.style.display = 'flex'
+                }
+              }}
+            />
+            {/* Fallback content (hidden by default, shown when image fails) */}
+            <div
+              className="w-full h-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center absolute inset-0"
+              style={{ display: 'none' }}
+            >
+              <div className="text-neutral-300 dark:text-neutral-600">
+                <Image
+                  src="/images/logo.svg"
+                  alt="Snack"
+                  width={48}
+                  height={48}
+                  className="w-12 h-12"
+                  style={{ filter: 'brightness(0) saturate(100%) invert(87%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(91%) contrast(89%)' }}
                 />
               </div>
-            </>
-          ) : (
-            <div className="w-full h-full bg-background flex items-center justify-center">
-              <Favicon 
-                url={link.url}
-                size={48}
-                className="rounded-lg"
-                fallbackClassName="bg-muted/20 rounded-lg"
-              />
             </div>
-          )}
-        </div>
-        
-        {/* Content */}
-        <div className="px-4 pb-4 space-y-2">
-          <h3 
+          </>
+        ) : (
+          <div className="w-full h-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center">
+            <Image
+              src="/images/logo.svg"
+              alt="Snack"
+              width={48}
+              height={48}
+              className="w-12 h-12"
+              style={{ filter: 'brightness(0) saturate(100%) invert(87%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(91%) contrast(89%)' }}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Site Info - Separated from OG Image */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="w-4 h-4 rounded-sm overflow-hidden flex-shrink-0">
+            <Favicon
+              url={link.url}
+              size={16}
+              className="rounded-sm"
+            />
+          </div>
+          <h3
             className="font-semibold text-foreground text-base leading-tight truncate"
             style={{ fontFamily: 'Open Runde' }}
           >
             {link.title || getHostname(link.url)}
           </h3>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-sm overflow-hidden bg-muted flex-shrink-0">
-              <Favicon 
-                url={link.url}
-                size={16}
-                className="rounded-sm"
-              />
-            </div>
-            <p 
-              className="text-sm text-muted-foreground/70 truncate"
-              style={{ fontFamily: 'Open Runde' }}
-            >
-              {getHostname(link.url)}
-            </p>
-          </div>
         </div>
+        <p
+          className="text-sm text-muted-foreground/70 flex-shrink-0"
+          style={{ fontFamily: 'Open Runde' }}
+        >
+          {getHostname(link.url)}
+        </p>
       </div>
     </motion.div>
   )

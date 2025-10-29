@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { getEmoji3D, getDefaultEmoji3D } from '@/lib/emoji'
 
 // GET /api/lists/[id] - Get a specific list
 export async function GET(
@@ -41,16 +42,37 @@ export async function GET(
       .eq('id', list.user_id)
       .single()
 
+    // Process emoji_3d data
+    let emoji3d = null
+    if (list.emoji_3d) {
+      try {
+        emoji3d = typeof list.emoji_3d === 'string' ? JSON.parse(list.emoji_3d) : list.emoji_3d
+      } catch (e) {
+        console.error('Failed to parse emoji_3d:', e)
+      }
+    }
+
+    // If no valid emoji_3d, try to get 3D version of the emoji
+    if (!emoji3d && list.emoji) {
+      emoji3d = getEmoji3D(list.emoji)
+    }
+
+    // If still no emoji_3d, use default
+    if (!emoji3d) {
+      emoji3d = getDefaultEmoji3D()
+    }
+
     // Sort links by position and format response
     const listWithSortedLinks = {
       ...list,
+      emoji_3d: emoji3d,
       links: list.links?.sort((a: any, b: any) => a.position - b.position) || [],
       user: userData ? {
         id: userData.id,
         username: userData.username
       } : null
     }
-    
+
     return NextResponse.json({ data: listWithSortedLinks })
   } catch (error) {
     console.error('Error in GET /api/lists/[id]:', error)
@@ -139,16 +161,37 @@ export async function PATCH(
       .eq('id', updatedList.user_id)
       .single()
 
+    // Process emoji_3d data
+    let emoji3d = null
+    if (updatedList.emoji_3d) {
+      try {
+        emoji3d = typeof updatedList.emoji_3d === 'string' ? JSON.parse(updatedList.emoji_3d) : updatedList.emoji_3d
+      } catch (e) {
+        console.error('Failed to parse emoji_3d:', e)
+      }
+    }
+
+    // If no valid emoji_3d, try to get 3D version of the emoji
+    if (!emoji3d && updatedList.emoji) {
+      emoji3d = getEmoji3D(updatedList.emoji)
+    }
+
+    // If still no emoji_3d, use default
+    if (!emoji3d) {
+      emoji3d = getDefaultEmoji3D()
+    }
+
     // Sort links by position and format response
     const listWithSortedLinks = {
       ...updatedList,
+      emoji_3d: emoji3d,
       links: updatedList.links?.sort((a: any, b: any) => a.position - b.position) || [],
       user: userData ? {
         id: userData.id,
         username: userData.username
       } : null
     }
-    
+
     return NextResponse.json({ data: listWithSortedLinks })
   } catch (error) {
     console.error('Error in PATCH /api/lists/[id]:', error)

@@ -38,41 +38,57 @@ export async function GET(
     const { data: { user: currentUser } } = await supabase.auth.getUser()
     const isOwner = currentUser?.id === user.id
 
-    // Fetch the list with links, checking ownership and visibility
-    // Use public_id for URL-friendly short IDs
-    const { data: list, error: listError } = await supabase
-      .from('lists')
-      .select(`
+    const selectFields = `
+      id,
+      public_id,
+      user_id,
+      title,
+      description,
+      emoji,
+      emoji_3d,
+      view_mode,
+      is_public,
+      save_count,
+      created_at,
+      updated_at,
+      links (
         id,
-        public_id,
-        user_id,
+        url,
         title,
         description,
-        emoji,
-        emoji_3d,
-        view_mode,
-        is_public,
-        save_count,
+        image_url,
+        favicon_url,
+        position,
         created_at,
-        updated_at,
-        links (
-          id,
-          url,
-          title,
-          description,
-          image_url,
-          favicon_url,
-          position,
-          created_at,
-          updated_at
-        )
-      `)
-      .eq('public_id', listId)
-      .eq('user_id', user.id) // Ensure the list belongs to the specified user
-      .single()
+        updated_at
+      )
+    `
 
-    if (listError) {
-      console.error('Error fetching list:', listError)
+    const fetchListByIdentifier = async (column: 'public_id' | 'id', value: string) => {
+      return supabase
+        .from('lists')
+        .select(selectFields)
+        .eq(column, value)
+        .eq('user_id', user.id) // Ensure the list belongs to the specified user
+        .maybeSingle()
+    }
+
+    // Try resolving via public_id first, then fall back to the internal id.
+    const { data: listByPublicId, error: publicIdError } = await fetchListByIdentifier('public_id', listId)
+
+    let list = listByPublicId
+    let listError = publicIdError
+
+    if (!list) {
+      const { data: listById, error: idError } = await fetchListByIdentifier('id', listId)
+      list = listById
+      listError = idError
+    }
+
+    if (!list) {
+      if (listError) {
+        console.error('Error fetching list:', listError)
+      }
       return NextResponse.json({ error: 'List not found' }, { status: 404 })
     }
 

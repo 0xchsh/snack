@@ -282,7 +282,7 @@ export default function UserListPage() {
               const url = `${window.location.origin}/${username}/${currentList.public_id || listId}?view=public`
               window.open(url, '_blank')
             }}
-            className="w-icon-button h-icon-button rounded-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors inline-flex items-center justify-center"
+            className="w-icon-button h-icon-button rounded-sm bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/90 transition-colors inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             aria-label="Preview public view"
           >
             <Eye className="w-5 h-5" />
@@ -292,7 +292,7 @@ export default function UserListPage() {
               const url = `${window.location.origin}/${username}/${currentList.public_id || listId}`
               await navigator.clipboard.writeText(url)
             }}
-            className="w-icon-button h-icon-button rounded-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors inline-flex items-center justify-center"
+            className="w-icon-button h-icon-button rounded-sm bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/90 transition-colors inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             aria-label="Copy link"
           >
             <Copy className="w-5 h-5" />
@@ -302,7 +302,7 @@ export default function UserListPage() {
               // TODO: Implement menu dropdown
               console.log('Open menu')
             }}
-            className="w-icon-button h-icon-button rounded-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors inline-flex items-center justify-center"
+            className="w-icon-button h-icon-button rounded-sm bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/90 transition-colors inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             aria-label="More options"
           >
             <MoreHorizontal className="w-5 h-5" />
@@ -314,13 +314,15 @@ export default function UserListPage() {
       {/* Main Content */}
       <AppContainer variant="app">
         <div className="py-8">
-        <ListEditor
-          list={currentList}
-          onUpdateList={handleUpdateList}
-          onAddLink={handleAddLink}
-          onRemoveLink={handleRemoveLink}
-          onReorderLinks={handleReorderLinks}
-        />
+          <div className="max-w-[560px] w-full mx-auto">
+            <ListEditor
+              list={currentList}
+              onUpdateList={handleUpdateList}
+              onAddLink={handleAddLink}
+              onRemoveLink={handleRemoveLink}
+              onReorderLinks={handleReorderLinks}
+            />
+          </div>
         </div>
       </AppContainer>
 

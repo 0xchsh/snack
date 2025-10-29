@@ -200,12 +200,14 @@ export class SupabaseListDatabase {
       
       const defaultEmoji = getDefaultEmoji3D()
       const newListData = {
+        id: crypto.randomUUID(), // Generate a UUID for the list
+        public_id: crypto.randomUUID(), // Generate a UUID for public access
         title: 'New list', // Default title - user can edit
         emoji: defaultEmoji.unicode, // Default pretzel emoji
         emoji_3d: JSON.stringify(defaultEmoji), // Now that column exists
         is_public: true,
         price_cents: null, // Now that column exists
-        view_mode: 'menu', // Default view mode
+        view_mode: 'row', // Default view mode
         user_id: session.user.id, // Use the session user ID to ensure it matches auth
       }
 
@@ -274,7 +276,7 @@ export class SupabaseListDatabase {
         // emoji_3d: formData.emoji_3d ? JSON.stringify(formData.emoji_3d) : null, // Temporarily removed
         is_public: formData.is_public,
         // price_cents: formData.price_cents || null, // Temporarily removed
-        view_mode: 'menu', // Default view mode
+        view_mode: 'row', // Default view mode
         user_id: session.user.id, // Use the session user ID to ensure it matches auth
       }
 

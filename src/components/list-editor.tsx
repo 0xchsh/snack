@@ -18,13 +18,13 @@ interface ListEditorProps {
   onReorderLinks?: (links: string[]) => void
 }
 
-type ViewMode = 'menu' | 'rows' | 'grid'
+type ViewMode = 'row' | 'card'
 
 // Ghost loading component for different view modes
 function GhostLinkItem({ viewMode }: { viewMode: ViewMode }) {
-  if (viewMode === 'menu') {
+  if (viewMode === 'row') {
     return (
-      <div className="bg-muted rounded-lg px-3 py-3 animate-pulse">
+      <div className="bg-background border border-border rounded-md px-3 py-3 animate-pulse">
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 rounded-md bg-accent flex-shrink-0" />
           <div className="flex-1">
@@ -35,30 +35,13 @@ function GhostLinkItem({ viewMode }: { viewMode: ViewMode }) {
     )
   }
 
-  if (viewMode === 'rows') {
-    return (
-      <div className="bg-muted rounded-2xl p-4 animate-pulse">
-        <div className="flex items-center gap-4">
-          <div className="w-20 h-11 rounded-xl bg-accent flex-shrink-0"></div>
-          <div className="flex-1">
-            <div className="h-5 bg-accent rounded w-3/4 mb-2"></div>
-            <div className="h-4 bg-accent rounded w-1/2"></div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Grid layout
+  // Card layout
   return (
-    <div className="bg-muted rounded-xl animate-pulse overflow-hidden">
-      <div className="aspect-video bg-accent"></div>
-      <div className="px-4 pb-4 pt-4 space-y-2">
+    <div className="flex flex-col gap-3 animate-pulse">
+      <div className="aspect-video bg-accent rounded-md"></div>
+      <div className="flex items-center gap-2">
+        <div className="w-4 h-4 rounded-sm bg-accent flex-shrink-0"></div>
         <div className="h-4 bg-accent rounded w-3/4"></div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-sm bg-accent flex-shrink-0"></div>
-          <div className="h-3 bg-accent rounded w-1/2"></div>
-        </div>
       </div>
     </div>
   )
@@ -71,7 +54,7 @@ export function ListEditor({
   onRemoveLink, 
   onReorderLinks 
 }: ListEditorProps) {
-  const [viewMode] = useState<ViewMode>('menu') // Fixed to menu view only
+  const [viewMode, setViewMode] = useState<ViewMode>((list.view_mode as ViewMode) || 'row')
   const [isEditingTitle, setIsEditingTitle] = useState(!list.title) // Start editing if title is empty
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [title, setTitle] = useState(list.title || '') // Ensure title is never undefined
@@ -194,12 +177,19 @@ export function ListEditor({
   }
 
 
-  // Update emoji when list.emoji_3d changes
+  // Update emoji when list changes
   useEffect(() => {
     if (list.emoji_3d) {
       setCurrentEmoji3D(list.emoji_3d)
+    } else if (list.emoji) {
+      // Fallback to emoji if emoji_3d is not available
+      setCurrentEmoji3D({
+        unicode: list.emoji,
+        url: getDefaultEmoji3D().url,
+        name: getDefaultEmoji3D().name
+      })
     }
-  }, [list.emoji_3d])
+  }, [list.emoji_3d, list.emoji])
 
   // Adjust textarea height when editing starts
   useEffect(() => {
@@ -667,7 +657,7 @@ export function ListEditor({
         <button
           ref={emojiButtonRef}
           onClick={() => setShowEmojiPicker(true)}
-          className="w-[62px] h-[62px] flex items-center justify-center bg-background border border-border rounded-xl text-3xl hover:border-muted-foreground transition-colors flex-shrink-0"
+          className="w-[62px] h-[62px] flex items-center justify-center bg-background border border-border rounded-md text-3xl hover:border-muted-foreground transition-colors flex-shrink-0"
         >
           <span>{currentEmoji3D.unicode}</span>
         </button>
@@ -685,14 +675,14 @@ export function ListEditor({
               }
             }}
             placeholder="Untitled List"
-            className="flex-1 text-3xl font-normal text-foreground bg-background border border-border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder:text-muted-foreground break-all"
+            className="flex-1 text-3xl font-normal text-foreground bg-background border border-border rounded-md px-4 py-3 outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder:text-muted-foreground break-all"
             maxLength={60}
             autoFocus
           />
         ) : (
           <button
             onClick={() => setIsEditingTitle(true)}
-            className="flex-1 text-left text-3xl font-normal text-foreground bg-background border border-border rounded-xl px-4 py-3 hover:border-muted-foreground transition-colors break-all hyphens-auto"
+            className="flex-1 text-left text-3xl font-normal text-foreground bg-background border border-border rounded-md px-4 py-3 hover:border-muted-foreground transition-colors break-all hyphens-auto"
           >
             {list.title || <span className="text-muted-foreground">Untitled List</span>}
           </button>
@@ -701,16 +691,50 @@ export function ListEditor({
 
       {/* Link count and Paste button/input */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-muted-foreground bg-muted px-3 py-2 rounded-sm flex-shrink-0">
-          <Link2 className="w-4 h-4" />
-          <span className="text-base">{optimisticList.links?.length || 0} links</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-muted-foreground bg-muted px-3 py-2 rounded-md flex-shrink-0">
+            <Link2 className="w-4 h-4" />
+            <span className="text-base">{optimisticList.links?.length || 0} links</span>
+          </div>
+
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-1 bg-muted rounded-md p-1">
+            <button
+              onClick={() => {
+                setViewMode('row')
+                onUpdateList?.({ view_mode: 'row' })
+              }}
+              className={`p-2 rounded transition-colors ${
+                viewMode === 'row'
+                  ? 'bg-background text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+              title="Row view"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => {
+                setViewMode('card')
+                onUpdateList?.({ view_mode: 'card' })
+              }}
+              className={`p-2 rounded transition-colors ${
+                viewMode === 'card'
+                  ? 'bg-background text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+              title="Card view"
+            >
+              <Grid3X3 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Desktop: Paste button */}
         {!isMobile && (
           <button
             onClick={pasteFromClipboard}
-            className="flex items-center gap-2 px-4 py-2 border border-border rounded-sm text-base text-muted-foreground hover:text-foreground hover:border-muted-foreground transition-colors flex-shrink-0"
+            className="flex items-center gap-2 px-4 py-2 border border-border rounded-md text-base text-muted-foreground hover:text-foreground hover:border-muted-foreground transition-colors flex-shrink-0"
           >
             <span>Paste links</span>
             <span className="text-sm">⌘V</span>
@@ -724,7 +748,7 @@ export function ListEditor({
             type="text"
             placeholder="Paste link(s) here"
             onPaste={handleMobilePaste}
-            className="flex-1 px-4 py-2 border border-border rounded-sm text-base bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-muted-foreground transition-colors min-w-0"
+            className="flex-1 px-4 py-2 border border-border rounded-md text-base bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-muted-foreground transition-colors min-w-0"
           />
         )}
       </div>
@@ -740,11 +764,11 @@ export function ListEditor({
       <div className="flex flex-col gap-3">
         {/* Ghost loading placeholders */}
         {loadingLinks.map((url, index) => (
-          <GhostLinkItem key={`ghost-${url}-${index}`} viewMode="menu" />
+          <GhostLinkItem key={`ghost-${url}-${index}`} viewMode={viewMode} />
         ))}
 
         {/* Draggable list */}
-        <div className="relative draggable-list-container flex flex-col gap-3">
+        <div className={`relative draggable-list-container flex flex-col ${viewMode === 'card' ? 'gap-6' : 'gap-3'}`}>
           {(optimisticList.links || []).map((link, index) => (
             <div
               key={link.id}
@@ -754,12 +778,12 @@ export function ListEditor({
                 transition-all duration-300 ease-out select-none
                 ${draggedItemId === link.id ? 'opacity-30' : 'opacity-100'}
                 ${dragOverIndex === index && draggedItemId !== link.id ?
-                  'transform translate-y-2 ring-1 ring-foreground rounded-lg' : ''}
+                  'transform translate-y-2 ring-1 ring-foreground rounded-md' : ''}
               `}
             >
               <LinkItem
                 link={link}
-                viewMode="menu"
+                viewMode={viewMode}
                 onRemove={() => handleDeleteLink(link.id)}
               />
             </div>
@@ -830,10 +854,10 @@ function LinkItem({
   viewMode, 
   onRemove
 }: LinkItemProps) {
-  if (viewMode === 'menu') {
+  if (viewMode === 'row') {
     // Compact rows - clean list layout
     return (
-      <div className="flex items-center gap-3 px-3 py-3 bg-muted hover:bg-muted/80 transition-transform transform hover:scale-[0.99] active:scale-[0.97] group cursor-grab rounded-lg select-none">
+      <div className="flex items-center gap-3 px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-transform transform hover:scale-[0.99] active:scale-[0.97] group cursor-grab rounded-md select-none">
         <div className="w-5 h-5 flex-shrink-0">
           <Favicon
             url={link.url}
@@ -869,207 +893,110 @@ function LinkItem({
     )
   }
 
-  if (viewMode === 'rows') {
-    // Larger cards as rows - medium layout
-    return (
-      <div
-        className="bg-muted rounded-2xl p-4 hover:bg-accent transition-all group cursor-grab relative"
-        style={{ 
-          backfaceVisibility: 'hidden',
-          WebkitBackfaceVisibility: 'hidden',
-          transformOrigin: 'center',
-          willChange: 'transform'
-        }}
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-[100px] h-14 rounded-xl overflow-hidden bg-accent flex-shrink-0 relative">
-            {link.image_url ? (
-              <>
-                <Image 
-                  src={link.image_url} 
-                  alt="" 
-                  fill
-                  className="object-cover"
-                  onError={(e) => {
-                    // Hide the failed image
-                    e.currentTarget.style.display = 'none'
-                    // Show the fallback div
-                    const fallback = e.currentTarget.nextElementSibling as HTMLElement
-                    if (fallback) {
-                      fallback.style.display = 'flex'
-                    }
-                  }}
-                />
-                {/* Fallback content (hidden by default, shown when image fails) */}
-                <div
-                  className="w-full h-full bg-background flex items-center justify-center absolute inset-0"
-                  style={{ display: 'none' }}
-                >
-                  <Favicon
-                    url={link.url}
-                    size={24}
-                    className="rounded-md"
-                  />
-                </div>
-              </>
-            ) : (
-              <div className="w-full h-full bg-background flex items-center justify-center">
-                <Favicon 
-                  url={link.url}
-                  size={24}
-                  className="rounded-md"
-                />
-              </div>
-            )}
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <h3 
-              className="text-lg font-semibold text-foreground truncate"
-              style={{ fontFamily: 'Open Runde' }}
-            >
-              {link.title || getHostname(link.url)}
-            </h3>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="w-4 h-4 rounded-sm overflow-hidden bg-muted flex-shrink-0">
-                <Favicon 
-                  url={link.url}
-                  size={16}
-                  className="rounded-sm"
-                />
-              </div>
-              <p 
-                className="text-sm text-muted-foreground/80 truncate"
-                style={{ fontFamily: 'Open Runde' }}
-              >
-                {getHostname(link.url)}
-              </p>
-            </div>
-          </div>
-          
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-            <div className="text-muted-foreground/50 p-2" title="Drag to reorder">
-              <GripVertical className="w-4 h-4" />
-            </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onRemove()
-              }}
-              onMouseDown={(e) => {
-                e.stopPropagation()
-              }}
-              className="text-muted-foreground hover:text-destructive transition-colors p-2 cursor-pointer"
-              title="Delete link"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Grid layout - largest cards with OG images
+  // Card layout - full-width cards with OG images
 
   return (
     <div
-      className="bg-muted rounded-xl hover:bg-accent transition-all group overflow-hidden cursor-grab"
-      style={{ 
+      className="rounded-md group cursor-grab flex flex-col gap-3"
+      style={{
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
-        minHeight: '280px',
-        display: 'flex',
-        flexDirection: 'column'
       }}
     >
-      <div className="space-y-4">
-        {/* OG Image Preview */}
-        <div className="aspect-video bg-accent relative">
-          {link.image_url ? (
-            <>
-              <Image 
-                src={link.image_url} 
-                alt={link.title || ''} 
-                fill
-                className="object-cover"
-                unoptimized
-                onError={(e) => {
-                  // Hide the failed image
-                  e.currentTarget.style.display = 'none'
-                  // Show the fallback div
-                  const fallback = e.currentTarget.nextElementSibling as HTMLElement
-                  if (fallback) {
-                    fallback.style.display = 'flex'
-                  }
-                }}
-              />
-              {/* Fallback content (hidden by default, shown when image fails) */}
-              <div
-                className="w-full h-full bg-background flex items-center justify-center absolute inset-0"
-                style={{ display: 'none' }}
-              >
-                <Favicon
-                  url={link.url}
-                  size={48}
-                  className="rounded-lg"
-                  fallbackClassName="bg-muted/20 rounded-lg"
+      {/* OG Image Preview */}
+      <div className="aspect-video bg-accent relative rounded-md overflow-hidden">
+        {link.image_url ? (
+          <>
+            <Image
+              src={link.image_url}
+              alt={link.title || ''}
+              fill
+              className="object-cover"
+              unoptimized
+              onError={(e) => {
+                // Hide the failed image
+                e.currentTarget.style.display = 'none'
+                // Show the fallback div
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                if (fallback) {
+                  fallback.style.display = 'flex'
+                }
+              }}
+            />
+            {/* Fallback content (hidden by default, shown when image fails) */}
+            <div
+              className="w-full h-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center absolute inset-0"
+              style={{ display: 'none' }}
+            >
+              <div className="text-neutral-300 dark:text-neutral-600">
+                <Image
+                  src="/images/logo.svg"
+                  alt="Snack"
+                  width={48}
+                  height={48}
+                  className="w-12 h-12"
+                  style={{ filter: 'brightness(0) saturate(100%) invert(87%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(91%) contrast(89%)' }}
                 />
               </div>
-            </>
-          ) : (
-            <div className="w-full h-full bg-background flex items-center justify-center">
-              <Favicon
-                url={link.url}
-                size={48}
-                className="rounded-lg"
-                fallbackClassName="bg-muted/20 rounded-lg"
-              />
             </div>
-          )}
-
-          {/* Actions overlay */}
-          <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onRemove()
-              }}
-              onMouseDown={(e) => {
-                e.stopPropagation()
-              }}
-              className="bg-background/90 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-lg cursor-pointer"
-              title="Delete link"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+          </>
+        ) : (
+          <div className="w-full h-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center">
+            <Image
+              src="/images/logo.svg"
+              alt="Snack"
+              width={48}
+              height={48}
+              className="w-12 h-12"
+              style={{ filter: 'brightness(0) saturate(100%) invert(87%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(91%) contrast(89%)' }}
+            />
           </div>
+        )}
+
+        {/* Actions overlay */}
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          <div className="bg-background/90 backdrop-blur-sm text-muted-foreground p-1.5 rounded-md cursor-grab" title="Drag to reorder">
+            <GripVertical className="w-4 h-4" />
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove()
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation()
+            }}
+            className="bg-background/90 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-md cursor-pointer"
+            title="Delete link"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
-        
-        {/* Content */}
-        <div className="px-4 pb-4 space-y-2 flex-1 flex flex-col justify-end">
-          <h3 
-            className="font-semibold text-foreground text-base leading-tight line-clamp-2 flex-1"
+      </div>
+
+      {/* Site Info - Separated from OG Image */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="w-4 h-4 rounded-sm overflow-hidden flex-shrink-0">
+            <Favicon
+              url={link.url}
+              size={16}
+              className="rounded-sm"
+            />
+          </div>
+          <h3
+            className="font-semibold text-foreground text-base leading-tight truncate"
             style={{ fontFamily: 'Open Runde' }}
           >
             {link.title || getHostname(link.url)}
           </h3>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-sm overflow-hidden bg-muted flex-shrink-0">
-              <Favicon 
-                url={link.url}
-                size={16}
-                className="rounded-sm"
-              />
-            </div>
-            <p 
-              className="text-sm text-muted-foreground/70 truncate"
-              style={{ fontFamily: 'Open Runde' }}
-            >
-              {getHostname(link.url)}
-            </p>
-          </div>
         </div>
+        <p
+          className="text-sm text-muted-foreground/70 flex-shrink-0"
+          style={{ fontFamily: 'Open Runde' }}
+        >
+          {getHostname(link.url)}
+        </p>
       </div>
     </div>
   )

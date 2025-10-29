@@ -47,7 +47,7 @@ export function UserMenu({ user, onLogout, username, className }: UserMenuProps)
     <div className={cn('relative', className)} ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-icon-button h-icon-button rounded-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors inline-flex items-center justify-center"
+        className="w-icon-button h-icon-button rounded-md bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/90 transition-colors inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         aria-label="User menu"
         aria-expanded={isOpen}
       >
@@ -55,7 +55,7 @@ export function UserMenu({ user, onLogout, username, className }: UserMenuProps)
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-popover border border-border rounded-lg shadow-lg z-50">
+        <div className="absolute right-0 mt-2 w-56 bg-popover border border-border rounded-md shadow-lg z-50">
           <div className="px-4 py-3 border-b border-border">
             <p className="text-sm font-medium text-foreground">
               {username || user.email}

@@ -34,8 +34,9 @@ export default function SignUpPage() {
 
     try {
       await signUp(email, password)
-      // For mock auth, signUp redirects to dashboard automatically
-      // We don't show success message since user will be redirected
+      // Show success message - user needs to verify email
+      setSuccess('Account created! Please check your email to verify your account.')
+      setIsLoading(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       setIsLoading(false)

@@ -97,7 +97,7 @@ export default function UsernamePage() {
           <p className="text-muted-foreground">{error}</p>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-semibold"
             style={{ fontFamily: 'Open Runde' }}
           >
             <span>←</span>
@@ -125,15 +125,15 @@ export default function UsernamePage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-background">
-        <div className="container mx-auto px-6 py-6">
+        <div className="mx-auto w-full max-w-container-app px-6 py-6">
           <div className="flex items-center justify-between">
             <Link href={user ? "/dashboard" : "/"} className="flex items-center">
               <Image
                 src="/images/logo.svg"
                 alt="Snack"
-                width={24}
-                height={24}
-                className="w-6 h-6"
+                width={32}
+                height={32}
+                className="w-8 h-8"
               />
             </Link>
 
@@ -205,7 +205,7 @@ export default function UsernamePage() {
                   <div key={list.id}>
                     <Link
                       href={`/${profile.user.username}/${list.public_id || list.id}`}
-                      className="flex items-center justify-between px-3 py-3 bg-muted hover:bg-muted/80 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-lg group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-md group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">

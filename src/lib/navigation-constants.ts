@@ -8,9 +8,9 @@ export const NAV_CONSTANTS = {
   CONTAINER_PADDING_Y: 'py-6',
 
   // Logo
-  LOGO_SIZE: 'w-6 h-6',
-  LOGO_WIDTH: 24,
-  LOGO_HEIGHT: 24,
+  LOGO_SIZE: 'w-8 h-8',
+  LOGO_WIDTH: 32,
+  LOGO_HEIGHT: 32,
 
   // Icon Buttons (Settings, Profile, etc.)
   ICON_BUTTON_SIZE: 'w-[42px] h-[42px]',
@@ -23,5 +23,5 @@ export const NAV_CONSTANTS = {
   BUTTON_GAP: 'gap-3',
 
   // Borders & Styles
-  BORDER_RADIUS: 'rounded-sm',
+  BORDER_RADIUS: 'rounded-md',
 } as const

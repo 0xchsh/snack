@@ -16,12 +16,10 @@ export function TopBar({ children, className, variant = 'app' }: TopBarProps) {
   const maxWidth = variant === 'marketing' ? 'max-w-container-marketing' : 'max-w-container-app'
 
   return (
-    <header className="border-b border-border bg-background">
+    <header className="bg-background">
       <div className={cn(
-        'container mx-auto',
-        'px-nav-x py-nav-y',
-        'md:px-nav-x md:py-nav-y',
-        'sm:px-nav-x-mobile sm:py-nav-y-mobile',
+        'mx-auto w-full',
+        'px-6 py-6',
         maxWidth,
         className
       )}>

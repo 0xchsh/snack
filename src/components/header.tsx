@@ -50,13 +50,13 @@ function MenuButton({ menuItems }: { menuItems: Array<{ label: string; onClick: 
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`inline-flex items-center justify-center ${NAV_CONSTANTS.ICON_BUTTON_SIZE} border border-border ${NAV_CONSTANTS.BORDER_RADIUS} text-muted-foreground hover:text-foreground transition-colors`}
+        className={`inline-flex items-center justify-center ${NAV_CONSTANTS.ICON_BUTTON_SIZE} ${NAV_CONSTANTS.BORDER_RADIUS} bg-secondary text-muted-foreground hover:text-foreground transition-colors`}
       >
         <MoreVertical className={NAV_CONSTANTS.ICON_SIZE} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-background border border-border rounded-lg shadow-lg py-2 z-50">
+        <div className="absolute right-0 mt-2 w-56 bg-background border border-border rounded-md shadow-lg py-2 z-50">
           {menuItems.map((item, index) => (
             <button
               key={index}
@@ -89,7 +89,7 @@ export function Header({
 }: HeaderProps) {
 
   const renderButton = (button: HeaderButton, index: number) => {
-    const baseClasses = "flex items-center gap-2 px-4 py-2 text-base font-medium border transition-colors rounded-sm"
+    const baseClasses = "flex items-center gap-2 px-4 py-2 text-base font-medium transition-colors rounded-md"
 
     switch (button.type) {
       case 'view':
@@ -97,7 +97,7 @@ export function Header({
           <button
             key={index}
             onClick={button.onClick}
-            className={`${baseClasses} border-border text-muted-foreground hover:text-foreground`}
+            className={`${baseClasses} bg-secondary text-muted-foreground hover:text-foreground`}
           >
             {button.label || 'View'}
             <ExternalLink className="w-4 h-4" />
@@ -109,7 +109,7 @@ export function Header({
           <button
             key={index}
             onClick={button.onClick}
-            className={`${baseClasses} border-border text-muted-foreground hover:text-foreground`}
+            className={`${baseClasses} bg-secondary text-muted-foreground hover:text-foreground`}
           >
             {button.label || 'Copy'}
             <Copy className="w-4 h-4" />
@@ -121,10 +121,10 @@ export function Header({
           <Link
             key={index}
             href={button.href || '/dashboard?tab=saved'}
-            className={`flex items-center gap-2 px-4 py-2 text-base font-medium border transition-colors rounded-sm ${
+            className={`flex items-center gap-2 px-4 py-2 text-base font-medium transition-colors rounded-md ${
               button.isActive
-                ? 'border-border text-foreground bg-secondary'
-                : 'border-border text-muted-foreground hover:text-foreground'
+                ? 'text-foreground bg-secondary'
+                : 'bg-secondary text-muted-foreground hover:text-foreground'
             }`}
           >
             {button.label || 'Saved'}
@@ -137,10 +137,10 @@ export function Header({
           <Link
             key={index}
             href={button.href || '/dashboard?tab=stats'}
-            className={`flex items-center gap-2 px-4 py-2 text-base font-medium border transition-colors rounded-sm ${
+            className={`flex items-center gap-2 px-4 py-2 text-base font-medium transition-colors rounded-md ${
               button.isActive
-                ? 'border-border text-foreground bg-secondary'
-                : 'border-border text-muted-foreground hover:text-foreground'
+                ? 'text-foreground bg-secondary'
+                : 'bg-secondary text-muted-foreground hover:text-foreground'
             }`}
           >
             {button.label || 'Stats'}
@@ -153,7 +153,7 @@ export function Header({
           <Link
             key={index}
             href={button.href || '/profile'}
-            className={`inline-flex items-center justify-center ${NAV_CONSTANTS.ICON_BUTTON_SIZE} border border-border ${NAV_CONSTANTS.BORDER_RADIUS} text-muted-foreground hover:text-foreground transition-colors`}
+            className={`inline-flex items-center justify-center ${NAV_CONSTANTS.ICON_BUTTON_SIZE} ${NAV_CONSTANTS.BORDER_RADIUS} bg-secondary text-muted-foreground hover:text-foreground transition-colors`}
           >
             <Settings className={NAV_CONSTANTS.ICON_SIZE} />
           </Link>
@@ -164,7 +164,7 @@ export function Header({
           <Link
             key={index}
             href={button.href || `/${username}`}
-            className={`inline-flex items-center justify-center ${NAV_CONSTANTS.ICON_BUTTON_SIZE} border border-border ${NAV_CONSTANTS.BORDER_RADIUS} text-muted-foreground hover:text-foreground transition-colors`}
+            className={`inline-flex items-center justify-center ${NAV_CONSTANTS.ICON_BUTTON_SIZE} ${NAV_CONSTANTS.BORDER_RADIUS} bg-secondary text-muted-foreground hover:text-foreground transition-colors`}
           >
             <User className={NAV_CONSTANTS.ICON_SIZE} />
           </Link>
@@ -179,7 +179,7 @@ export function Header({
             <Link
               key={index}
               href={button.href}
-              className={button.className || `${baseClasses} border-border text-muted-foreground hover:text-foreground`}
+              className={button.className || `${baseClasses} bg-secondary text-muted-foreground hover:text-foreground`}
             >
               {button.label}
               {button.icon}
@@ -190,7 +190,7 @@ export function Header({
           <button
             key={index}
             onClick={button.onClick}
-            className={button.className || `${baseClasses} border-border text-muted-foreground hover:text-foreground`}
+            className={button.className || `${baseClasses} bg-secondary text-muted-foreground hover:text-foreground`}
           >
             {button.label}
             {button.icon}
@@ -203,8 +203,8 @@ export function Header({
   }
 
   return (
-    <div className="border-b border-border bg-background">
-      <div className={`container mx-auto ${NAV_CONSTANTS.CONTAINER_PADDING_X} ${NAV_CONSTANTS.CONTAINER_PADDING_Y}`}>
+    <div className="bg-background">
+      <div className={`mx-auto w-full max-w-container-app ${NAV_CONSTANTS.CONTAINER_PADDING_X} ${NAV_CONSTANTS.CONTAINER_PADDING_Y}`}>
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href={logoHref} className="flex items-center">

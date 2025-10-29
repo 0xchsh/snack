@@ -57,7 +57,7 @@ export default function AppLayout({
       {/* Skip to content link for accessibility */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-sm"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md"
       >
         Skip to content
       </a>
@@ -70,10 +70,10 @@ export default function AppLayout({
         <TopBar.Right>
           <Link
             href="/dashboard?tab=saved"
-            className={`w-icon-button h-icon-button rounded-sm inline-flex items-center justify-center transition-colors ${
+            className={`w-icon-button h-icon-button rounded-md inline-flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
               activeTab === 'saved'
                 ? 'bg-secondary text-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/90'
             }`}
             aria-label="Saved lists"
           >
@@ -81,10 +81,10 @@ export default function AppLayout({
           </Link>
           <Link
             href="/dashboard?tab=stats"
-            className={`w-icon-button h-icon-button rounded-sm inline-flex items-center justify-center transition-colors ${
+            className={`w-icon-button h-icon-button rounded-md inline-flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
               activeTab === 'stats'
                 ? 'bg-secondary text-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/90'
             }`}
             aria-label="Stats"
           >

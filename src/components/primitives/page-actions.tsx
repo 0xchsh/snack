@@ -26,21 +26,24 @@ export function PageActions({ actions, className }: PageActionsProps) {
     <div className={cn('flex items-center gap-nav', className)}>
       {actions.map((action, index) => {
         const Icon = action.icon as LucideIcon | undefined
+        const isIconOnly = !action.label
 
         const buttonClasses = cn(
           'inline-flex items-center justify-center',
           'font-semibold transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          action.label
-            ? 'px-4 py-2 text-sm rounded-lg gap-2' // Labeled button
-            : 'w-icon-button h-icon-button rounded-sm', // Icon-only button
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          isIconOnly
+            ? 'w-icon-button h-icon-button rounded-sm'
+            : 'px-4 py-2 text-sm rounded-lg gap-2',
           {
             'bg-primary text-primary-foreground hover:bg-primary/90':
               action.variant === 'primary',
-            'text-muted-foreground hover:text-foreground hover:bg-accent':
-              action.variant === 'ghost' || !action.variant,
+            'bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/90':
+              (action.variant === 'ghost' || !action.variant) && isIconOnly,
             'bg-secondary text-secondary-foreground hover:bg-secondary/80':
-              action.variant === 'default' && action.label,
+              action.variant === 'default',
+            'text-muted-foreground hover:text-foreground hover:bg-secondary/80':
+              (action.variant === 'ghost' || !action.variant) && !isIconOnly,
           }
         )
 

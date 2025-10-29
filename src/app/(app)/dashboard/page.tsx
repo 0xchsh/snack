@@ -84,7 +84,7 @@ export default function DashboardPage() {
       <AppContainer variant="app">
         <div className="py-8">
         {tab === 'your-lists' || !tab ? (
-          <>
+          <div className="max-w-[560px] w-full mx-auto">
             {/* Breadcrumb */}
             <div className="mb-6">
               <Breadcrumb
@@ -94,15 +94,15 @@ export default function DashboardPage() {
             </div>
 
             {/* Header with count and create button */}
-            <div className="flex items-center justify-between mb-12">
-              <div className="flex items-center gap-2 text-muted-foreground bg-muted px-3 py-2 rounded-sm">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-muted-foreground bg-muted px-3 py-2 rounded-md">
                 <List className="w-4 h-4" />
                 <span className="text-base">{lists.length} lists</span>
               </div>
               <button
                 onClick={handleCreateList}
                 disabled={creatingList}
-                className="flex items-center gap-2 px-3 py-2 bg-secondary text-foreground hover:bg-accent transition-colors disabled:opacity-50 rounded-sm border border-border"
+                className="flex items-center gap-2 px-3 py-2 bg-secondary text-foreground hover:bg-accent transition-colors disabled:opacity-50 rounded-md"
               >
                 <span className="text-sm font-[400]">Create list</span>
                 <Plus className="w-4 h-4" />
@@ -133,7 +133,7 @@ export default function DashboardPage() {
                   <div key={list.id}>
                     <Link
                       href={`/${user.username}/${list.public_id || list.id}`}
-                      className="flex items-center justify-between px-3 py-3 bg-muted hover:bg-muted/80 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-lg group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-base">{list.emoji || '📋'}</span>
@@ -149,9 +149,9 @@ export default function DashboardPage() {
                 ))
               )}
             </div>
-          </>
+          </div>
         ) : tab === 'saved' ? (
-          <>
+          <div className="max-w-[560px] w-full mx-auto">
             <div className="mb-6">
               <Breadcrumb
                 username={user.username || 'User'}
@@ -159,11 +159,12 @@ export default function DashboardPage() {
               />
             </div>
             <div className="text-center py-16">
-              <p className="text-muted-foreground">Saved lists coming soon...</p>
+              <p className="text-muted-foreground">See your saved lists here</p>
+              <p className="text-muted-foreground mt-2">Click on the bookmark icon on any list to see it here.</p>
             </div>
-          </>
+          </div>
         ) : tab === 'stats' ? (
-          <>
+          <div className="max-w-[560px] w-full mx-auto">
             <div className="mb-6">
               <Breadcrumb
                 username={user.username || 'User'}
@@ -172,16 +173,18 @@ export default function DashboardPage() {
             </div>
 
             {/* Summary Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-12">
-              <div className="text-center">
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="text-center border border-border rounded-md py-4">
                 <div className="text-2xl font-bold text-foreground">{lists.length}</div>
                 <div className="text-sm text-muted-foreground">lists</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-foreground">{totalLinks}</div>
-                <div className="text-sm text-muted-foreground">links</div>
+              <div className="text-center border border-border rounded-md py-4">
+                <div className="text-2xl font-bold text-foreground">
+                  {analyticsData ? analyticsData.totalClicks.toLocaleString() : '0'}
+                </div>
+                <div className="text-sm text-muted-foreground">clicks</div>
               </div>
-              <div className="text-center">
+              <div className="text-center border border-border rounded-md py-4">
                 <div className="text-2xl font-bold text-foreground">
                   {analyticsData ? analyticsData.totalViews.toLocaleString() : '0'}
                 </div>
@@ -197,7 +200,7 @@ export default function DashboardPage() {
 
                 return (
                   <div key={list.id}>
-                    <div className="flex items-center justify-between px-3 py-3 bg-muted hover:bg-muted/80 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-lg">
+                    <div className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-md">
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="text-base">{list.emoji || '📋'}</span>
                         <span className="text-base text-foreground truncate">
@@ -214,7 +217,7 @@ export default function DashboardPage() {
                 )
               })}
             </div>
-          </>
+          </div>
         ) : null}
         </div>
       </AppContainer>
