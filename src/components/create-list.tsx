@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { getDefaultEmoji3D } from '@/lib/emoji'
-import { EmojiPicker } from './emoji-picker'
-import { CreateListForm, Emoji3D } from '@/types'
-import { X } from 'lucide-react'
 import Image from 'next/image'
+import { useRef, useState } from 'react'
+import { X } from 'lucide-react'
+
+import { Button, Input, Label } from '@/components/ui'
+import { getDefaultEmoji3D } from '@/lib/emoji'
+import { CreateListForm, Emoji3D } from '@/types'
+import { EmojiPicker } from './emoji-picker'
 
 interface CreateListProps {
   onCreateList: (list: CreateListForm) => void
@@ -55,28 +57,31 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
-            <h2 
+            <h2
               className="text-2xl font-bold"
-              style={{ fontFamily: 'Open Runde' }}
             >
               Create New List
             </h2>
-            <button
+            <Button
+              type="button"
               onClick={onClose}
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
             >
               <X className="w-6 h-6" />
-            </button>
+            </Button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Emoji Selection */}
             <div className="text-center">
-              <button
+              <Button
                 ref={emojiButtonRef}
                 type="button"
                 onClick={() => setShowEmojiPicker(true)}
-                className="w-20 h-20 bg-secondary hover:bg-secondary/80 rounded-2xl flex items-center justify-center text-4xl transition-colors mx-auto mb-3"
+                variant="secondary"
+                className="w-20 h-20 rounded-2xl text-4xl mx-auto mb-3 hover:bg-secondary/80"
               >
                 {currentEmoji3D.url ? (
                   <Image
@@ -90,10 +95,9 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
                 ) : (
                   <span>{currentEmoji3D.unicode}</span>
                 )}
-              </button>
+              </Button>
               <p 
                 className="text-sm text-muted-foreground"
-                style={{ fontFamily: 'Open Runde' }}
               >
                 Tap to change emoji
               </p>
@@ -101,23 +105,22 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
 
             {/* Title Input */}
             <div>
-              <label 
+              <Label
                 htmlFor="title"
-                className="block text-sm font-medium text-foreground mb-2"
-                style={{ fontFamily: 'Open Runde' }}
+                className="mb-2 block"
               >
                 List Title
-              </label>
-              <input
+              </Label>
+              <Input
                 id="title"
-                type="text"
                 value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                onChange={(e) =>
+                  setFormData(prev => ({ ...prev, title: e.target.value }))
+                }
                 placeholder="My awesome list"
-                className="w-full px-4 py-3 bg-secondary border-none rounded-lg text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none transition-all"
-                style={{ fontFamily: 'Open Runde' }}
                 maxLength={100}
                 required
+                variant="secondary"
               />
             </div>
 
@@ -134,13 +137,11 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
                 <div>
                   <p 
                     className="font-medium text-foreground"
-                    style={{ fontFamily: 'Open Runde' }}
                   >
                     Private
                   </p>
                   <p 
                     className="text-sm text-muted-foreground"
-                    style={{ fontFamily: 'Open Runde' }}
                   >
                     Only you can see this list
                   </p>
@@ -158,13 +159,11 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
                 <div>
                   <p 
                     className="font-medium text-foreground"
-                    style={{ fontFamily: 'Open Runde' }}
                   >
                     Public
                   </p>
                   <p 
                     className="text-sm text-muted-foreground"
-                    style={{ fontFamily: 'Open Runde' }}
                   >
                     Anyone can discover and view this list
                   </p>
@@ -174,22 +173,21 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
 
             {/* Actions */}
             <div className="flex gap-3 pt-4">
-              <button
+              <Button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-6 py-3 bg-secondary text-foreground rounded-lg hover:bg-secondary/80 transition-colors font-semibold"
-                style={{ fontFamily: 'Open Runde' }}
+                variant="secondary"
+                className="flex-1"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={!formData.title.trim() || isLoading}
-                className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold"
-                style={{ fontFamily: 'Open Runde' }}
+                className="flex-1"
               >
                 {isLoading ? 'Creating...' : 'Create List'}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

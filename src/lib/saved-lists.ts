@@ -7,6 +7,25 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabase = createClient<Database>(supabaseUrl, supabaseKey)
 
+type SavedListRow = Database['public']['Tables']['saved_lists']['Row']
+type SavedListInsertRow = Database['public']['Tables']['saved_lists']['Insert']
+type ListRow = Database['public']['Tables']['lists']['Row']
+type UserRow = Database['public']['Tables']['users']['Row']
+
+type SavedListWithListRow = SavedListRow & {
+  lists: Pick<ListRow, 'id' | 'public_id' | 'user_id' | 'title' | 'description' | 'emoji' | 'emoji_3d' | 'view_mode' | 'is_public' | 'save_count' | 'created_at' | 'updated_at'> | null
+}
+
+type SavedListCardRow = SavedListRow & {
+  lists: Pick<ListRow, 'title' | 'emoji' | 'save_count' | 'user_id'> | null
+}
+
+type PopularListRow = Pick<ListRow, 'id' | 'title' | 'emoji' | 'save_count' | 'user_id' | 'created_at'>
+type ListSaveCountRow = Pick<ListRow, 'save_count'>
+type SavedListEmojiRow = SavedListRow & {
+  lists: Pick<ListRow, 'emoji' | 'view_mode'> | null
+}
+
 /**
  * Optimized Saved Lists Database Manager
  * Implements hybrid counter-cache system for ultra-fast queries
@@ -24,14 +43,15 @@ export class OptimizedSavedListsDB {
    */
   async saveList(userId: string, listId: string, notes?: string): Promise<SavedList> {
     try {
-      const { data, error } = await this.supabase
-        .from('saved_lists')
-        .upsert({
-          user_id: userId,
-          list_id: listId,
-          notes: notes || null,
-          saved_at: new Date().toISOString()
-        }, {
+      const payload: SavedListInsertRow = {
+        user_id: userId,
+        list_id: listId,
+        notes: notes ?? null,
+        saved_at: new Date().toISOString(),
+      }
+
+      const { data, error } = await (this.supabase.from('saved_lists') as any)
+        .upsert(payload as SavedListInsert, {
           onConflict: 'user_id,list_id'
         })
         .select()
@@ -44,7 +64,7 @@ export class OptimizedSavedListsDB {
 
       // Counter is updated automatically via database trigger
       console.log('List saved successfully:', listId)
-      return data
+      return data as SavedList
     } catch (error) {
       console.error('Failed to save list:', error)
       throw error
@@ -113,13 +133,12 @@ export class OptimizedSavedListsDB {
    */
   async getUserSavedLists(userId: string): Promise<SavedListWithDetails[]> {
     try {
-      const { data, error } = await this.supabase
-        .from('saved_lists')
+      const { data, error } = await (this.supabase.from('saved_lists') as any)
         .select(`
           *,
           lists (
-            id, title, description, emoji, view_mode, is_public, 
-            save_count, created_at, updated_at, user_id
+            id, public_id, user_id, title, description, emoji, emoji_3d, view_mode, is_public,
+            save_count, created_at, updated_at
           )
         `)
         .eq('user_id', userId)
@@ -130,26 +149,44 @@ export class OptimizedSavedListsDB {
         throw error
       }
 
+      const rows = (data ?? []) as SavedListWithListRow[]
+
+      // Filter out rows without related lists just in case
+      const rowsWithLists = rows.filter((save): save is SavedListWithListRow & { lists: NonNullable<SavedListWithListRow['lists']> } => !!save.lists)
+
       // Get unique user IDs from the saved lists
-      const userIds = [...new Set((data || []).map(save => save.lists.user_id))]
+      const userIds = [...new Set(rowsWithLists.map(save => save.lists.user_id))]
       
       // Fetch user data for all unique user IDs
-      const { data: usersData } = await this.supabase
-        .from('users')
-        .select('id, username')
+      const { data: usersData } = await (this.supabase.from('users') as any)
+        .select('id, username, profile_picture_url')
         .in('id', userIds)
       
       // Create a map for quick user lookup
-      const usersMap = new Map(usersData?.map(u => [u.id, u]) || [])
+      const usersArray = (usersData ?? []) as Pick<UserRow, 'id' | 'username' | 'profile_picture_url'>[]
+      const usersMap = new Map(usersArray.map((u) => [u.id, u]))
 
-      return (data || []).map(save => ({
-        ...save,
-        list: {
-          ...save.lists,
-          user: usersMap.get(save.lists.user_id) || { id: save.lists.user_id, username: 'User' },
-          is_saved: true
+      return rowsWithLists.map(save => {
+        const list = save.lists
+        const owner = usersMap.get(list.user_id) ?? {
+          id: list.user_id,
+          username: 'User',
+          profile_picture_url: null
         }
-      })) as SavedListWithDetails[]
+
+        return {
+          user_id: save.user_id,
+          list_id: save.list_id,
+          saved_at: save.saved_at,
+          notes: save.notes,
+          list: {
+            ...list,
+            user: owner,
+            is_saved: true,
+            price_cents: null
+          }
+        }
+      }) as SavedListWithDetails[]
     } catch (error) {
       console.error('Failed to fetch user saved lists:', error)
       throw error
@@ -162,8 +199,7 @@ export class OptimizedSavedListsDB {
    */
   async getUserSavedListCards(userId: string): Promise<SavedListCard[]> {
     try {
-      const { data, error } = await this.supabase
-        .from('saved_lists')
+      const { data, error } = await (this.supabase.from('saved_lists') as any)
         .select(`
           list_id, saved_at, notes,
           lists (title, emoji, save_count, user_id)
@@ -177,26 +213,29 @@ export class OptimizedSavedListsDB {
       }
 
       // Get unique user IDs from the saved lists
-      const userIds = [...new Set((data || []).map(save => save.lists.user_id))]
+      const rows = (data ?? []) as SavedListCardRow[]
+      const rowsWithLists = rows.filter((save): save is SavedListCardRow & { lists: NonNullable<SavedListCardRow['lists']> } => !!save.lists)
+
+      const userIds = [...new Set(rowsWithLists.map(save => save.lists.user_id))]
       
       // Fetch user data for all unique user IDs
-      const { data: usersData } = await this.supabase
-        .from('users')
-        .select('id, username')
+      const { data: usersData } = await (this.supabase.from('users') as any)
+        .select('id, username, profile_picture_url')
         .in('id', userIds)
       
       // Create a map for quick user lookup
-      const usersMap = new Map(usersData?.map(u => [u.id, u]) || [])
+      const usersArray = (usersData ?? []) as Pick<UserRow, 'id' | 'username' | 'profile_picture_url'>[]
+      const usersMap = new Map(usersArray.map((u) => [u.id, u]))
 
-      return (data || []).map(save => ({
+      return rowsWithLists.map(save => ({
         list_id: save.list_id,
-        title: save.lists.title,
+        title: save.lists.title ?? 'Untitled List',
         emoji: save.lists.emoji,
         save_count: save.lists.save_count,
         is_saved: true,
         saved_at: save.saved_at,
         notes: save.notes,
-        user: usersMap.get(save.lists.user_id) || { id: save.lists.user_id, username: 'User' }
+        user: usersMap.get(save.lists.user_id) ?? { id: save.lists.user_id, username: 'User' }
       }))
     } catch (error) {
       console.error('Failed to fetch saved list cards:', error)
@@ -214,8 +253,7 @@ export class OptimizedSavedListsDB {
    */
   async getPopularLists(limit: number = 20): Promise<SavedListCard[]> {
     try {
-      const { data, error } = await this.supabase
-        .from('lists')
+      const { data, error } = await (this.supabase.from('lists') as any)
         .select('id, title, emoji, save_count, user_id, created_at')
         .eq('is_public', true)
         .gt('save_count', 0)
@@ -227,19 +265,21 @@ export class OptimizedSavedListsDB {
         throw error
       }
 
+      const lists = (data ?? []) as PopularListRow[]
+
       // Get unique user IDs from the lists
-      const userIds = [...new Set((data || []).map(list => list.user_id))]
+      const userIds = [...new Set(lists.map(list => list.user_id))]
       
       // Fetch user data for all unique user IDs
-      const { data: usersData } = await this.supabase
-        .from('users')
+      const { data: usersData } = await (this.supabase.from('users') as any)
         .select('id, username')
         .in('id', userIds)
       
       // Create a map for quick user lookup
-      const usersMap = new Map(usersData?.map(u => [u.id, u]) || [])
+      const usersArray = (usersData ?? []) as Pick<UserRow, 'id' | 'username'>[]
+      const usersMap = new Map(usersArray.map((u) => [u.id, u]))
 
-      return (data || []).map(list => ({
+      return lists.map(list => ({
         list_id: list.id,
         title: list.title,
         emoji: list.emoji,
@@ -259,8 +299,7 @@ export class OptimizedSavedListsDB {
    */
   async getListSaveCount(listId: string): Promise<number> {
     try {
-      const { data, error } = await this.supabase
-        .from('lists')
+      const { data, error } = await (this.supabase.from('lists') as any)
         .select('save_count')
         .eq('id', listId)
         .single()
@@ -270,7 +309,8 @@ export class OptimizedSavedListsDB {
         return 0
       }
 
-      return data.save_count || 0
+      const row = data as ListSaveCountRow
+      return row?.save_count || 0
     } catch (error) {
       console.error('Failed to get list save count:', error)
       return 0
@@ -283,8 +323,7 @@ export class OptimizedSavedListsDB {
    */
   async checkMultipleSavedLists(userId: string, listIds: string[]): Promise<Record<string, boolean>> {
     try {
-      const { data, error } = await this.supabase
-        .from('saved_lists')
+      const { data, error } = await (this.supabase.from('saved_lists') as any)
         .select('list_id')
         .eq('user_id', userId)
         .in('list_id', listIds)
@@ -294,7 +333,8 @@ export class OptimizedSavedListsDB {
         return {}
       }
 
-      const savedSet = new Set((data || []).map(save => save.list_id))
+      const rows = (data ?? []) as SavedListRow[]
+      const savedSet = new Set(rows.map(save => save.list_id))
       return listIds.reduce((acc, listId) => {
         acc[listId] = savedSet.has(listId)
         return acc
@@ -318,8 +358,7 @@ export class OptimizedSavedListsDB {
     favorite_categories: string[]
   }> {
     try {
-      const { data, error } = await this.supabase
-        .from('saved_lists')
+      const { data, error } = await (this.supabase.from('saved_lists') as any)
         .select(`
           saved_at,
           lists (emoji, view_mode)
@@ -330,12 +369,13 @@ export class OptimizedSavedListsDB {
         throw error
       }
 
+      const rows = (data ?? []) as SavedListEmojiRow[]
       const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-      const recentSaves = (data || []).filter(save => save.saved_at >= oneWeekAgo).length
+      const recentSaves = rows.filter(save => save.saved_at >= oneWeekAgo).length
 
       // Simple emoji-based category analysis
       const emojiCounts: Record<string, number> = {}
-      ;(data || []).forEach(save => {
+      rows.forEach(save => {
         if (save.lists?.emoji) {
           emojiCounts[save.lists.emoji] = (emojiCounts[save.lists.emoji] || 0) + 1
         }
@@ -347,7 +387,7 @@ export class OptimizedSavedListsDB {
         .map(([emoji]) => emoji)
 
       return {
-        total_saved: data?.length || 0,
+        total_saved: rows.length,
         recent_saves: recentSaves,
         favorite_categories: favoriteCategories
       }

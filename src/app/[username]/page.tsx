@@ -98,7 +98,6 @@ export default function UsernamePage() {
           <Link
             href="/"
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-semibold"
-            style={{ fontFamily: 'Open Runde' }}
           >
             <span>←</span>
             Go Home
@@ -112,9 +111,20 @@ export default function UsernamePage() {
     return null
   }
 
+  const resolveInitial = (value?: string | null) => {
+    if (!value || value.length === 0) {
+      return 'U'
+    }
+    const normalized = value.startsWith('@') ? value.slice(1) : value
+    const char = normalized[0]
+    return char ? char.toUpperCase() : 'U'
+  }
+
   const displayName = profile.user.first_name && profile.user.last_name
     ? `${profile.user.first_name} ${profile.user.last_name}`.trim()
     : profile.user.username
+
+  const profileInitial = resolveInitial(profile.user.username)
 
   const joinDate = new Date(profile.user.created_at).toLocaleDateString('en-US', {
     month: 'long',
@@ -157,7 +167,9 @@ export default function UsernamePage() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="text-2xl">👤</div>
+              <span className="text-lg font-semibold text-muted-foreground">
+                {profileInitial}
+              </span>
             )}
           </div>
 
@@ -175,23 +187,23 @@ export default function UsernamePage() {
           </div>
 
           {/* Stats */}
-          <div className="flex items-start justify-between">
-            <div className="bg-neutral-50 dark:bg-neutral-900 rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
-              <List className="w-4 h-4 text-neutral-400" />
-              <span className="text-base text-neutral-400">{profile.stats.total_public_lists} lists</span>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <List className="w-4 h-4" />
+              <span className="text-sm sm:text-base">{profile.stats.total_public_lists} lists</span>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="bg-neutral-50 dark:bg-neutral-900 rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
-                <Link2 className="w-4 h-4 text-neutral-400" />
-                <span className="text-base text-neutral-400">100</span>
+            <div className="flex items-center gap-3 sm:gap-3 text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <Link2 className="w-4 h-4" />
+                <span className="text-sm sm:text-base">100</span>
               </div>
-              <div className="bg-neutral-50 dark:bg-neutral-900 rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
-                <Eye className="w-4 h-4 text-neutral-400" />
-                <span className="text-base text-neutral-400">6.9K</span>
+              <div className="flex items-center gap-1.5">
+                <Eye className="w-4 h-4" />
+                <span className="text-sm sm:text-base">6.9K</span>
               </div>
-              <div className="bg-neutral-50 dark:bg-neutral-900 rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
-                <Bookmark className="w-4 h-4 text-neutral-400" />
-                <span className="text-base text-neutral-400">69K</span>
+              <div className="flex items-center gap-1.5">
+                <Bookmark className="w-4 h-4" />
+                <span className="text-sm sm:text-base">69K</span>
               </div>
             </div>
           </div>

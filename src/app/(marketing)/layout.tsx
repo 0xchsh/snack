@@ -1,6 +1,8 @@
+import Link from 'next/link'
+
 import { TopBar, BrandMark } from '@/components/primitives'
 import { ThemeToggle } from '@/components/theme-toggle'
-import Link from 'next/link'
+import { Button } from '@/components/ui'
 
 /**
  * Marketing Layout
@@ -29,19 +31,10 @@ export default function MarketingLayout({
         </TopBar.Left>
 
         <TopBar.Right>
+          <Button asChild>
+            <Link href="http://localhost:3001/auth/sign-in">Get Started</Link>
+          </Button>
           <ThemeToggle />
-          <Link
-            href="/auth/sign-in"
-            className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/auth/sign-up"
-            className="px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-          >
-            Sign Up
-          </Link>
         </TopBar.Right>
       </TopBar>
 

@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
-import { Bookmark, BarChart3, User, Settings, Copy, ExternalLink, MoreVertical, Sun, Moon, ArrowLeft } from 'lucide-react'
+import { useState } from 'react'
+import { ArrowLeft, BarChart3, Bookmark, Copy, ExternalLink, Moon, MoreVertical, Settings, Sun, User } from 'lucide-react'
+
+import { Button, Card, CardDescription, CardFooter, CardHeader, CardTitle, Input, Label, Textarea } from '@/components/ui'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { NAV_CONSTANTS } from '@/lib/navigation-constants'
 
 export default function StylesPage() {
   const [inputValue, setInputValue] = useState('')
@@ -171,13 +172,11 @@ export default function StylesPage() {
             <div>
               <h3 className="text-lg font-semibold mb-3 text-foreground">Primary Button</h3>
               <div className="bg-secondary p-6 rounded-lg border border-border space-y-4">
-                <button className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold">
+                <Button size="lg">
                   Primary Button
-                </button>
+                </Button>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto">
-{`className="px-6 py-3 bg-primary text-primary-foreground
-          rounded-lg hover:bg-primary/90 transition-colors
-          font-semibold"`}
+{`<Button size="lg">Primary Button</Button>`}
                 </pre>
               </div>
             </div>
@@ -186,13 +185,11 @@ export default function StylesPage() {
             <div>
               <h3 className="text-lg font-semibold mb-3 text-foreground">Secondary Button</h3>
               <div className="bg-secondary p-6 rounded-lg border border-border space-y-4">
-                <button className="px-6 py-3 bg-secondary text-foreground rounded-lg hover:bg-secondary/80 transition-colors font-semibold">
+                <Button size="lg" variant="secondary">
                   Secondary Button
-                </button>
+                </Button>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto">
-{`className="px-6 py-3 bg-secondary text-foreground
-          rounded-lg hover:bg-secondary/80 transition-colors
-          font-semibold"`}
+{`<Button size="lg" variant="secondary">Secondary Button</Button>`}
                 </pre>
               </div>
             </div>
@@ -202,28 +199,32 @@ export default function StylesPage() {
               <h3 className="text-lg font-semibold mb-3 text-foreground">Text Buttons with Icons</h3>
               <div className="bg-secondary p-6 rounded-lg border border-border">
                 <div className="flex flex-wrap gap-3">
-                  <button className="flex items-center gap-2 px-4 py-2 text-base font-medium bg-secondary rounded-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <Button variant="muted" className="gap-2 font-medium">
                     View
                     <ExternalLink className="w-4 h-4" />
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 text-base font-medium bg-secondary rounded-sm text-muted-foreground hover:text-foreground transition-colors">
+                  </Button>
+                  <Button variant="muted" className="gap-2 font-medium">
                     Copy
                     <Copy className="w-4 h-4" />
-                  </button>
-                  <Link href="#" className="flex items-center gap-2 px-4 py-2 text-base font-medium bg-secondary rounded-sm text-muted-foreground hover:text-foreground transition-colors">
-                    Saved
-                    <Bookmark className="w-4 h-4" />
-                  </Link>
-                  <Link href="#" className="flex items-center gap-2 px-4 py-2 text-base font-medium bg-secondary rounded-sm text-muted-foreground hover:text-foreground transition-colors">
-                    Stats
-                    <BarChart3 className="w-4 h-4" />
-                  </Link>
+                  </Button>
+                  <Button asChild variant="muted" className="gap-2 font-medium">
+                    <Link href="#">
+                      Saved
+                      <Bookmark className="w-4 h-4" />
+                    </Link>
+                  </Button>
+                  <Button asChild variant="muted" className="gap-2 font-medium">
+                    <Link href="#">
+                      Stats
+                      <BarChart3 className="w-4 h-4" />
+                    </Link>
+                  </Button>
                 </div>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto mt-4">
-{`className="flex items-center gap-2 px-4 py-2 text-base
-          font-medium bg-secondary rounded-sm
-          text-muted-foreground hover:text-foreground
-          transition-colors"`}
+{`<Button variant="muted" className="gap-2 font-medium">
+  View
+  <ExternalLink className="w-4 h-4" />
+</Button>`}
                 </pre>
               </div>
             </div>
@@ -233,24 +234,23 @@ export default function StylesPage() {
               <h3 className="text-lg font-semibold mb-3 text-foreground">Icon Buttons</h3>
               <div className="bg-secondary p-6 rounded-lg border border-border">
                 <div className="flex flex-wrap gap-3">
-                  <button className={`inline-flex items-center justify-center ${NAV_CONSTANTS.ICON_BUTTON_SIZE} ${NAV_CONSTANTS.BORDER_RADIUS} bg-secondary text-muted-foreground hover:text-foreground transition-colors`}>
-                    <User className={NAV_CONSTANTS.ICON_SIZE} />
-                  </button>
-                  <button className={`inline-flex items-center justify-center ${NAV_CONSTANTS.ICON_BUTTON_SIZE} ${NAV_CONSTANTS.BORDER_RADIUS} bg-secondary text-muted-foreground hover:text-foreground transition-colors`}>
-                    <Settings className={NAV_CONSTANTS.ICON_SIZE} />
-                  </button>
-                  <button className={`inline-flex items-center justify-center ${NAV_CONSTANTS.ICON_BUTTON_SIZE} ${NAV_CONSTANTS.BORDER_RADIUS} bg-secondary text-muted-foreground hover:text-foreground transition-colors`}>
-                    <MoreVertical className={NAV_CONSTANTS.ICON_SIZE} />
-                  </button>
-                  <button className={`inline-flex items-center justify-center ${NAV_CONSTANTS.ICON_BUTTON_SIZE} ${NAV_CONSTANTS.BORDER_RADIUS} bg-secondary text-muted-foreground hover:text-foreground transition-colors`}>
-                    <Sun className={NAV_CONSTANTS.ICON_SIZE} />
-                  </button>
+                  <Button variant="muted" size="icon">
+                    <User className="w-5 h-5" />
+                  </Button>
+                  <Button variant="muted" size="icon">
+                    <Settings className="w-5 h-5" />
+                  </Button>
+                  <Button variant="muted" size="icon">
+                    <MoreVertical className="w-5 h-5" />
+                  </Button>
+                  <Button variant="muted" size="icon">
+                    <Sun className="w-5 h-5" />
+                  </Button>
                 </div>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto mt-4">
-{`className="inline-flex items-center justify-center
-          w-[42px] h-[42px] rounded-sm bg-secondary
-          text-muted-foreground hover:text-foreground
-          transition-colors"`}
+{`<Button variant="muted" size="icon">
+  <User className="w-5 h-5" />
+</Button>`}
                 </pre>
               </div>
             </div>
@@ -259,14 +259,11 @@ export default function StylesPage() {
             <div>
               <h3 className="text-lg font-semibold mb-3 text-foreground">Destructive Button</h3>
               <div className="bg-secondary p-6 rounded-lg border border-border space-y-4">
-                <button className="px-6 py-3 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition-colors font-semibold">
+                <Button size="lg" variant="destructive">
                   Delete
-                </button>
+                </Button>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto">
-{`className="px-6 py-3 bg-destructive
-          text-destructive-foreground rounded-lg
-          hover:bg-destructive/90 transition-colors
-          font-semibold"`}
+{`<Button size="lg" variant="destructive">Delete</Button>`}
                 </pre>
               </div>
             </div>
@@ -284,23 +281,20 @@ export default function StylesPage() {
               <h3 className="text-lg font-semibold mb-3 text-foreground">Text Input</h3>
               <div className="bg-secondary p-6 rounded-lg border border-border space-y-4">
                 <div className="max-w-md">
-                  <label htmlFor="text-input" className="block text-sm font-medium text-foreground mb-2">
+                  <Label htmlFor="text-input" className="mb-2 block">
                     Label
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     id="text-input"
-                    type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder="Enter text..."
-                    className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-foreground"
+                    size="sm"
                   />
                 </div>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto">
-{`className="w-full px-3 py-2 border border-border
-          rounded-lg focus:outline-none focus:ring-2
-          focus:ring-primary focus:border-transparent
-          bg-background text-foreground"`}
+{`<Label htmlFor="text-input">Label</Label>
+<Input id="text-input" placeholder="Enter text..." size="sm" />`}
                 </pre>
               </div>
             </div>
@@ -310,23 +304,20 @@ export default function StylesPage() {
               <h3 className="text-lg font-semibold mb-3 text-foreground">Textarea</h3>
               <div className="bg-secondary p-6 rounded-lg border border-border space-y-4">
                 <div className="max-w-md">
-                  <label htmlFor="textarea" className="block text-sm font-medium text-foreground mb-2">
+                  <Label htmlFor="textarea" className="mb-2 block">
                     Description
-                  </label>
-                  <textarea
+                  </Label>
+                  <Textarea
                     id="textarea"
                     value={textareaValue}
                     onChange={(e) => setTextareaValue(e.target.value)}
                     placeholder="Enter description..."
                     rows={4}
-                    className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-foreground resize-none"
                   />
                 </div>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto">
-{`className="w-full px-3 py-2 border border-border
-          rounded-lg focus:outline-none focus:ring-2
-          focus:ring-primary focus:border-transparent
-          bg-background text-foreground resize-none"`}
+{`<Label htmlFor="textarea">Description</Label>
+<Textarea id="textarea" rows={4} placeholder="Enter description..." />`}
                 </pre>
               </div>
             </div>
@@ -336,22 +327,23 @@ export default function StylesPage() {
               <h3 className="text-lg font-semibold mb-3 text-foreground">Input (Secondary Background)</h3>
               <div className="bg-secondary p-6 rounded-lg border border-border space-y-4">
                 <div className="max-w-md">
-                  <label htmlFor="alt-input" className="block text-sm font-medium text-foreground mb-2">
+                  <Label htmlFor="alt-input" className="mb-2 block">
                     Email
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     id="alt-input"
                     type="email"
                     placeholder="name@example.com"
-                    className="w-full px-4 py-3 bg-secondary border-none rounded-lg text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+                    variant="secondary"
                   />
                 </div>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto">
-{`className="w-full px-4 py-3 bg-secondary border-none
-          rounded-lg text-foreground
-          placeholder:text-muted-foreground focus:ring-2
-          focus:ring-primary focus:outline-none
-          transition-all"`}
+{`<Input
+  id="alt-input"
+  type="email"
+  placeholder="name@example.com"
+  variant="secondary"
+/>`}
                 </pre>
               </div>
             </div>
@@ -486,18 +478,27 @@ export default function StylesPage() {
             <div>
               <h3 className="text-lg font-semibold mb-3 text-foreground">Card</h3>
               <div className="bg-secondary p-6 rounded-lg border border-border space-y-4">
-                <div className="bg-background border border-border rounded-lg p-6 max-w-md">
-                  <h4 className="text-lg font-semibold text-foreground mb-2">Card Title</h4>
-                  <p className="text-muted-foreground mb-4">
-                    This is a card component with a title, description, and action button.
-                  </p>
-                  <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
-                    Action
-                  </button>
-                </div>
+                <Card className="max-w-md">
+                  <CardHeader>
+                    <CardTitle>Card Title</CardTitle>
+                    <CardDescription>
+                      This is a card component with a title, description, and action button.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardFooter className="pt-0">
+                    <Button>Action</Button>
+                  </CardFooter>
+                </Card>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto">
-{`className="bg-background border border-border
-          rounded-lg p-6"`}
+{`<Card>
+  <CardHeader>
+    <CardTitle>Card Title</CardTitle>
+    <CardDescription>Supporting copy.</CardDescription>
+  </CardHeader>
+  <CardFooter>
+    <Button>Action</Button>
+  </CardFooter>
+</Card>`}
                 </pre>
               </div>
             </div>

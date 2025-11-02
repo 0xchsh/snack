@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from 'react'
 import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import { Emoji3D } from '@/types'
-import { useTheme } from 'next-themes'
+import { useTheme } from './theme-provider'
 
 interface EmojiPickerProps {
   isOpen: boolean
@@ -21,12 +21,18 @@ export function EmojiPicker({
   onSelectEmoji,
   onClose
 }: EmojiPickerProps) {
-  const { theme, resolvedTheme } = useTheme()
+  const { resolvedTheme } = useTheme()
   const [position, setPosition] = useState({ top: 0, left: 0 })
+  const [mounted, setMounted] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
 
-  // Determine the actual theme to use (resolvedTheme handles 'system')
-  const actualTheme = resolvedTheme || theme || 'light'
+  // Wait for mount to get correct theme
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Determine the actual theme to use
+  const actualTheme = mounted ? resolvedTheme : 'light'
 
   useEffect(() => {
     if (isOpen && triggerRef.current) {

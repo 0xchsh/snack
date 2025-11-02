@@ -1,19 +1,20 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Menu, List, Grid3X3, GripVertical, Trash2, RefreshCw, MoreHorizontal, Clipboard, FileText, Eye, Link2 } from 'lucide-react'
+import { Rows2, List, GripVertical, Trash2, RefreshCw, MoreHorizontal, Clipboard, FileText, Eye, Link2 } from 'lucide-react'
 import Image from 'next/image'
-import { ListWithLinks, LinkInsert, Link, Emoji3D } from '@/types'
+import { ListWithLinks, Link, Emoji3D, LinkCreatePayload } from '@/types'
 import { EmojiPicker } from './emoji-picker'
 import { validateAndNormalizeUrl, getHostname } from '@/lib/url-utils'
 import { Favicon } from './favicon'
 import { fetchOGDataClient } from '@/lib/og-client'
 import { getDefaultEmoji3D } from '@/lib/emoji'
+import { Button } from '@/components/ui'
 
 interface ListEditorProps {
   list: ListWithLinks
   onUpdateList?: (updates: Partial<ListWithLinks>) => void
-  onAddLink?: (link: LinkInsert) => void
+  onAddLink?: (link: LinkCreatePayload) => void
   onRemoveLink?: (linkId: string) => void
   onReorderLinks?: (links: string[]) => void
 }
@@ -76,6 +77,7 @@ export function ListEditor({
   const [isDragging, setIsDragging] = useState(false)
   const [draggedItemPosition, setDraggedItemPosition] = useState({ x: 0, y: 0, width: 0 })
   const [isMobile, setIsMobile] = useState(false)
+  const [showCopySuccess, setShowCopySuccess] = useState(false)
   const dragStartPosition = useRef({ x: 0, y: 0 })
   const dragOffset = useRef({ x: 0, y: 0 })
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
@@ -298,6 +300,10 @@ export function ListEditor({
       // Reorder the links
       const newLinks = [...optimisticList.links]
       const [draggedItem] = newLinks.splice(draggedIndex, 1)
+      if (!draggedItem) {
+        cleanup()
+        return
+      }
       newLinks.splice(dragOverIndex, 0, draggedItem)
       
       console.log('Reordering in', viewMode, ':', {
@@ -331,14 +337,16 @@ export function ListEditor({
   
   // Set up global mouse event listeners when dragging starts
   useEffect(() => {
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove)
-      document.addEventListener('mouseup', handleMouseUp)
-      
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove)
-        document.removeEventListener('mouseup', handleMouseUp)
-      }
+    if (!isDragging) {
+      return undefined
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
     }
   }, [isDragging, handleMouseMove, handleMouseUp])
 
@@ -474,11 +482,12 @@ export function ListEditor({
   // Copy public list link
   const copyListLink = async () => {
     setShowMoreMenu(false)
-    
+
     try {
       const url = `${window.location.origin}/${list.user?.username || 'list'}/${list.id}`
       await navigator.clipboard.writeText(url)
-      // TODO: Could add a toast notification here
+      setShowCopySuccess(true)
+      setTimeout(() => setShowCopySuccess(false), 2000)
     } catch (error) {
       console.error('Failed to copy list link:', error)
       // Fallback for browsers that don't support clipboard API
@@ -579,14 +588,20 @@ export function ListEditor({
 
   // Handle global paste event when not focused on any input
   useEffect(() => {
+    console.log('Setting up paste listener, onAddLink exists:', !!onAddLink)
+
     const handleGlobalPaste = async (e: ClipboardEvent) => {
+      console.log('Paste event fired', { onAddLink: !!onAddLink })
+
       // Check if the user is focused on an input, textarea, or contenteditable element
       const activeElement = document.activeElement
-      const isInputFocused = 
-        activeElement?.tagName === 'INPUT' || 
-        activeElement?.tagName === 'TEXTAREA' || 
+      const isInputFocused =
+        activeElement?.tagName === 'INPUT' ||
+        activeElement?.tagName === 'TEXTAREA' ||
         activeElement?.getAttribute('contenteditable') === 'true'
-      
+
+      console.log('Is input focused:', isInputFocused, 'Active element:', activeElement?.tagName)
+
       // If user is focused on an input, let the default paste behavior handle it
       if (isInputFocused) {
         return
@@ -594,19 +609,20 @@ export function ListEditor({
 
       // Prevent default paste behavior
       e.preventDefault()
-      
+
       // Get clipboard text
       const clipboardText = e.clipboardData?.getData('text')
+      console.log('Clipboard text:', clipboardText)
       if (!clipboardText) return
-      
+
       // Parse URLs from clipboard
       const urls = clipboardText
         .split(/[\n,\s]+/)
         .map(url => url.trim())
         .filter(url => url)
-      
+
       const validUrls: string[] = []
-      
+
       // Validate URLs
       urls.forEach(url => {
         const { isValid, normalizedUrl } = validateAndNormalizeUrl(url)
@@ -614,26 +630,29 @@ export function ListEditor({
           validUrls.push(normalizedUrl)
         }
       })
-      
+
+      console.log('Valid URLs:', validUrls)
+
       // If we have valid URLs, add them to the list
       if (validUrls.length > 0) {
         // Add ghost loading placeholders immediately
         setLoadingLinks(validUrls)
-        
+
         // Add links sequentially
         for (let i = 0; i < validUrls.length; i++) {
           const url = validUrls[i]
           if (url) {
-            await onAddLink?.({ 
+            console.log('Adding link:', url)
+            await onAddLink?.({
               url,
               title: url // Use URL as default title, it will be updated with OG data
             })
-            
+
             // Remove from loading state as each one completes
             setLoadingLinks(prev => prev.filter(loadingUrl => loadingUrl !== url))
           }
         }
-        
+
         // Clear any existing errors
         setLinkError('')
       }
@@ -641,9 +660,11 @@ export function ListEditor({
 
     // Add paste event listener
     document.addEventListener('paste', handleGlobalPaste)
-    
+    console.log('Paste listener added')
+
     // Cleanup
     return () => {
+      console.log('Removing paste listener')
       document.removeEventListener('paste', handleGlobalPaste)
     }
   }, [list.id, onAddLink])
@@ -652,15 +673,25 @@ export function ListEditor({
 
   return (
     <div className="space-y-6">
+      {/* Copy Success Toast */}
+      {showCopySuccess && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+          <Clipboard className="w-4 h-4" />
+          <span className="font-medium">Link copied to clipboard!</span>
+        </div>
+      )}
+
       {/* Emoji + Title */}
       <div className="flex items-start gap-4">
-        <button
+        <Button
           ref={emojiButtonRef}
+          type="button"
           onClick={() => setShowEmojiPicker(true)}
-          className="w-[62px] h-[62px] flex items-center justify-center bg-background border border-border rounded-md text-3xl hover:border-muted-foreground transition-colors flex-shrink-0"
+          variant="outline"
+          className="flex-shrink-0 w-[62px] h-[62px] p-0 rounded-md text-3xl bg-background hover:border-muted-foreground"
         >
           <span>{currentEmoji3D.unicode}</span>
-        </button>
+        </Button>
 
         {isEditingTitle ? (
           <input
@@ -675,70 +706,80 @@ export function ListEditor({
               }
             }}
             placeholder="Untitled List"
-            className="flex-1 text-3xl font-normal text-foreground bg-background border border-border rounded-md px-4 py-3 outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder:text-muted-foreground break-all"
+            className="flex-1 min-w-0 w-full text-3xl font-normal text-foreground bg-background border border-border rounded-md px-4 py-3 outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder:text-muted-foreground break-all"
             maxLength={60}
             autoFocus
           />
         ) : (
-          <button
+          <Button
+            type="button"
             onClick={() => setIsEditingTitle(true)}
-            className="flex-1 text-left text-3xl font-normal text-foreground bg-background border border-border rounded-md px-4 py-3 hover:border-muted-foreground transition-colors break-all hyphens-auto"
+            variant="outline"
+            className="flex-1 min-w-0 justify-start text-left text-3xl font-normal text-foreground bg-background border-border px-4 py-3 hover:border-muted-foreground break-all hyphens-auto"
           >
             {list.title || <span className="text-muted-foreground">Untitled List</span>}
-          </button>
+          </Button>
         )}
       </div>
 
       {/* Link count and Paste button/input */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-muted-foreground bg-muted px-3 py-2 rounded-md flex-shrink-0">
-            <Link2 className="w-4 h-4" />
-            <span className="text-base">{optimisticList.links?.length || 0} links</span>
-          </div>
-
           {/* View Mode Toggle */}
           <div className="flex items-center gap-1 bg-muted rounded-md p-1">
-            <button
+            <Button
+              type="button"
               onClick={() => {
                 setViewMode('row')
                 onUpdateList?.({ view_mode: 'row' })
               }}
-              className={`p-2 rounded transition-colors ${
+              variant={viewMode === 'row' ? 'secondary' : 'ghost'}
+              size="sm"
+              className={`p-2 rounded ${
                 viewMode === 'row'
                   ? 'bg-background text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-transparent'
               }`}
               title="Row view"
             >
-              <Menu className="w-4 h-4" />
-            </button>
-            <button
+              <List className="w-4 h-4" />
+            </Button>
+            <Button
+              type="button"
               onClick={() => {
                 setViewMode('card')
                 onUpdateList?.({ view_mode: 'card' })
               }}
-              className={`p-2 rounded transition-colors ${
+              variant={viewMode === 'card' ? 'secondary' : 'ghost'}
+              size="sm"
+              className={`p-2 rounded ${
                 viewMode === 'card'
                   ? 'bg-background text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-transparent'
               }`}
               title="Card view"
             >
-              <Grid3X3 className="w-4 h-4" />
-            </button>
+              <Rows2 className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-2 text-muted-foreground flex-shrink-0">
+            <Link2 className="w-4 h-4" />
+            <span className="text-base">{optimisticList.links?.length || 0} links</span>
           </div>
         </div>
 
         {/* Desktop: Paste button */}
         {!isMobile && (
-          <button
+          <Button
+            type="button"
             onClick={pasteFromClipboard}
-            className="flex items-center gap-2 px-4 py-2 border border-border rounded-md text-base text-muted-foreground hover:text-foreground hover:border-muted-foreground transition-colors flex-shrink-0"
+            variant="outline"
+            className="flex items-center gap-2 px-4 py-2 text-base text-muted-foreground hover:text-foreground hover:border-muted-foreground flex-shrink-0"
           >
             <span>Paste links</span>
             <span className="text-sm">⌘V</span>
-          </button>
+          </Button>
         )}
 
         {/* Mobile: Visible paste input */}
@@ -746,9 +787,9 @@ export function ListEditor({
           <input
             ref={mobilePasteInputRef}
             type="text"
-            placeholder="Paste link(s) here"
+            placeholder="Paste links here"
             onPaste={handleMobilePaste}
-            className="flex-1 px-4 py-2 border border-border rounded-md text-base bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-muted-foreground transition-colors min-w-0"
+            className="flex-1 px-4 py-2 bg-background text-foreground border border-border rounded-md text-base placeholder:text-muted-foreground focus:outline-none focus:border-muted-foreground transition-colors min-w-0"
           />
         )}
       </div>
@@ -808,7 +849,7 @@ export function ListEditor({
               >
                 <LinkItem
                   link={draggedLink}
-                  viewMode="menu"
+                  viewMode={viewMode}
                   onRemove={() => {}}
                 />
               </div>
@@ -819,8 +860,8 @@ export function ListEditor({
       
       {(!optimisticList.links || optimisticList.links.length === 0) && loadingLinks.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
-          <p style={{ fontFamily: 'Open Runde' }}>
-            Add your first link to get started
+          <p>
+            Paste your first link to get started
           </p>
         </div>
       )}
@@ -857,7 +898,7 @@ function LinkItem({
   if (viewMode === 'row') {
     // Compact rows - clean list layout
     return (
-      <div className="flex items-center gap-3 px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-transform transform hover:scale-[0.99] active:scale-[0.97] group cursor-grab rounded-md select-none">
+      <div className="flex items-center gap-3 pl-3 pr-0 py-0 bg-background border border-border hover:bg-accent/50 transition-colors group cursor-grab rounded-md select-none">
         <div className="w-5 h-5 flex-shrink-0">
           <Favicon
             url={link.url}
@@ -866,7 +907,7 @@ function LinkItem({
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="text-base text-foreground truncate">
+          <h3 className="text-base font-medium text-foreground truncate">
             {link.title || getHostname(link.url)}
           </h3>
         </div>
@@ -875,7 +916,8 @@ function LinkItem({
           <div className="text-muted-foreground p-1 cursor-grab" title="Drag to reorder">
             <GripVertical className="w-4 h-4" />
           </div>
-          <button
+          <Button
+            type="button"
             onClick={(e) => {
               e.stopPropagation()
               onRemove()
@@ -883,11 +925,13 @@ function LinkItem({
             onMouseDown={(e) => {
               e.stopPropagation()
             }}
-            className="text-red-600 hover:text-red-700 transition-colors p-1 cursor-pointer"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 p-1 text-red-600 hover:text-red-700"
             title="Delete link"
           >
             <Trash2 className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -897,7 +941,7 @@ function LinkItem({
 
   return (
     <div
-      className="rounded-md group cursor-grab flex flex-col gap-3"
+      className="rounded-md group cursor-grab flex flex-col gap-3 transition-transform active:scale-[0.98]"
       style={{
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
@@ -911,7 +955,7 @@ function LinkItem({
               src={link.image_url}
               alt={link.title || ''}
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.05]"
               unoptimized
               onError={(e) => {
                 // Hide the failed image
@@ -925,7 +969,7 @@ function LinkItem({
             />
             {/* Fallback content (hidden by default, shown when image fails) */}
             <div
-              className="w-full h-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center absolute inset-0"
+              className="w-full h-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center absolute inset-0 transition-transform duration-300 ease-out group-hover:scale-[1.05]"
               style={{ display: 'none' }}
             >
               <div className="text-neutral-300 dark:text-neutral-600">
@@ -941,7 +985,7 @@ function LinkItem({
             </div>
           </>
         ) : (
-          <div className="w-full h-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center">
+          <div className="w-full h-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center transition-transform duration-300 ease-out group-hover:scale-[1.05]">
             <Image
               src="/images/logo.svg"
               alt="Snack"
@@ -958,7 +1002,8 @@ function LinkItem({
           <div className="bg-background/90 backdrop-blur-sm text-muted-foreground p-1.5 rounded-md cursor-grab" title="Drag to reorder">
             <GripVertical className="w-4 h-4" />
           </div>
-          <button
+          <Button
+            type="button"
             onClick={(e) => {
               e.stopPropagation()
               onRemove()
@@ -966,11 +1011,13 @@ function LinkItem({
             onMouseDown={(e) => {
               e.stopPropagation()
             }}
-            className="bg-background/90 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-md cursor-pointer"
+            variant="ghost"
+            size="icon"
+            className="bg-background/90 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-md h-8 w-8"
             title="Delete link"
           >
             <Trash2 className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -985,15 +1032,13 @@ function LinkItem({
             />
           </div>
           <h3
-            className="font-semibold text-foreground text-base leading-tight truncate"
-            style={{ fontFamily: 'Open Runde' }}
+            className="font-medium text-foreground text-base leading-tight truncate"
           >
             {link.title || getHostname(link.url)}
           </h3>
         </div>
         <p
-          className="text-sm text-muted-foreground/70 flex-shrink-0"
-          style={{ fontFamily: 'Open Runde' }}
+          className="text-sm text-muted-foreground flex-shrink-0"
         >
           {getHostname(link.url)}
         </p>

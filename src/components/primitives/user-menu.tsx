@@ -1,10 +1,12 @@
 'use client'
 
-import { User } from '@supabase/supabase-js'
 import { User as UserIcon, LogOut, Settings } from 'lucide-react'
 import Link from 'next/link'
+import { useEffect, useRef, useState } from 'react'
+
+import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
-import { useState, useRef, useEffect } from 'react'
+import type { User } from '@/types'
 
 interface UserMenuProps {
   user: User | null
@@ -45,23 +47,25 @@ export function UserMenu({ user, onLogout, username, className }: UserMenuProps)
 
   return (
     <div className={cn('relative', className)} ref={menuRef}>
-      <button
+      <Button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-icon-button h-icon-button rounded-md bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/90 transition-colors inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        variant="muted"
+        size="icon"
         aria-label="User menu"
         aria-expanded={isOpen}
       >
         <UserIcon className="w-5 h-5" />
-      </button>
+      </Button>
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 bg-popover border border-border rounded-md shadow-lg z-50">
           <div className="px-4 py-3 border-b border-border">
             <p className="text-sm font-medium text-foreground">
-              {username || user.email}
+              {username || user.username || user.email}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              {user.email}
+              {user.email || 'No email'}
             </p>
           </div>
 
@@ -76,16 +80,18 @@ export function UserMenu({ user, onLogout, username, className }: UserMenuProps)
             </Link>
 
             {onLogout && (
-              <button
+              <Button
+                type="button"
                 onClick={() => {
                   setIsOpen(false)
                   onLogout()
                 }}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
+                variant="ghost"
+                className="w-full justify-start gap-3 px-4 py-2 text-sm text-foreground hover:bg-accent"
               >
                 <LogOut className="w-4 h-4" />
                 Sign Out
-              </button>
+              </Button>
             )}
           </div>
         </div>

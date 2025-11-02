@@ -137,19 +137,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('useAuth: Found session for user:', session.user.email)
           
           // Use session data directly
-          const emailPrefix = session.user.email?.split('@')[0] || 'user'
-          const basicUser: User = {
-            id: session.user.id,
-            email: session.user.email || '',
-            username: session.user.user_metadata?.username || `@${emailPrefix}`,
-            first_name: session.user.user_metadata?.first_name || null,
-            last_name: session.user.user_metadata?.last_name || null,
-            profile_picture_url: session.user.user_metadata?.avatar_url || null,
+         const emailPrefix = session.user.email?.split('@')[0] || 'user'
+         const basicUser: User = {
+           id: session.user.id,
+           email: session.user.email || '',
+           username: session.user.user_metadata?.username || `@${emailPrefix}`,
+           first_name: session.user.user_metadata?.first_name || null,
+           last_name: session.user.user_metadata?.last_name || null,
+           profile_picture_url: session.user.user_metadata?.avatar_url || null,
+            profile_is_public: true,
+            bio: null,
             subscription_status: 'free',
             subscription_tier: 'free',
             created_at: session.user.created_at,
             updated_at: session.user.updated_at || session.user.created_at
-          }
+         }
           
           setUser(basicUser)
           console.log('useAuth: User state updated')
@@ -205,6 +207,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           first_name: null,
           last_name: null,
           profile_picture_url: null,
+          profile_is_public: true,
+          bio: null,
           subscription_status: 'free',
           subscription_tier: 'free',
           created_at: session.user.created_at,
@@ -370,6 +374,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           first_name: session.user.user_metadata?.first_name || null,
           last_name: session.user.user_metadata?.last_name || null,
           profile_picture_url: session.user.user_metadata?.avatar_url || null,
+          profile_is_public: true,
+          bio: session.user.user_metadata?.bio || null,
           subscription_status: 'free',
           subscription_tier: 'free',
           created_at: session.user.created_at,

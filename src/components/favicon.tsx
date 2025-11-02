@@ -36,7 +36,7 @@ export function Favicon({
   if (hasError || currentIndex >= faviconUrls.length) {
     return (
       <div 
-        className={`${fallbackClassName} flex items-center justify-center text-xs font-bold text-muted-foreground ${className}`}
+        className={`${fallbackClassName} flex items-center justify-center text-xs font-bold text-muted-foreground rounded-xs ${className}`}
         style={{ width: size, height: size }}
       >
         {hostname.charAt(0).toUpperCase()}
@@ -49,7 +49,7 @@ export function Favicon({
   if (!currentSrc) {
     return (
       <div 
-        className={`${fallbackClassName} flex items-center justify-center text-xs font-bold text-muted-foreground ${className}`}
+        className={`${fallbackClassName} flex items-center justify-center text-xs font-bold text-muted-foreground rounded-xs ${className}`}
         style={{ width: size, height: size }}
       >
         {hostname.charAt(0).toUpperCase()}
@@ -63,7 +63,7 @@ export function Favicon({
       alt={`${hostname} favicon`}
       width={size}
       height={size}
-      className={`object-cover ${className}`}
+      className={`object-cover rounded-xs ${className}`}
       onError={handleError}
       unoptimized
     />

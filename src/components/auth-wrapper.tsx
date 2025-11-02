@@ -21,11 +21,13 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
           // Map API response to User type
           const apiUser: User = {
             id: data.user.id,
-            email: data.user.email,
-            username: data.user.metadata?.username || data.user.email.split('@')[0],
+            email: data.user.email ?? '',
+            username: data.user.metadata?.username || data.user.email?.split('@')[0] || 'user',
             first_name: data.user.metadata?.first_name || null,
             last_name: data.user.metadata?.last_name || null,
             profile_picture_url: data.user.metadata?.avatar_url || null,
+            profile_is_public: true,
+            bio: data.user.metadata?.bio || null,
             subscription_status: 'free',
             subscription_tier: 'free',
             created_at: new Date().toISOString(),

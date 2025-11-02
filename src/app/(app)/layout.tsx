@@ -2,11 +2,13 @@
 
 import Link from 'next/link'
 import { Bookmark, BarChart3 } from 'lucide-react'
+import { useEffect, Suspense } from 'react'
+
+import { Button } from '@/components/ui'
 import { TopBar, BrandMark, UserMenu } from '@/components/primitives'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, Suspense } from 'react'
 
 /**
  * App Layout
@@ -68,32 +70,32 @@ function AppLayoutContent({
         </TopBar.Left>
 
         <TopBar.Right>
-          <Link
-            href="/dashboard?tab=saved"
-            className={`w-icon-button h-icon-button rounded-md inline-flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-              activeTab === 'saved'
-                ? 'bg-secondary text-foreground'
-                : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/90'
-            }`}
+          <Button
+            asChild
+            variant={activeTab === 'saved' ? 'secondary' : 'muted'}
+            size="icon"
+            className={activeTab === 'saved' ? 'text-foreground' : undefined}
             aria-label="Saved lists"
           >
-            <Bookmark className="w-4 h-4" />
-          </Link>
-          <Link
-            href="/dashboard?tab=stats"
-            className={`w-icon-button h-icon-button rounded-md inline-flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-              activeTab === 'stats'
-                ? 'bg-secondary text-foreground'
-                : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/90'
-            }`}
+            <Link href="/dashboard?tab=saved">
+              <Bookmark className="w-4 h-4" />
+            </Link>
+          </Button>
+          <Button
+            asChild
+            variant={activeTab === 'stats' ? 'secondary' : 'muted'}
+            size="icon"
+            className={activeTab === 'stats' ? 'text-foreground' : undefined}
             aria-label="Stats"
           >
-            <BarChart3 className="w-4 h-4" />
-          </Link>
+            <Link href="/dashboard?tab=stats">
+              <BarChart3 className="w-4 h-4" />
+            </Link>
+          </Button>
           <UserMenu
             user={user}
             onLogout={handleLogout}
-            username={user.user_metadata?.username}
+            username={user.username}
           />
           <ThemeToggle />
         </TopBar.Right>

@@ -73,6 +73,13 @@ export const auth = {
         id: authUser.id,
         email: authUser.email || '',
         username: authUser.email?.split('@')[0] || 'user',
+        first_name: authUser.user_metadata?.first_name || null,
+        last_name: authUser.user_metadata?.last_name || null,
+        profile_picture_url: authUser.user_metadata?.avatar_url || null,
+        profile_is_public: true,
+        bio: authUser.user_metadata?.bio || null,
+        subscription_status: 'free',
+        subscription_tier: 'free',
         created_at: authUser.created_at,
         updated_at: authUser.updated_at || authUser.created_at
       }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, memo } from 'react'
-import { Copy, Clock, Link as LinkIcon, Eye, Bookmark, Edit, BarChart3 } from 'lucide-react'
+import { Copy, Clock, Link as LinkIcon, Eye, Bookmark, Edit } from 'lucide-react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -32,15 +32,25 @@ export function PublicListView({ list }: PublicListViewProps) {
   const [clickedLinks, setClickedLinks] = useState<Set<string>>(new Set())
   const [hasAnimated, setHasAnimated] = useState(false)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [showCopySuccess, setShowCopySuccess] = useState(false)
   const router = useRouter()
   const { user } = useAuth()
 
   // Get view mode from list data, default to 'row' if not set
-  const viewMode: ViewMode = (list.view_mode as ViewMode) || 'row'
+  const viewMode: ViewMode = list.view_mode === 'card' ? 'card' : 'row'
 
   // Get display name - prioritize current user's data for their own lists
   const isOwner = user && list.user_id === user.id
   
+  const resolveInitial = (value?: string | null) => {
+    if (!value || value.length === 0) {
+      return 'U'
+    }
+    const normalized = value.startsWith('@') ? value.slice(1) : value
+    const char = normalized[0]
+    return char ? char.toUpperCase() : 'U'
+  }
+
   let displayName = 'Unknown User'
   let displayInitial = 'U'
   
@@ -48,22 +58,23 @@ export function PublicListView({ list }: PublicListViewProps) {
     // Use current user's name data for their own lists
     if (user.first_name && user.last_name) {
       displayName = `${user.first_name} ${user.last_name}`
-      displayInitial = user.first_name[0]?.toUpperCase() || 'U'
+      displayInitial = resolveInitial(user.first_name)
     } else if (user.first_name) {
       displayName = user.first_name
-      displayInitial = user.first_name[0]?.toUpperCase() || 'U'
+      displayInitial = resolveInitial(user.first_name)
     } else if (user.username) {
       displayName = user.username
-      displayInitial = user.username.startsWith('@') ? user.username[1]?.toUpperCase() : user.username[0]?.toUpperCase() || 'U'
+      displayInitial = resolveInitial(user.username)
     }
   } else if (list.user) {
     // Use stored list user data for other users' lists
     displayName = list.user.username || 'Unknown User'
-    displayInitial = displayName.startsWith('@') ? displayName[1]?.toUpperCase() : displayName[0]?.toUpperCase() || 'U'
+    displayInitial = resolveInitial(displayName)
   }
   
   // Get profile picture - use current user's profile picture if this is their list, otherwise use list user's picture
-  const profilePictureUrl = (user && list.user_id === user.id ? user.profile_picture_url : list.user?.profile_picture_url) || null
+  const profilePictureUrl =
+    (user && list.user_id === user.id ? user.profile_picture_url : list.user?.profile_picture_url) || null
 
   const handleLinkClick = async (linkId: string, url: string) => {
     setClickedLinks(prev => new Set(prev).add(linkId))
@@ -90,6 +101,8 @@ export function PublicListView({ list }: PublicListViewProps) {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href)
+      setShowCopySuccess(true)
+      setTimeout(() => setShowCopySuccess(false), 2000)
     } catch {
       // Silently handle error
     }
@@ -143,43 +156,45 @@ export function PublicListView({ list }: PublicListViewProps) {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Copy Success Toast */}
+      {showCopySuccess && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+          <Copy className="w-4 h-4" />
+          <span className="font-medium">Link copied to clipboard!</span>
+        </div>
+      )}
+
       {isOwner ? (
         <Header
           logoHref="/dashboard"
-          username={user?.username}
+          username={user?.username || list.user?.username || ''}
           buttons={[
             {
               type: 'custom',
-              label: 'Edit',
-              icon: <Edit className="w-4 h-4" />,
+              icon: <Edit className="w-5 h-5" />,
               onClick: () => {
                 const username = user?.username || list.user?.username
                 router.push(`/${username}/${list.public_id || list.id}`)
               },
-              className: "flex items-center gap-2 px-4 py-2 text-base font-medium border border-border text-muted-foreground hover:text-foreground transition-colors rounded-md"
+              className: "w-10 h-10 p-0 flex items-center justify-center"
             },
             {
               type: 'custom',
-              label: 'Stats',
-              icon: <BarChart3 className="w-4 h-4" />,
-              onClick: () => {
-                router.push('/dashboard?tab=stats')
-              },
-              className: "flex items-center gap-2 px-4 py-2 text-base font-medium border border-border text-muted-foreground hover:text-foreground transition-colors rounded-md"
-            },
-            {
-              type: 'copy',
+              icon: <Copy className="w-5 h-5" />,
               onClick: async () => {
                 const url = `${window.location.origin}/${list.user?.username}/${list.public_id || list.id}`
                 await navigator.clipboard.writeText(url)
-              }
+                setShowCopySuccess(true)
+                setTimeout(() => setShowCopySuccess(false), 2000)
+              },
+              className: "w-10 h-10 p-0 flex items-center justify-center"
             }
           ]}
         />
       ) : (
         <Header
           logoHref="/"
-          username={user?.username}
+          username={user?.username || list.user?.username || ''}
           buttons={user ? [
             {
               type: 'custom',
@@ -205,66 +220,66 @@ export function PublicListView({ list }: PublicListViewProps) {
             <span className="text-5xl">{list.emoji}</span>
           </div>
 
-          {/* Title and Creator */}
+          {/* Title */}
           <div className="flex flex-col gap-4">
-            <h1 className="text-xl font-normal text-foreground break-words leading-[1.5]">
+            <h1 className="text-3xl font-medium text-foreground break-words leading-[1.5]">
               {list.title || 'Untitled List'}
             </h1>
-
-            {/* Creator */}
-            {list.user?.username && (
-              <Link
-                href={`/${list.user.username}`}
-                className="flex items-center gap-1.5 hover:text-foreground transition-colors text-base w-fit"
-              >
-                <div className="w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center overflow-hidden">
-                  {profilePictureUrl ? (
-                    <Image
-                      src={profilePictureUrl}
-                      alt={`${displayName}'s profile`}
-                      width={16}
-                      height={16}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none'
-                        const fallback = e.currentTarget.nextElementSibling as HTMLElement
-                        if (fallback) {
-                          fallback.style.display = 'flex'
-                        }
-                      }}
-                    />
-                  ) : null}
-                  <span
-                    className="text-white text-[8px] font-bold"
-                    style={{ display: profilePictureUrl ? 'none' : 'flex' }}
-                  >
-                    {displayInitial}
-                  </span>
-                </div>
-                <span className="font-medium text-neutral-600">{displayName}</span>
-              </Link>
-            )}
           </div>
 
           {/* Stats */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            {/* Left: Today */}
-            <div className="bg-muted rounded-md px-3 py-1.5 h-9 flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm sm:text-base text-muted-foreground">Today</span>
+            {/* Left: Creator */}
+            <div>
+              {list.user?.username && (
+                <Link
+                  href={`/${list.user.username}`}
+                  className="flex items-center gap-1.5 hover:text-foreground transition-colors text-base w-fit"
+                >
+                  <div className="w-6 h-6 bg-muted rounded-full flex items-center justify-center overflow-hidden">
+                    {profilePictureUrl ? (
+                      <Image
+                        src={profilePictureUrl}
+                        alt={`${displayName}'s profile`}
+                        width={24}
+                        height={24}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                          const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                          if (fallback) {
+                            fallback.style.display = 'flex'
+                          }
+                        }}
+                      />
+                    ) : null}
+                    <span
+                      className="text-muted-foreground text-[10px] font-bold"
+                      style={{ display: profilePictureUrl ? 'none' : 'flex' }}
+                    >
+                      {displayInitial}
+                    </span>
+                  </div>
+                  <span className="font-medium text-muted-foreground">{displayName}</span>
+                </Link>
+              )}
             </div>
 
             {/* Right: Links, Views, Saves */}
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-              <div className="bg-muted rounded-md px-2.5 sm:px-3 py-1.5 h-9 flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm sm:text-base text-muted-foreground">Today</span>
+              </div>
+              <div className="flex items-center gap-1.5">
                 <LinkIcon className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm sm:text-base text-muted-foreground">{list.links?.length || 0}</span>
               </div>
-              <div className="bg-muted rounded-md px-2.5 sm:px-3 py-1.5 h-9 flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5">
                 <Eye className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm sm:text-base text-muted-foreground">69K</span>
+                <span className="text-sm sm:text-base text-muted-foreground">{formatCount(list.view_count || 0)}</span>
               </div>
-              <div className="bg-muted rounded-md px-2.5 sm:px-3 py-1.5 h-9 flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5">
                 <Bookmark className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm sm:text-base text-muted-foreground">{formatCount(list.save_count || 0)}</span>
               </div>
@@ -326,11 +341,10 @@ const PublicLinkItem = memo(function PublicLinkItem({
         onClick={onClick}
       >
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-4 h-4 rounded-sm overflow-hidden flex-shrink-0">
+          <div className="w-4 h-4 overflow-hidden flex-shrink-0">
             <Favicon
               url={link.url}
               size={16}
-              className="rounded-sm"
             />
           </div>
 
@@ -363,7 +377,7 @@ const PublicLinkItem = memo(function PublicLinkItem({
               src={link.image_url}
               alt={link.title || ''}
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.05]"
               unoptimized
               onError={(e) => {
                 // Hide the failed image
@@ -377,7 +391,7 @@ const PublicLinkItem = memo(function PublicLinkItem({
             />
             {/* Fallback content (hidden by default, shown when image fails) */}
             <div
-              className="w-full h-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center absolute inset-0"
+              className="w-full h-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center absolute inset-0 transition-transform duration-300 ease-out group-hover:scale-[1.05]"
               style={{ display: 'none' }}
             >
               <div className="text-neutral-300 dark:text-neutral-600">
@@ -393,7 +407,7 @@ const PublicLinkItem = memo(function PublicLinkItem({
             </div>
           </>
         ) : (
-          <div className="w-full h-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center">
+          <div className="w-full h-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center transition-transform duration-300 ease-out group-hover:scale-[1.05]">
             <Image
               src="/images/logo.svg"
               alt="Snack"
@@ -409,23 +423,21 @@ const PublicLinkItem = memo(function PublicLinkItem({
       {/* Site Info - Separated from OG Image */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="w-4 h-4 rounded-sm overflow-hidden flex-shrink-0">
+          <div className="w-4 h-4 overflow-hidden flex-shrink-0">
             <Favicon
               url={link.url}
               size={16}
-              className="rounded-sm"
             />
           </div>
           <h3
-            className="font-semibold text-foreground text-base leading-tight truncate"
-            style={{ fontFamily: 'Open Runde' }}
+            className="font-medium text-foreground text-base leading-tight truncate"
           >
             {link.title || getHostname(link.url)}
           </h3>
         </div>
         <p
-          className="text-sm text-muted-foreground/70 flex-shrink-0"
-          style={{ fontFamily: 'Open Runde' }}
+          className="text-sm text-muted-foreground flex-shrink-0"
+          style={{ color: 'var(--muted-foreground)' }}
         >
           {getHostname(link.url)}
         </p>

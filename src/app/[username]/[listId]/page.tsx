@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, Copy, ExternalLink, Eye, MoreHorizontal } from 'lucide-react'
+import { ArrowLeft, Copy, ExternalLink, Eye } from 'lucide-react'
+import { Button } from '@/components/ui'
 import { TopBar, BrandMark, PageActions, AppContainer } from '@/components/primitives'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { ListEditor } from '@/components/list-editor'
 import { PublicListView } from '@/components/public-list-view'
 import { CreateList } from '@/components/create-list'
-import { ListWithLinks, CreateListForm, LinkInsert } from '@/types'
+import { ListWithLinks, CreateListForm, LinkCreatePayload } from '@/types'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
 
@@ -24,6 +25,7 @@ export default function UserListPage() {
   const [showCreateList, setShowCreateList] = useState(false)
   const [isListPublic, setIsListPublic] = useState(true)
   const [isListPaid, setIsListPaid] = useState(false)
+  const [showCopySuccess, setShowCopySuccess] = useState(false)
   const { user } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -119,7 +121,7 @@ export default function UserListPage() {
     }
   }
 
-  const handleAddLink = async (linkData: LinkInsert) => {
+  const handleAddLink = async (linkData: LinkCreatePayload) => {
     if (!currentList) return
     
     try {
@@ -245,18 +247,19 @@ export default function UserListPage() {
             }
           </p>
           <div className="flex gap-4 justify-center">
-            <button
+            <Button
               onClick={() => router.push(`/${username}`)}
-              className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors font-semibold"
+              variant="secondary"
+              className="px-4 py-2 font-semibold"
             >
               Back to Profile
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => router.push('/')}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
+              className="px-4 py-2 font-semibold"
             >
               Go Home
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -271,42 +274,44 @@ export default function UserListPage() {
   // Show editable view for authenticated owners (when not forced to public view)
   return (
     <div className="min-h-screen bg-background">
+      {/* Copy Success Toast */}
+      {showCopySuccess && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+          <Copy className="w-4 h-4" />
+          <span className="font-medium">Link copied to clipboard!</span>
+        </div>
+      )}
+
       <TopBar variant="app">
         <TopBar.Left>
           <BrandMark variant="app" href="/dashboard" />
         </TopBar.Left>
 
         <TopBar.Right>
-          <button
+          <Button
             onClick={() => {
               const url = `${window.location.origin}/${username}/${currentList.public_id || listId}?view=public`
               window.open(url, '_blank')
             }}
-            className="w-icon-button h-icon-button rounded-sm bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/90 transition-colors inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            variant="muted"
+            size="icon"
             aria-label="Preview public view"
           >
             <Eye className="w-5 h-5" />
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={async () => {
               const url = `${window.location.origin}/${username}/${currentList.public_id || listId}`
               await navigator.clipboard.writeText(url)
+              setShowCopySuccess(true)
+              setTimeout(() => setShowCopySuccess(false), 2000)
             }}
-            className="w-icon-button h-icon-button rounded-sm bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/90 transition-colors inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            variant="muted"
+            size="icon"
             aria-label="Copy link"
           >
             <Copy className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => {
-              // TODO: Implement menu dropdown
-              console.log('Open menu')
-            }}
-            className="w-icon-button h-icon-button rounded-sm bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/90 transition-colors inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            aria-label="More options"
-          >
-            <MoreHorizontal className="w-5 h-5" />
-          </button>
+          </Button>
           <ThemeToggle />
         </TopBar.Right>
       </TopBar>

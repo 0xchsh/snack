@@ -1,4 +1,4 @@
-import { ListWithLinks, CreateListForm, User } from '@/types'
+import { ListWithLinks, CreateListForm, User, Link } from '@/types'
 import { getRandomEmoji, getDefaultEmoji3D } from '@/lib/emoji'
 import { fetchOGDataClient } from './og-client'
 
@@ -58,20 +58,25 @@ export class MockListDatabase {
     const defaultEmoji = getDefaultEmoji3D()
     const newList: ListWithLinks = {
       id: this.generateListId(),
-      title: 'New list', // Default title - user can edit
-      emoji: defaultEmoji.unicode, // Default pretzel emoji
-      emoji_3d: defaultEmoji,
-      is_public: true,
-      price_cents: null,
-      view_mode: 'row', // Default view mode
+      public_id: this.generateListId(),
       user_id: user.id,
+      title: 'New list',
+      description: null,
+      emoji: defaultEmoji.unicode,
+      emoji_3d: defaultEmoji,
+      view_mode: 'row',
+      is_public: true,
+      save_count: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      links: [], // No links initially
+      links: [] as Link[],
       user: {
         id: user.id,
-        username: user.username
-      }
+        username: user.username,
+        profile_picture_url: user.profile_picture_url || null
+      },
+      price_cents: null,
+      is_saved: false
     }
 
     const allLists = this.getAllLists()
@@ -86,20 +91,25 @@ export class MockListDatabase {
   createList(formData: CreateListForm, user: User): ListWithLinks {
     const newList: ListWithLinks = {
       id: this.generateListId(),
-      title: formData.title,
-      emoji: formData.emoji || getRandomEmoji(),
-      emoji_3d: formData.emoji_3d,
-      is_public: formData.is_public,
-      price_cents: formData.price_cents || null,
-      view_mode: 'row', // Default view mode
+      public_id: this.generateListId(),
       user_id: user.id,
+      title: formData.title,
+      description: null,
+      emoji: formData.emoji || getRandomEmoji(),
+      emoji_3d: formData.emoji_3d ?? null,
+      view_mode: 'row',
+      is_public: formData.is_public,
+      save_count: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      links: [],
+      links: [] as Link[],
       user: {
         id: user.id,
-        username: user.username
-      }
+        username: user.username,
+        profile_picture_url: user.profile_picture_url || null
+      },
+      price_cents: formData.price_cents ?? null,
+      is_saved: false
     }
 
     const allLists = this.getAllLists()
@@ -120,10 +130,26 @@ export class MockListDatabase {
       return null
     }
 
-    const updatedList = {
-      ...allLists[listIndex],
+    const base = allLists[listIndex]!
+    const updatedList: ListWithLinks = {
+      ...base,
       ...updates,
-      updated_at: new Date().toISOString()
+      id: base.id,
+      public_id: base.public_id,
+      user_id: base.user_id,
+      title: updates.title ?? base.title,
+      description: updates.description ?? base.description,
+      emoji: updates.emoji ?? base.emoji,
+      emoji_3d: updates.emoji_3d ?? base.emoji_3d,
+      view_mode: updates.view_mode ?? base.view_mode,
+      is_public: updates.is_public ?? base.is_public,
+      save_count: updates.save_count ?? base.save_count,
+      created_at: base.created_at,
+      updated_at: new Date().toISOString(),
+      links: (updates.links ?? base.links) as Link[],
+      user: updates.user ?? base.user,
+      price_cents: updates.price_cents ?? base.price_cents ?? null,
+      is_saved: updates.is_saved ?? base.is_saved ?? false
     }
 
     const updatedLists = [...allLists]
@@ -158,7 +184,7 @@ export class MockListDatabase {
     if (!list) return null
 
     // Shift all existing links down by 1 position
-    const updatedLinks = list.links.map(link => ({
+    const updatedLinks: Link[] = list.links.map(link => ({
       ...link,
       position: link.position + 1
     }))
@@ -166,10 +192,11 @@ export class MockListDatabase {
     // Fetch OG data using OpenGraph.io
     const ogData = await fetchOGDataClient(linkData.url)
 
-    const newLink = {
+    const newLink: Link = {
       id: this.generateLinkId(),
       url: linkData.url,
       title: linkData.title || ogData.title || new URL(linkData.url).hostname,
+      description: ogData.description || null,
       favicon_url: ogData.favicon_url || `https://www.google.com/s2/favicons?domain=${new URL(linkData.url).hostname}&sz=32`,
       image_url: ogData.image_url,
       position: 0, // Always add at the top

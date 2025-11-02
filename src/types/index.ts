@@ -31,14 +31,15 @@ export type InvoiceUpdate = Database['public']['Tables']['invoices']['Update']
 // Extended types with relations
 export type ListWithLinks = List & {
   links: Link[]
-  user: Pick<User, 'id' | 'username'>
-  emoji_3d?: Emoji3D
-  is_saved?: boolean // If current user has saved this list
+  user: Pick<User, 'id' | 'username' | 'profile_picture_url'>
+  is_saved?: boolean
+  price_cents?: number | null
 }
 
 export type ListWithUser = List & {
-  user: Pick<User, 'id' | 'username'>
+  user: Pick<User, 'id' | 'username' | 'profile_picture_url'>
   is_saved?: boolean
+  price_cents?: number | null
 }
 
 // Optimized saved lists with enhanced functionality
@@ -93,6 +94,15 @@ export interface LinkMetadata {
   image?: string
   favicon?: string
   url: string
+}
+
+export interface LinkCreatePayload {
+  url: string
+  title?: string | null
+  description?: string | null
+  image_url?: string | null
+  favicon_url?: string | null
+  position?: number
 }
 
 // Analytics types

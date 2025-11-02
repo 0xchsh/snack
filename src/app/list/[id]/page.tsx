@@ -5,10 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft, Copy, ExternalLink } from 'lucide-react'
+import { Button } from '@/components/ui'
 import { ListEditor } from '@/components/list-editor'
 import { PublicListView } from '@/components/public-list-view'
 import { CreateList } from '@/components/create-list'
-import { ListWithLinks, CreateListForm, LinkInsert } from '@/types'
+import { ListWithLinks, CreateListForm, LinkCreatePayload } from '@/types'
 import { getRandomEmoji } from '@/lib/emoji'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -118,7 +119,7 @@ export default function ListPage({ params }: ListPageProps) {
     }
   }
 
-  const handleAddLink = async (linkData: LinkInsert) => {
+  const handleAddLink = async (linkData: LinkCreatePayload) => {
     if (!currentList) return
     
     try {
@@ -244,12 +245,12 @@ export default function ListPage({ params }: ListPageProps) {
               : 'Something went wrong while loading this list. Please try again.'
             }
           </p>
-          <button
+          <Button
             onClick={() => router.push('/')}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
+            className="px-4 py-2 font-semibold"
           >
             Go Home
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -271,7 +272,6 @@ export default function ListPage({ params }: ListPageProps) {
             <Link 
               href="/dashboard" 
               className="navigation-button flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors bg-neutral-100 rounded-full no-underline"
-              style={{ fontFamily: 'Open Runde' }}
             >
               <ArrowLeft className="w-4 h-4" />
               Back
@@ -279,23 +279,22 @@ export default function ListPage({ params }: ListPageProps) {
             
             {/* Copy and View buttons */}
             <div className="flex items-center gap-3">
-              <button
+              <Button
                 onClick={async () => {
                   const url = `${window.location.origin}/${user?.username || 'list'}/${currentList.id}?view=public`
                   await navigator.clipboard.writeText(url)
                 }}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors bg-neutral-100 rounded-full border-0 outline-none"
-                style={{ fontFamily: 'Open Runde' }}
+                variant="muted"
+                className="gap-2 rounded-full bg-neutral-100 text-muted-foreground hover:text-foreground"
               >
                 Copy
                 <Copy className="w-4 h-4" />
-              </button>
+              </Button>
               <Link
                 href={`/${user?.username || 'list'}/${currentList.public_id || currentList.id}?view=public`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="navigation-button flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors bg-neutral-100 rounded-full no-underline"
-                style={{ fontFamily: 'Open Runde' }}
               >
                 View
                 <ExternalLink className="w-4 h-4" />

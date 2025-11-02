@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { Suspense, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { List, Plus } from 'lucide-react'
+
+import { Button } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 import { useLists } from '@/hooks/useLists'
 import { AppContainer } from '@/components/primitives'
@@ -95,18 +97,20 @@ function DashboardContent() {
 
             {/* Header with count and create button */}
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 text-muted-foreground bg-muted px-3 py-2 rounded-md">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <List className="w-4 h-4" />
                 <span className="text-base">{lists.length} lists</span>
               </div>
-              <button
+              <Button
                 onClick={handleCreateList}
                 disabled={creatingList}
-                className="flex items-center gap-2 px-3 py-2 bg-secondary text-foreground hover:bg-accent transition-colors disabled:opacity-50 rounded-md"
+                variant="secondary"
+                size="default"
+                className="gap-2"
               >
-                <span className="text-sm font-[400]">Create list</span>
+                <span>Create list</span>
                 <Plus className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
 
             {/* Lists */}
@@ -120,20 +124,21 @@ function DashboardContent() {
                   <p className="text-muted-foreground mb-6">
                     Create your first list to start curating content
                   </p>
-                  <button
+                  <Button
                     onClick={handleCreateList}
                     disabled={creatingList}
-                    className="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                    size="lg"
+                    className="px-6 py-3"
                   >
                     {creatingList ? 'Creating...' : 'Create Your First List'}
-                  </button>
+                  </Button>
                 </div>
               ) : (
                 lists.map((list) => (
                   <div key={list.id}>
                     <Link
                       href={`/${user.username}/${list.public_id || list.id}`}
-                      className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-colors rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-base">{list.emoji || '📋'}</span>
@@ -199,8 +204,12 @@ function DashboardContent() {
                 const stats = analyticsData?.listStats[listId] || { views: 0, clicks: 0 }
 
                 return (
-                  <div key={list.id}>
-                    <div className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-md">
+                  <Link
+                    key={list.id}
+                    href={`/${user.username}/${listId}`}
+                    className="block"
+                  >
+                    <div className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-colors rounded-md cursor-pointer">
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="text-base">{list.emoji || '📋'}</span>
                         <span className="text-base text-foreground truncate">
@@ -213,7 +222,7 @@ function DashboardContent() {
                         <span>👥 {stats.clicks.toLocaleString()}</span>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 )
               })}
             </div>

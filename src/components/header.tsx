@@ -1,11 +1,14 @@
 'use client'
 
-import Link from 'next/link'
 import Image from 'next/image'
-import { Settings, User, Bookmark, BarChart3, Copy, ExternalLink, MoreVertical } from 'lucide-react'
-import { ThemeToggle } from './theme-toggle'
-import { ReactNode, useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
+import { useEffect, useRef, useState, ReactNode } from 'react'
+import { BarChart3, Bookmark, Copy, ExternalLink, MoreVertical, Settings, User } from 'lucide-react'
+
+import { Button } from '@/components/ui'
+import { cn } from '@/lib/utils'
 import { NAV_CONSTANTS } from '@/lib/navigation-constants'
+import { ThemeToggle } from './theme-toggle'
 
 export interface HeaderButton {
   type: 'view' | 'copy' | 'saved' | 'stats' | 'settings' | 'profile' | 'menu' | 'custom'
@@ -26,7 +29,7 @@ export interface HeaderButton {
 interface HeaderProps {
   logoHref?: string
   buttons?: HeaderButton[]
-  username?: string
+  username?: string | undefined
 }
 
 function MenuButton({ menuItems }: { menuItems: Array<{ label: string; onClick: () => void; type?: 'toggle' | 'action'; checked?: boolean }> }) {
@@ -44,29 +47,35 @@ function MenuButton({ menuItems }: { menuItems: Array<{ label: string; onClick: 
       document.addEventListener('mousedown', handleClickOutside)
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
+
+    return undefined
   }, [isOpen])
 
   return (
     <div className="relative" ref={menuRef}>
-      <button
+      <Button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`inline-flex items-center justify-center ${NAV_CONSTANTS.ICON_BUTTON_SIZE} ${NAV_CONSTANTS.BORDER_RADIUS} bg-secondary text-muted-foreground hover:text-foreground transition-colors`}
+        variant="muted"
+        size="icon"
       >
         <MoreVertical className={NAV_CONSTANTS.ICON_SIZE} />
-      </button>
+      </Button>
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 bg-background border border-border rounded-md shadow-lg py-2 z-50">
           {menuItems.map((item, index) => (
-            <button
+            <Button
               key={index}
+              type="button"
+              variant="ghost"
+              className="w-full justify-between px-4 py-2 text-sm text-foreground hover:bg-accent"
               onClick={() => {
                 item.onClick()
                 if (item.type !== 'toggle') {
                   setIsOpen(false)
                 }
               }}
-              className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-accent transition-colors flex items-center justify-between"
             >
               <span>{item.label}</span>
               {item.type === 'toggle' && (
@@ -74,7 +83,7 @@ function MenuButton({ menuItems }: { menuItems: Array<{ label: string; onClick: 
                   <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-background transition-transform ${item.checked ? 'translate-x-5' : 'translate-x-0.5'}`} />
                 </div>
               )}
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -89,85 +98,101 @@ export function Header({
 }: HeaderProps) {
 
   const renderButton = (button: HeaderButton, index: number) => {
-    const baseClasses = "flex items-center gap-2 px-4 py-2 text-base font-medium transition-colors rounded-md"
-
     switch (button.type) {
       case 'view':
         return (
-          <button
+          <Button
             key={index}
+            type="button"
             onClick={button.onClick}
-            className={`${baseClasses} bg-secondary text-muted-foreground hover:text-foreground`}
+            variant="muted"
+            className={cn('gap-2 font-medium', button.className)}
           >
             {button.label || 'View'}
             <ExternalLink className="w-4 h-4" />
-          </button>
+          </Button>
         )
 
       case 'copy':
         return (
-          <button
+          <Button
             key={index}
+            type="button"
             onClick={button.onClick}
-            className={`${baseClasses} bg-secondary text-muted-foreground hover:text-foreground`}
+            variant="muted"
+            className={cn('gap-2 font-medium', button.className)}
           >
             {button.label || 'Copy'}
             <Copy className="w-4 h-4" />
-          </button>
+          </Button>
         )
 
       case 'saved':
         return (
-          <Link
+          <Button
             key={index}
-            href={button.href || '/dashboard?tab=saved'}
-            className={`flex items-center gap-2 px-4 py-2 text-base font-medium transition-colors rounded-md ${
-              button.isActive
-                ? 'text-foreground bg-secondary'
-                : 'bg-secondary text-muted-foreground hover:text-foreground'
-            }`}
+            asChild
+            variant={button.isActive ? 'secondary' : 'muted'}
+            className={cn(
+              'gap-2 font-medium',
+              button.className,
+              button.isActive && 'text-foreground'
+            )}
           >
-            {button.label || 'Saved'}
-            <Bookmark className="w-4 h-4" />
-          </Link>
+            <Link href={button.href || '/dashboard?tab=saved'}>
+              {button.label || 'Saved'}
+              <Bookmark className="w-4 h-4" />
+            </Link>
+          </Button>
         )
 
       case 'stats':
         return (
-          <Link
+          <Button
             key={index}
-            href={button.href || '/dashboard?tab=stats'}
-            className={`flex items-center gap-2 px-4 py-2 text-base font-medium transition-colors rounded-md ${
-              button.isActive
-                ? 'text-foreground bg-secondary'
-                : 'bg-secondary text-muted-foreground hover:text-foreground'
-            }`}
+            asChild
+            variant={button.isActive ? 'secondary' : 'muted'}
+            className={cn(
+              'gap-2 font-medium',
+              button.className,
+              button.isActive && 'text-foreground'
+            )}
           >
-            {button.label || 'Stats'}
-            <BarChart3 className="w-4 h-4" />
-          </Link>
+            <Link href={button.href || '/dashboard?tab=stats'}>
+              {button.label || 'Stats'}
+              <BarChart3 className="w-4 h-4" />
+            </Link>
+          </Button>
         )
 
       case 'settings':
         return (
-          <Link
+          <Button
             key={index}
-            href={button.href || '/profile'}
-            className={`inline-flex items-center justify-center ${NAV_CONSTANTS.ICON_BUTTON_SIZE} ${NAV_CONSTANTS.BORDER_RADIUS} bg-secondary text-muted-foreground hover:text-foreground transition-colors`}
+            asChild
+            variant="muted"
+            size="icon"
+            className={button.className}
           >
-            <Settings className={NAV_CONSTANTS.ICON_SIZE} />
-          </Link>
+            <Link href={button.href || '/profile'}>
+              <Settings className={NAV_CONSTANTS.ICON_SIZE} />
+            </Link>
+          </Button>
         )
 
       case 'profile':
         return (
-          <Link
+          <Button
             key={index}
-            href={button.href || `/${username}`}
-            className={`inline-flex items-center justify-center ${NAV_CONSTANTS.ICON_BUTTON_SIZE} ${NAV_CONSTANTS.BORDER_RADIUS} bg-secondary text-muted-foreground hover:text-foreground transition-colors`}
+            asChild
+            variant="muted"
+            size="icon"
+            className={button.className}
           >
-            <User className={NAV_CONSTANTS.ICON_SIZE} />
-          </Link>
+            <Link href={button.href || `/${username}`}>
+              <User className={NAV_CONSTANTS.ICON_SIZE} />
+            </Link>
+          </Button>
         )
 
       case 'menu':
@@ -176,25 +201,30 @@ export function Header({
       case 'custom':
         if (button.href) {
           return (
-            <Link
+            <Button
               key={index}
-              href={button.href}
-              className={button.className || `${baseClasses} bg-secondary text-muted-foreground hover:text-foreground`}
+              asChild
+              variant="muted"
+              className={cn('gap-2 font-medium', button.className)}
             >
-              {button.label}
-              {button.icon}
-            </Link>
+              <Link href={button.href}>
+                {button.label}
+                {button.icon}
+              </Link>
+            </Button>
           )
         }
         return (
-          <button
+          <Button
             key={index}
+            type="button"
             onClick={button.onClick}
-            className={button.className || `${baseClasses} bg-secondary text-muted-foreground hover:text-foreground`}
+            variant="muted"
+            className={cn('gap-2 font-medium', button.className)}
           >
             {button.label}
             {button.icon}
-          </button>
+          </Button>
         )
 
       default:

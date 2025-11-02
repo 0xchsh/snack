@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { LucideIcon } from 'lucide-react'
 
@@ -27,24 +28,20 @@ export function PageActions({ actions, className }: PageActionsProps) {
       {actions.map((action, index) => {
         const Icon = action.icon as LucideIcon | undefined
         const isIconOnly = !action.label
+        const size = isIconOnly ? 'icon' : 'default'
 
-        const buttonClasses = cn(
-          'inline-flex items-center justify-center',
-          'font-semibold transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-          isIconOnly
-            ? 'w-icon-button h-icon-button rounded-sm'
-            : 'px-4 py-2 text-sm rounded-lg gap-2',
-          {
-            'bg-primary text-primary-foreground hover:bg-primary/90':
-              action.variant === 'primary',
-            'bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/90':
-              (action.variant === 'ghost' || !action.variant) && isIconOnly,
-            'bg-secondary text-secondary-foreground hover:bg-secondary/80':
-              action.variant === 'default',
-            'text-muted-foreground hover:text-foreground hover:bg-secondary/80':
-              (action.variant === 'ghost' || !action.variant) && !isIconOnly,
-          }
+        const variant =
+          action.variant === 'primary'
+            ? 'primary'
+            : action.variant === 'default'
+              ? 'secondary'
+              : isIconOnly
+                ? 'muted'
+                : 'ghost'
+
+        const classNames = cn(
+          isIconOnly ? 'rounded-sm' : 'gap-2 text-sm',
+          !isIconOnly && action.variant === 'ghost' && 'font-medium'
         )
 
         const content = (
@@ -55,28 +52,28 @@ export function PageActions({ actions, className }: PageActionsProps) {
           </>
         )
 
+        const sharedProps = {
+          key: index,
+          variant,
+          size,
+          className: classNames,
+          'aria-label': action.ariaLabel,
+        } as const
+
         if (action.href) {
           return (
-            <a
-              key={index}
-              href={action.href}
-              className={buttonClasses}
-              aria-label={action.ariaLabel}
-            >
-              {content}
-            </a>
+            <Button asChild {...sharedProps}>
+              <a href={action.href} onClick={action.onClick}>
+                {content}
+              </a>
+            </Button>
           )
         }
 
         return (
-          <button
-            key={index}
-            onClick={action.onClick}
-            className={buttonClasses}
-            aria-label={action.ariaLabel}
-          >
+          <Button type="button" onClick={action.onClick} {...sharedProps}>
             {content}
-          </button>
+          </Button>
         )
       })}
     </div>

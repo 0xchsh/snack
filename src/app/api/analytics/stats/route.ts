@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import type { Database } from '@/types/database'
+
+type ListSummary = Pick<Database['public']['Tables']['lists']['Row'], 'id' | 'public_id' | 'title' | 'emoji' | 'save_count'>
+type TopList = ListSummary & { view_count: number; click_count: number }
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +22,7 @@ export async function GET(request: NextRequest) {
     let totalClicks = 0
     
     // Try to get views if table exists
-    const { data: viewsData, error: viewsError, count: viewCount } = await supabase
+    const { error: viewsError } = await supabase
       .from('list_views')
       .select('*', { count: 'exact', head: true })
       .eq('list_id', 'dummy') // Just checking if table exists
@@ -61,15 +65,16 @@ export async function GET(request: NextRequest) {
       .eq('user_id', user.id)
       .order('save_count', { ascending: false })
 
-    const totalSaves = listsData?.reduce((sum, list) => sum + (list.save_count || 0), 0) || 0
+    const typedLists: ListSummary[] = (listsData ?? []) as ListSummary[]
+    const totalSaves = typedLists.reduce((sum, list) => sum + (list.save_count || 0), 0)
 
     // Get top 5 lists with analytics if available
-    let topLists = []
-    if (listsData && listsData.length > 0) {
+    let topLists: TopList[] = []
+    if (typedLists.length > 0) {
       if (hasAnalyticsTables) {
         // Get view and click counts for each list
         const listsWithAnalytics = await Promise.all(
-          listsData.slice(0, 5).map(async (list) => {
+          typedLists.slice(0, 5).map(async (list) => {
             const { count: views } = await supabase
               .from('list_views')
               .select('*', { count: 'exact', head: true })
@@ -98,7 +103,7 @@ export async function GET(request: NextRequest) {
           })
       } else {
         // No analytics tables, just use save_count for sorting
-        topLists = listsData.slice(0, 5).map(list => ({
+        topLists = typedLists.slice(0, 5).map(list => ({
           ...list,
           view_count: 0,
           click_count: 0

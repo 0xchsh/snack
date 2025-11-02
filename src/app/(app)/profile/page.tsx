@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { User, CreditCard, Shield, Camera, Mail, Edit, Trash2, ExternalLink, Eye, EyeOff, Bookmark } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Bookmark, CreditCard, Edit, Eye, EyeOff, ExternalLink, Mail, Shield, Trash2, User } from 'lucide-react'
+
+import { Button } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 
 type ProfileTab = 'account' | 'billing' | 'security'
@@ -42,7 +44,6 @@ export default function ProfilePage() {
           <Link
             href="/auth/sign-in"
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
-            style={{ fontFamily: 'Open Runde' }}
           >
             Sign In
           </Link>
@@ -57,42 +58,48 @@ export default function ProfilePage() {
         {/* Navigation Tabs */}
         <div className="flex items-center justify-center mb-12">
           <div className="flex items-center bg-muted rounded-full p-1">
-            <button
+            <Button
+              type="button"
               onClick={() => setActiveTab('account')}
-              className={`flex items-center gap-2 px-6 py-3 font-semibold text-sm transition-colors rounded-full ${
+              variant={activeTab === 'account' ? 'secondary' : 'ghost'}
+              size="sm"
+              className={`gap-2 px-6 py-3 rounded-full font-semibold text-sm ${
                 activeTab === 'account'
                   ? 'text-foreground bg-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-transparent'
               }`}
-              style={{ fontFamily: 'Open Runde' }}
             >
               <User className="w-4 h-4" />
               Account
-            </button>
-            <button
+            </Button>
+            <Button
+              type="button"
               onClick={() => setActiveTab('billing')}
-              className={`flex items-center gap-2 px-6 py-3 font-semibold text-sm transition-colors rounded-full ${
+              variant={activeTab === 'billing' ? 'secondary' : 'ghost'}
+              size="sm"
+              className={`gap-2 px-6 py-3 rounded-full font-semibold text-sm ${
                 activeTab === 'billing'
                   ? 'text-foreground bg-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-transparent'
               }`}
-              style={{ fontFamily: 'Open Runde' }}
             >
               <Eye className="w-4 h-4" />
               Analytics
-            </button>
-            <button
+            </Button>
+            <Button
+              type="button"
               onClick={() => setActiveTab('security')}
-              className={`flex items-center gap-2 px-6 py-3 font-semibold text-sm transition-colors rounded-full ${
+              variant={activeTab === 'security' ? 'secondary' : 'ghost'}
+              size="sm"
+              className={`gap-2 px-6 py-3 rounded-full font-semibold text-sm ${
                 activeTab === 'security'
                   ? 'text-foreground bg-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-transparent'
               }`}
-              style={{ fontFamily: 'Open Runde' }}
             >
               <Shield className="w-4 h-4" />
               Security
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -111,12 +118,22 @@ function AccountTab({ user }: { user: any }) {
   const [uploadingPicture, setUploadingPicture] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [currentUser, setCurrentUser] = useState(user)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    first_name: string
+    last_name: string
+    username: string
+    email: string
+    bio: string
+    profile_is_public: boolean
+  }>({
     first_name: user.first_name || '',
     last_name: user.last_name || '',
     username: user.username || '',
     email: user.email || '',
+    bio: user.bio || '',
+    profile_is_public: user.profile_is_public ?? true,
   })
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Reset form when user data changes
   useEffect(() => {
@@ -126,6 +143,8 @@ function AccountTab({ user }: { user: any }) {
       last_name: user.last_name || '',
       username: user.username || '',
       email: user.email || '',
+      bio: user.bio || '',
+      profile_is_public: user.profile_is_public ?? true,
     })
   }, [user])
 
@@ -252,7 +271,6 @@ function AccountTab({ user }: { user: any }) {
       <div>
         <h2 
           className="text-2xl font-bold mb-2"
-          style={{ fontFamily: 'Open Runde' }}
         >
           Account Settings
         </h2>
@@ -296,27 +314,38 @@ function AccountTab({ user }: { user: any }) {
             )}
           </div>
           <div>
-            <h3 className="font-semibold mb-1" style={{ fontFamily: 'Open Runde' }}>Profile Picture</h3>
+            <h3 className="font-semibold mb-1">Profile Picture</h3>
             <p className="text-sm text-muted-foreground mb-3">JPG, PNG, or GIF (max 2MB)</p>
             <div className="flex gap-3">
-              <label className="px-4 py-2 text-sm font-semibold text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors cursor-pointer disabled:opacity-50">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-primary border-primary hover:bg-primary/5"
+                disabled={uploadingPicture}
+                onClick={() => fileInputRef.current?.click()}
+              >
                 {uploadingPicture ? 'Uploading...' : 'Upload New Photo'}
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  disabled={uploadingPicture}
-                />
-              </label>
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileUpload}
+                disabled={uploadingPicture}
+              />
               {currentUser.profile_picture_url && (
-                <button
+                <Button
+                  type="button"
                   onClick={handleRemovePicture}
                   disabled={uploadingPicture}
-                  className="px-4 py-2 text-sm font-semibold text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive border-destructive hover:bg-destructive/10"
                 >
                   Remove
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -327,17 +356,20 @@ function AccountTab({ user }: { user: any }) {
       <div className="bg-background border border-border rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="font-semibold mb-1" style={{ fontFamily: 'Open Runde' }}>Personal Information</h3>
+            <h3 className="font-semibold mb-1">Personal Information</h3>
             <p className="text-sm text-muted-foreground">Update your personal details here.</p>
           </div>
-          <button
+          <Button
+            type="button"
             onClick={() => setIsEditing(!isEditing)}
             disabled={isSaving}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors disabled:opacity-50"
+            variant="outline"
+            size="sm"
+            className="gap-2 border-primary text-primary hover:bg-primary/5"
           >
             <Edit className="w-4 h-4" />
             {isEditing ? 'Cancel' : 'Edit'}
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -348,7 +380,7 @@ function AccountTab({ user }: { user: any }) {
                 type="text"
                 value={formData.first_name}
                 onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary"
+                className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary"
                 placeholder="Enter your first name"
                 disabled={isSaving}
               />
@@ -366,7 +398,7 @@ function AccountTab({ user }: { user: any }) {
                 type="text"
                 value={formData.last_name}
                 onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary"
+                className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary"
                 placeholder="Enter your last name"
                 disabled={isSaving}
               />
@@ -384,7 +416,7 @@ function AccountTab({ user }: { user: any }) {
                 type="text"
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary"
+                className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary"
                 placeholder="Enter your username"
                 disabled={isSaving}
                 required
@@ -403,7 +435,7 @@ function AccountTab({ user }: { user: any }) {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary"
+                className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary"
                 placeholder="Enter your email"
                 disabled={isSaving}
                 required
@@ -418,20 +450,23 @@ function AccountTab({ user }: { user: any }) {
 
         {isEditing && (
           <div className="flex gap-3 mt-6 pt-6 border-t border-border">
-            <button 
+            <Button
+              type="button"
               onClick={handleSaveProfile}
               disabled={isSaving}
-              className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold disabled:opacity-50"
+              className="px-6"
             >
               {isSaving ? 'Saving...' : 'Save Changes'}
-            </button>
-            <button
+            </Button>
+            <Button
+              type="button"
               onClick={handleCancel}
               disabled={isSaving}
-              className="px-6 py-2 text-muted-foreground border border-border rounded-lg hover:bg-muted transition-colors font-semibold disabled:opacity-50"
+              variant="outline"
+              className="px-6 text-muted-foreground hover:bg-muted"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -439,20 +474,23 @@ function AccountTab({ user }: { user: any }) {
   )
 }
 
+type AnalyticsSummary = {
+  totalViews: number
+  totalClicks: number
+  totalSaves: number
+  topLists: Array<{
+    id: string
+    public_id: string | null
+    title: string | null
+    emoji: string | null
+    view_count: number
+    click_count: number
+    save_count: number
+  }>
+}
+
 function BillingTab({ user }: { user: any }) {
-  const [analytics, setAnalytics] = useState<{
-    totalViews: number
-    totalClicks: number
-    totalSaves: number
-    topLists: Array<{
-      id: string
-      title: string
-      emoji: string
-      view_count: number
-      click_count: number
-      save_count: number
-    }>
-  } | null>(null)
+  const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -460,8 +498,13 @@ function BillingTab({ user }: { user: any }) {
       try {
         const response = await fetch('/api/analytics/stats')
         if (response.ok) {
-          const data = await response.json()
-          setAnalytics(data)
+          const data = await response.json() as AnalyticsSummary
+          setAnalytics({
+            totalViews: data.totalViews ?? 0,
+            totalClicks: data.totalClicks ?? 0,
+            totalSaves: data.totalSaves ?? 0,
+            topLists: Array.isArray(data.topLists) ? data.topLists : [],
+          })
         }
       } catch (error) {
         console.error('Failed to fetch analytics:', error)
@@ -478,7 +521,6 @@ function BillingTab({ user }: { user: any }) {
       <div>
         <h2 
           className="text-2xl font-bold mb-2"
-          style={{ fontFamily: 'Open Runde' }}
         >
           Analytics & Insights
         </h2>
@@ -494,7 +536,7 @@ function BillingTab({ user }: { user: any }) {
             <h3 className="font-medium text-muted-foreground">Total Views</h3>
             <Eye className="w-5 h-5 text-muted-foreground" />
           </div>
-          <div className="text-3xl font-bold" style={{ fontFamily: 'Open Runde' }}>
+          <div className="text-3xl font-bold">
             {loading ? (
               <div className="h-8 w-20 bg-muted animate-pulse rounded"></div>
             ) : (
@@ -508,7 +550,7 @@ function BillingTab({ user }: { user: any }) {
             <h3 className="font-medium text-muted-foreground">Link Clicks</h3>
             <ExternalLink className="w-5 h-5 text-muted-foreground" />
           </div>
-          <div className="text-3xl font-bold" style={{ fontFamily: 'Open Runde' }}>
+          <div className="text-3xl font-bold">
             {loading ? (
               <div className="h-8 w-20 bg-muted animate-pulse rounded"></div>
             ) : (
@@ -522,7 +564,7 @@ function BillingTab({ user }: { user: any }) {
             <h3 className="font-medium text-muted-foreground">Total Saves</h3>
             <Bookmark className="w-5 h-5 text-muted-foreground" />
           </div>
-          <div className="text-3xl font-bold" style={{ fontFamily: 'Open Runde' }}>
+          <div className="text-3xl font-bold">
             {loading ? (
               <div className="h-8 w-20 bg-muted animate-pulse rounded"></div>
             ) : (
@@ -534,7 +576,7 @@ function BillingTab({ user }: { user: any }) {
 
       {/* Top 5 Most Popular Lists */}
       <div className="bg-background border border-border rounded-xl p-6">
-        <h3 className="font-semibold mb-6" style={{ fontFamily: 'Open Runde' }}>
+        <h3 className="font-semibold mb-6">
           Your Top 5 Most Popular Lists
         </h3>
         
@@ -597,7 +639,7 @@ function BillingTab({ user }: { user: any }) {
 
       {/* Current Plan */}
       <div className="bg-background border border-border rounded-xl p-6">
-        <h3 className="font-semibold mb-4" style={{ fontFamily: 'Open Runde' }}>Current Plan</h3>
+        <h3 className="font-semibold mb-4">Current Plan</h3>
         <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
           <div>
             <div className="font-semibold text-lg">Free Plan</div>
@@ -615,7 +657,6 @@ function SecurityTab({ user }: { user: any }) {
       <div>
         <h2 
           className="text-2xl font-bold mb-2"
-          style={{ fontFamily: 'Open Runde' }}
         >
           Security Settings
         </h2>
@@ -631,15 +672,20 @@ function SecurityTab({ user }: { user: any }) {
             <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-red-900 dark:text-red-200 mb-2" style={{ fontFamily: 'Open Runde' }}>
+            <h3 className="font-semibold text-red-900 dark:text-red-200 mb-2">
               Delete Account
             </h3>
             <p className="text-red-700 dark:text-red-300 text-sm mb-4">
               Permanently delete your account and all associated data. This action cannot be undone.
             </p>
-            <button className="px-6 py-2 bg-red-600 dark:bg-red-700 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors font-semibold">
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="px-6 py-2"
+            >
               Delete Account
-            </button>
+            </Button>
           </div>
         </div>
       </div>

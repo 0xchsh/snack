@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useAuth } from '@/hooks/useAuth'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+import { Button } from '@/components/ui'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function SignInPage() {
   const [email, setEmail] = useState('')
@@ -83,7 +85,7 @@ export default function SignInPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
@@ -98,7 +100,7 @@ export default function SignInPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="Enter your email"
             />
           </div>
@@ -113,18 +115,19 @@ export default function SignInPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="Enter your password"
             />
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            size="lg"
+            className="w-full"
           >
             {isLoading ? 'Signing In...' : 'Sign In'}
-          </button>
+          </Button>
         </form>
 
         <div className="relative">
@@ -136,10 +139,12 @@ export default function SignInPage() {
           </div>
         </div>
 
-        <button
+        <Button
           onClick={handleGoogleSignIn}
           disabled={isLoading}
-          className="w-full border border-border text-foreground py-3 rounded-lg font-semibold hover:bg-accent transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          size="lg"
+          variant="outline"
+          className="w-full gap-2 hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
         >
 {!isLoading && (
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -150,7 +155,7 @@ export default function SignInPage() {
             </svg>
           )}
           {isLoading ? 'Signing In...' : 'Continue with Google'}
-        </button>
+        </Button>
 
         <p className="text-center text-muted-foreground">
           Don&apos;t have an account?{' '}
