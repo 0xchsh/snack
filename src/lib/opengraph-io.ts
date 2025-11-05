@@ -2,6 +2,8 @@
  * OpenGraph.io API integration for fetching Open Graph data
  */
 
+import { fetchOGData as fetchOGDataDirect, type OGData } from '@/lib/og'
+
 interface OpenGraphIOResponse {
   hybridGraph?: {
     title?: string
@@ -36,14 +38,6 @@ interface OpenGraphIOResponse {
   }
 }
 
-interface OGData {
-  title: string | null
-  description: string | null
-  image_url: string | null
-  favicon_url: string | null
-  site_name: string | null
-}
-
 /**
  * Fetches Open Graph data from OpenGraph.io API
  * @param url The URL to fetch OG data for
@@ -54,7 +48,7 @@ export async function fetchOpenGraphData(url: string): Promise<OGData> {
 
   if (!apiKey || apiKey === 'your_opengraph_io_api_key_here') {
     console.warn('OpenGraph.io API key not configured, using fallback')
-    return getFallbackOGData(url)
+    return fallbackOgData(url)
   }
 
   try {
@@ -72,7 +66,7 @@ export async function fetchOpenGraphData(url: string): Promise<OGData> {
 
     if (!response.ok) {
       console.error(`OpenGraph.io API error: ${response.status}`)
-      return getFallbackOGData(url)
+      return fallbackOgData(url)
     }
 
     const data: OpenGraphIOResponse = await response.json()
@@ -80,7 +74,7 @@ export async function fetchOpenGraphData(url: string): Promise<OGData> {
     // Check if request was successful
     if (data.requestInfo?.success === false) {
       console.error('OpenGraph.io request failed:', data.requestInfo?.error)
-      return getFallbackOGData(url)
+      return fallbackOgData(url)
     }
 
     // Extract data with priority: hybridGraph > openGraph > htmlInferred
@@ -109,12 +103,52 @@ export async function fetchOpenGraphData(url: string): Promise<OGData> {
                  null
     }
 
+    if (needsSupplementalData(ogData)) {
+      const supplemental = await fallbackOgData(url)
+      return mergeOgData(ogData, supplemental)
+    }
+
     return ogData
 
   } catch (error) {
     console.error('Error fetching OpenGraph data:', error)
-    return getFallbackOGData(url)
+    return fallbackOgData(url)
   }
+}
+
+function needsSupplementalData(data: OGData): boolean {
+  return !data.image_url || !data.title || !data.favicon_url || !data.site_name
+}
+
+async function fallbackOgData(url: string): Promise<OGData> {
+  const directData = await fetchOGDataDirect(url)
+
+  if (!needsSupplementalData(directData)) {
+    return directData
+  }
+
+  const fallbackData = getFallbackOGData(url)
+  return mergeOgData(directData, fallbackData)
+}
+
+function mergeOgData(primary: OGData, secondary: OGData): OGData {
+  const merged: OGData = {
+    title: primary.title ?? secondary.title,
+    description: primary.description ?? secondary.description,
+    image_url: primary.image_url ?? secondary.image_url,
+    favicon_url: primary.favicon_url ?? secondary.favicon_url,
+    site_name: primary.site_name ?? secondary.site_name
+  }
+
+  if (
+    primary.favicon_url &&
+    primary.favicon_url.includes('google.com/s2/favicons') &&
+    secondary.favicon_url
+  ) {
+    merged.favicon_url = secondary.favicon_url
+  }
+
+  return merged
 }
 
 /**
@@ -267,7 +301,7 @@ export async function fetchOpenGraphDataServer(url: string, apiKey?: string): Pr
   const key = apiKey || process.env.OPENGRAPH_IO_API_KEY
 
   if (!key || key === 'your_opengraph_io_api_key_here') {
-    return getFallbackOGData(url)
+    return fallbackOgData(url)
   }
 
   try {
@@ -282,16 +316,16 @@ export async function fetchOpenGraphDataServer(url: string, apiKey?: string): Pr
     })
 
     if (!response.ok) {
-      return getFallbackOGData(url)
+      return fallbackOgData(url)
     }
 
     const data: OpenGraphIOResponse = await response.json()
 
     if (data.requestInfo?.success === false) {
-      return getFallbackOGData(url)
+      return fallbackOgData(url)
     }
 
-    return {
+    const ogData: OGData = {
       title: data.hybridGraph?.title || data.openGraph?.title || data.htmlInferred?.title || null,
       description: data.hybridGraph?.description || data.openGraph?.description || data.htmlInferred?.description || null,
       image_url: data.hybridGraph?.image || data.openGraph?.image?.url || data.htmlInferred?.image || null,
@@ -299,7 +333,14 @@ export async function fetchOpenGraphDataServer(url: string, apiKey?: string): Pr
       site_name: data.hybridGraph?.site_name || data.openGraph?.site_name || null
     }
 
+    if (needsSupplementalData(ogData)) {
+      const supplemental = await fallbackOgData(url)
+      return mergeOgData(ogData, supplemental)
+    }
+
+    return ogData
+
   } catch (error) {
-    return getFallbackOGData(url)
+    return fallbackOgData(url)
   }
 }

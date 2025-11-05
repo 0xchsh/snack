@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { List, Plus } from 'lucide-react'
+import { Eye, Link2, List, Plus, Users } from 'lucide-react'
 
 import { Button } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
@@ -217,9 +217,18 @@ function DashboardContent() {
                         </span>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground flex-shrink-0">
-                        <span>🔗 {list.links?.length || 0}</span>
-                        <span>👁️ {stats.views.toLocaleString()}</span>
-                        <span>👥 {stats.clicks.toLocaleString()}</span>
+                        <div className="flex items-center gap-1">
+                          <Link2 className="h-4 w-4" aria-hidden="true" />
+                          <span>{list.links?.length || 0}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Eye className="h-4 w-4" aria-hidden="true" />
+                          <span>{stats.views.toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="h-4 w-4" aria-hidden="true" />
+                          <span>{stats.clicks.toLocaleString()}</span>
+                        </div>
                       </div>
                     </div>
                   </Link>

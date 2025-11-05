@@ -380,6 +380,16 @@ img[src*="logomark.svg"] {
   opacity: 0.98;
 }
 
+/* Keyframe animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Override browser autofill styles */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,

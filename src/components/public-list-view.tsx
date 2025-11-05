@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, memo } from 'react'
 import { Copy, Clock, Link as LinkIcon, Eye, Bookmark, Edit } from 'lucide-react'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ListWithLinks, Link as LinkType } from '@/types'
@@ -157,12 +157,20 @@ export function PublicListView({ list }: PublicListViewProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Copy Success Toast */}
-      {showCopySuccess && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
-          <Copy className="w-4 h-4" />
-          <span className="font-medium">Link copied to clipboard!</span>
-        </div>
-      )}
+      <AnimatePresence>
+        {showCopySuccess && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
+          >
+            <Copy className="w-4 h-4" />
+            <span className="font-medium">Link copied to clipboard!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {isOwner ? (
         <Header

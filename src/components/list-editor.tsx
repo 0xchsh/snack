@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Rows2, List, GripVertical, Trash2, RefreshCw, MoreHorizontal, Clipboard, FileText, Eye, Link2 } from 'lucide-react'
 import Image from 'next/image'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ListWithLinks, Link, Emoji3D, LinkCreatePayload } from '@/types'
 import { EmojiPicker } from './emoji-picker'
 import { validateAndNormalizeUrl, getHostname } from '@/lib/url-utils'
@@ -674,12 +675,20 @@ export function ListEditor({
   return (
     <div className="space-y-6">
       {/* Copy Success Toast */}
-      {showCopySuccess && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
-          <Clipboard className="w-4 h-4" />
-          <span className="font-medium">Link copied to clipboard!</span>
-        </div>
-      )}
+      <AnimatePresence>
+        {showCopySuccess && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
+          >
+            <Clipboard className="w-4 h-4" />
+            <span className="font-medium">Link copied to clipboard!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Emoji + Title */}
       <div className="flex items-start gap-4">
