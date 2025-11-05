@@ -234,7 +234,7 @@ export function Header({
 
   return (
     <div className="bg-background">
-      <div className={`mx-auto w-full max-w-container-app ${NAV_CONSTANTS.CONTAINER_PADDING_X} ${NAV_CONSTANTS.CONTAINER_PADDING_Y}`}>
+      <div className="mx-auto w-full max-w-container-app px-6 py-6">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href={logoHref} className="flex items-center">
@@ -248,7 +248,7 @@ export function Header({
           </Link>
 
           {/* Right side - Configured buttons */}
-          <div className={`flex items-center ${NAV_CONSTANTS.BUTTON_GAP}`}>
+          <div className="flex items-center gap-nav">
             {buttons.map((button, index) => renderButton(button, index))}
             <ThemeToggle />
           </div>

@@ -275,11 +275,11 @@ function getFallbackOGData(url: string): OGData {
 
     // Default fallback
     return {
-      title: null,
+      title: hostname,
       description: null,
-      image_url: null,
+      image_url: getScreenshotFallback(url),
       favicon_url: `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`,
-      site_name: null
+      site_name: hostname
     }
 
   } catch (error) {
@@ -291,6 +291,10 @@ function getFallbackOGData(url: string): OGData {
       site_name: null
     }
   }
+}
+
+function getScreenshotFallback(url: string): string {
+  return `https://v1.screenshot.11ty.dev/${encodeURIComponent(url)}/opengraph/`
 }
 
 /**

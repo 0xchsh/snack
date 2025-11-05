@@ -160,11 +160,11 @@ export function PublicListView({ list }: PublicListViewProps) {
       <AnimatePresence>
         {showCopySuccess && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.95, x: '-50%' }}
+            animate={{ opacity: 1, scale: 1, x: '-50%' }}
+            exit={{ opacity: 0, scale: 0.95, x: '-50%' }}
             transition={{ duration: 0.2 }}
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
+            className="fixed top-4 left-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
           >
             <Copy className="w-4 h-4" />
             <span className="font-medium">Link copied to clipboard!</span>
@@ -182,7 +182,7 @@ export function PublicListView({ list }: PublicListViewProps) {
               icon: <Edit className="w-5 h-5" />,
               onClick: () => {
                 const username = user?.username || list.user?.username
-                router.push(`/${username}/${list.public_id || list.id}`)
+                router.push(`/${username}/${list.public_id || list.id}?view=edit`)
               },
               className: "w-10 h-10 p-0 flex items-center justify-center"
             },

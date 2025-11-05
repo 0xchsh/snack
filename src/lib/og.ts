@@ -249,9 +249,9 @@ function getDefaultOGData(url: string): OGData {
     return {
       title: urlObj.hostname,
       description: null,
-      image_url: null,
+      image_url: getScreenshotFallback(url),
       favicon_url: `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=32`,
-      site_name: null
+      site_name: urlObj.hostname
     }
   } catch {
     return {
@@ -262,4 +262,8 @@ function getDefaultOGData(url: string): OGData {
       site_name: null
     }
   }
+}
+
+function getScreenshotFallback(url: string): string {
+  return `https://v1.screenshot.11ty.dev/${encodeURIComponent(url)}/opengraph/`
 }
