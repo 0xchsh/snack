@@ -53,9 +53,10 @@ function DashboardContent() {
     try {
       const newList = await createEmptyList()
       if (user?.username) {
-        router.push(`/${user.username}/${newList.public_id || newList.id}`)
+        // New lists should open in edit mode so user can add content
+        router.push(`/${user.username}/${newList.public_id || newList.id}?view=edit`)
       } else {
-        router.push(`/list/${newList.public_id || newList.id}`)
+        router.push(`/list/${newList.public_id || newList.id}?view=edit`)
       }
     } catch (error) {
       console.error('Error creating list:', error)
