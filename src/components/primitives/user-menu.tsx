@@ -1,6 +1,7 @@
 'use client'
 
-import { User as UserIcon, LogOut, Settings } from 'lucide-react'
+import Image from 'next/image'
+import { LogOut, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
@@ -24,6 +25,8 @@ interface UserMenuProps {
 export function UserMenu({ user, onLogout, username, className }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const displayName = username || user?.username || user?.email || 'User'
+  const avatarSrc = user?.profile_picture_url || '/images/default-avatar.svg'
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -54,19 +57,39 @@ export function UserMenu({ user, onLogout, username, className }: UserMenuProps)
         size="icon"
         aria-label="User menu"
         aria-expanded={isOpen}
+        className="p-0 rounded-full"
       >
-        <UserIcon className="w-5 h-5" />
+        <span className="relative block h-icon-button w-icon-button overflow-hidden rounded-full border border-border bg-muted">
+          <Image
+            src={avatarSrc}
+            alt={`${displayName} profile picture`}
+            fill
+            sizes="42px"
+            className="object-cover"
+          />
+        </span>
       </Button>
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 bg-popover border border-border rounded-md shadow-lg z-50">
-          <div className="px-4 py-3 border-b border-border">
-            <p className="text-sm font-medium text-foreground">
-              {username || user.username || user.email}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {user.email || 'No email'}
-            </p>
+          <div className="px-4 py-3 border-b border-border flex items-center gap-3">
+            <span className="relative block h-10 w-10 overflow-hidden rounded-full border border-border bg-muted">
+              <Image
+                src={avatarSrc}
+                alt={`${displayName} profile picture`}
+                fill
+                sizes="40px"
+                className="object-cover"
+              />
+            </span>
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                {displayName}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {user.email || 'No email'}
+              </p>
+            </div>
           </div>
 
           <div className="py-1">

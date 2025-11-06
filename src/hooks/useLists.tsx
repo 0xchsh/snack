@@ -86,11 +86,11 @@ export function ListsProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true)
       const newList = await supabaseListDB.createEmptyList(user)
-      
-      // Update local state
-      setLists(prev => [...prev, newList])
+
+      // Update local state - add new list to the top
+      setLists(prev => [newList, ...prev])
       setError(null)
-      
+
       console.log('Created empty list in Supabase:', newList)
       return newList
     } catch (err) {
@@ -111,11 +111,11 @@ export function ListsProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true)
       const newList = await supabaseListDB.createList(formData, user)
-      
-      // Update local state
-      setLists(prev => [...prev, newList])
+
+      // Update local state - add new list to the top
+      setLists(prev => [newList, ...prev])
       setError(null)
-      
+
       console.log('Created list in Supabase:', newList)
       return newList
     } catch (err) {
