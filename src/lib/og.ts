@@ -59,6 +59,12 @@ export async function fetchOGData(url: string): Promise<OGData> {
       throw new Error(`Failed to fetch HTML for OG parsing (status: ${response?.status ?? 'unknown'})`)
     }
 
+    // Check if we got a bot protection page instead of real content
+    if (isBotProtectionPage(html)) {
+      console.warn('Bot protection detected, returning default OG data', { url })
+      return getDefaultOGData(url)
+    }
+
     const ogData = parseOGTags(html, urlObj)
 
     return {
@@ -182,6 +188,36 @@ function decodeHtmlEntities(value: string): string {
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, '\'')
+}
+
+/**
+ * Detects if the HTML is a bot protection/challenge page
+ * @param html The HTML content to check
+ * @returns true if it's a bot protection page
+ */
+function isBotProtectionPage(html: string): boolean {
+  const indicators = [
+    // Cloudflare challenge indicators
+    'Verifying you are human',
+    'challenge-platform',
+    'cf-challenge',
+    'cf-captcha-container',
+    'cf_chl_opt',
+    'cloudflare.com/ajax/libs/turnstile',
+    // Generic bot detection indicators
+    'security check',
+    'checking your browser',
+    'bot protection',
+    'automated access',
+    'DDoS protection',
+    // Check if title is generic challenge page
+    '<title>Just a moment...</title>',
+    '<title>Attention Required</title>',
+    '<title>One more step</title>'
+  ]
+
+  const lowerHtml = html.toLowerCase()
+  return indicators.some(indicator => lowerHtml.includes(indicator.toLowerCase()))
 }
 
 function createTimeoutSignal(timeoutMs: number): { signal?: AbortSignal; cleanup?: () => void } {
