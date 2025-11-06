@@ -1097,7 +1097,7 @@ function LinkItem({
 
         {/* Actions overlay */}
         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0">
-          <div className="h-icon-button w-icon-button flex items-center justify-center bg-background/90 backdrop-blur-sm text-muted-foreground rounded-md cursor-grab" title="Drag to reorder">
+          <div className="h-icon-button w-icon-button flex items-center justify-center bg-muted text-muted-foreground rounded-md cursor-grab" title="Drag to reorder">
             <GripVertical className="w-5 h-5" />
           </div>
           <Button
@@ -1111,7 +1111,7 @@ function LinkItem({
             }}
             variant="ghost"
             size="icon"
-            className="bg-background/90 backdrop-blur-sm text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-md h-8 w-8 disabled:opacity-50"
+            className="bg-muted text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-md h-8 w-8 disabled:opacity-50"
             title="Refresh link preview"
             disabled={isRefreshing}
           >
@@ -1128,7 +1128,7 @@ function LinkItem({
             }}
             variant="ghost"
             size="icon"
-            className="bg-background/90 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-md h-8 w-8"
+            className="bg-muted text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-md h-8 w-8"
             title="Delete link"
           >
             <Trash2 className="w-4 h-4" />
