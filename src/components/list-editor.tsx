@@ -993,7 +993,7 @@ function LinkItem({
           </h3>
         </div>
 
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 ml-auto">
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-4 ml-auto">
           <div className="text-muted-foreground p-1 cursor-grab" title="Drag to reorder">
             <GripVertical className="w-4 h-4" />
           </div>
@@ -1096,7 +1096,7 @@ function LinkItem({
         )}
 
         {/* Actions overlay */}
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-4">
           <div className="bg-background/90 backdrop-blur-sm text-muted-foreground p-1.5 rounded-md cursor-grab" title="Drag to reorder">
             <GripVertical className="w-4 h-4" />
           </div>
