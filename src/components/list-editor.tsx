@@ -994,8 +994,8 @@ function LinkItem({
         </div>
 
         <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0 ml-auto">
-          <div className="h-8 w-8 p-1 flex items-center justify-center text-muted-foreground cursor-grab" title="Drag to reorder">
-            <GripVertical className="w-4 h-4" />
+          <div className="h-icon-button w-icon-button flex items-center justify-center text-muted-foreground cursor-grab rounded-md" title="Drag to reorder">
+            <GripVertical className="w-5 h-5" />
           </div>
           <Button
             type="button"
@@ -1097,8 +1097,8 @@ function LinkItem({
 
         {/* Actions overlay */}
         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0">
-          <div className="h-8 w-8 flex items-center justify-center bg-background/90 backdrop-blur-sm text-muted-foreground rounded-md cursor-grab" title="Drag to reorder">
-            <GripVertical className="w-4 h-4" />
+          <div className="h-icon-button w-icon-button flex items-center justify-center bg-background/90 backdrop-blur-sm text-muted-foreground rounded-md cursor-grab" title="Drag to reorder">
+            <GripVertical className="w-5 h-5" />
           </div>
           <Button
             type="button"
