@@ -79,6 +79,7 @@ export function ListEditor({
   const [draggedItemPosition, setDraggedItemPosition] = useState({ x: 0, y: 0, width: 0 })
   const [isMobile, setIsMobile] = useState(false)
   const [showCopySuccess, setShowCopySuccess] = useState(false)
+  const [refreshingLinkIds, setRefreshingLinkIds] = useState<Record<string, boolean>>({})
   const dragStartPosition = useRef({ x: 0, y: 0 })
   const dragOffset = useRef({ x: 0, y: 0 })
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
@@ -533,6 +534,62 @@ export function ListEditor({
       console.error('Failed to delete link:', error)
     }
   }
+  
+  const handleRefreshLink = async (link: Link) => {
+    if (refreshingLinkIds[link.id]) {
+      return
+    }
+
+    setRefreshingLinkIds(prev => ({ ...prev, [link.id]: true }))
+    
+    const originalLink = link
+    
+    try {
+      const ogData = await fetchOGDataClient(link.url)
+      const updatedLink: Link = {
+        ...link,
+        title: ogData.title || link.title || getHostname(link.url),
+        description: ogData.description || link.description,
+        image_url: ogData.image_url || link.image_url,
+        favicon_url: ogData.favicon_url || link.favicon_url
+      }
+
+      setOptimisticList(prev => ({
+        ...prev,
+        links: prev.links?.map(l => l.id === link.id ? updatedLink : l) || []
+      }))
+
+      const response = await fetch(`/api/lists/${list.id}/links/${link.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: updatedLink.title,
+          description: updatedLink.description,
+          image_url: updatedLink.image_url,
+          favicon_url: updatedLink.favicon_url,
+          url: updatedLink.url
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to refresh link')
+      }
+    } catch (error) {
+      console.error('Failed to refresh link:', error)
+      setOptimisticList(prev => ({
+        ...prev,
+        links: prev.links?.map(l => l.id === originalLink.id ? originalLink : l) || []
+      }))
+    } finally {
+      setRefreshingLinkIds(prev => {
+        const { [link.id]: _, ...rest } = prev
+        return rest
+      })
+    }
+  }
 
   // Sync optimistic list with props when the parent component updates
   useEffect(() => {
@@ -819,25 +876,34 @@ export function ListEditor({
 
         {/* Draggable list */}
         <div className={`relative draggable-list-container flex flex-col ${viewMode === 'card' ? 'gap-6' : 'gap-3'}`}>
-          {(optimisticList.links || []).map((link, index) => (
-            <div
-              key={link.id}
-              data-link-id={link.id}
-              onMouseDown={(e) => handleMouseDown(e, link.id, index)}
-              className={`
-                transition-all duration-300 ease-out select-none
-                ${draggedItemId === link.id ? 'opacity-30' : 'opacity-100'}
-                ${dragOverIndex === index && draggedItemId !== link.id ?
-                  'transform translate-y-2 ring-1 ring-foreground rounded-md' : ''}
-              `}
-            >
-              <LinkItem
-                link={link}
-                viewMode={viewMode}
-                onRemove={() => handleDeleteLink(link.id)}
-              />
-            </div>
-          ))}
+          {(optimisticList.links || []).map((link, index) => {
+            // Show skeleton loader if link is being refreshed
+            if (refreshingLinkIds[link.id]) {
+              return <GhostLinkItem key={`refreshing-${link.id}`} viewMode={viewMode} />
+            }
+
+            return (
+              <div
+                key={link.id}
+                data-link-id={link.id}
+                onMouseDown={(e) => handleMouseDown(e, link.id, index)}
+                className={`
+                  transition-all duration-300 ease-out select-none
+                  ${draggedItemId === link.id ? 'opacity-30' : 'opacity-100'}
+                  ${dragOverIndex === index && draggedItemId !== link.id ?
+                    'transform translate-y-2 ring-1 ring-foreground rounded-md' : ''}
+                `}
+              >
+                <LinkItem
+                  link={link}
+                  viewMode={viewMode}
+                  onRemove={() => handleDeleteLink(link.id)}
+                  onRefresh={() => handleRefreshLink(link)}
+                  isRefreshing={false}
+                />
+              </div>
+            )
+          })}
 
           {/* Floating Drag Preview */}
           {isDragging && draggedItemId && (() => {
@@ -860,6 +926,8 @@ export function ListEditor({
                   link={draggedLink}
                   viewMode={viewMode}
                   onRemove={() => {}}
+                  onRefresh={() => {}}
+                  isRefreshing={false}
                 />
               </div>
             )
@@ -897,12 +965,16 @@ interface LinkItemProps {
   link: Link
   viewMode: ViewMode
   onRemove: () => void
+  onRefresh: () => void
+  isRefreshing: boolean
 }
 
 function LinkItem({ 
   link, 
   viewMode, 
-  onRemove
+  onRemove,
+  onRefresh,
+  isRefreshing
 }: LinkItemProps) {
   if (viewMode === 'row') {
     // Compact rows - clean list layout
@@ -925,6 +997,23 @@ function LinkItem({
           <div className="text-muted-foreground p-1 cursor-grab" title="Drag to reorder">
             <GripVertical className="w-4 h-4" />
           </div>
+          <Button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onRefresh()
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation()
+            }}
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 p-1 text-muted-foreground hover:text-foreground disabled:opacity-50"
+            title="Refresh link preview"
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
           <Button
             type="button"
             onClick={(e) => {
@@ -1011,6 +1100,23 @@ function LinkItem({
           <div className="bg-background/90 backdrop-blur-sm text-muted-foreground p-1.5 rounded-md cursor-grab" title="Drag to reorder">
             <GripVertical className="w-4 h-4" />
           </div>
+          <Button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onRefresh()
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation()
+            }}
+            variant="ghost"
+            size="icon"
+            className="bg-background/90 backdrop-blur-sm text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-md h-8 w-8 disabled:opacity-50"
+            title="Refresh link preview"
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
           <Button
             type="button"
             onClick={(e) => {
