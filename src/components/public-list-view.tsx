@@ -184,7 +184,7 @@ export function PublicListView({ list }: PublicListViewProps) {
                 const username = user?.username || list.user?.username
                 router.push(`/${username}/${list.public_id || list.id}?view=edit`)
               },
-              className: "w-10 h-10 p-0 flex items-center justify-center"
+              className: "w-icon-button h-icon-button p-0 flex items-center justify-center"
             },
             {
               type: 'custom',
@@ -195,7 +195,7 @@ export function PublicListView({ list }: PublicListViewProps) {
                 setShowCopySuccess(true)
                 setTimeout(() => setShowCopySuccess(false), 2000)
               },
-              className: "w-10 h-10 p-0 flex items-center justify-center"
+              className: "w-icon-button h-icon-button p-0 flex items-center justify-center"
             }
           ]}
         />
@@ -345,7 +345,7 @@ const PublicLinkItem = memo(function PublicLinkItem({
     // Public list view layout with domain on right
     return (
       <div
-        className="flex items-center justify-between py-3 hover:bg-accent/50 transition-colors group cursor-pointer border-b border-border last:border-0"
+        className="flex items-center justify-between pb-3 hover:bg-accent/50 transition-colors group cursor-pointer border-b border-border last:border-0"
         onClick={onClick}
       >
         <div className="flex items-center gap-3 flex-1 min-w-0">

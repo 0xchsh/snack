@@ -8,6 +8,7 @@ import { List, Link2, Eye, Bookmark } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { LoadingState } from '@/components/loading-state'
 
 interface PublicProfile {
   user: {
@@ -80,10 +81,7 @@ export default function UsernamePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading profile...</p>
-        </div>
+        <LoadingState message="Loading profile..." />
       </div>
     )
   }

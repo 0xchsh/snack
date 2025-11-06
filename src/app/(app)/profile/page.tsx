@@ -4,10 +4,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Bookmark, CreditCard, Edit, Eye, EyeOff, ExternalLink, Mail, Shield, Trash2, User } from 'lucide-react'
+import { Bookmark, CreditCard, Edit, Eye, EyeOff, ExternalLink, Loader2, Mail, Shield, Trash2, User } from 'lucide-react'
 
 import { Button } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
+import { LoadingState } from '@/components/loading-state'
 
 type ProfileTab = 'account' | 'billing' | 'security'
 
@@ -26,10 +27,7 @@ export default function ProfilePage() {
   if (!mounted || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading profile...</p>
-        </div>
+        <LoadingState message="Loading profile..." />
       </div>
     )
   }
@@ -309,7 +307,7 @@ function AccountTab({ user }: { user: any }) {
             </div>
             {uploadingPicture && (
               <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                <Loader2 className="h-6 w-6 animate-spin text-white" aria-hidden="true" />
               </div>
             )}
           </div>

@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useLists } from '@/hooks/useLists'
 import { AppContainer } from '@/components/primitives'
 import { Breadcrumb } from '@/components/breadcrumb'
+import { LoadingState } from '@/components/loading-state'
 import { ListWithLinks } from '@/types'
 
 function DashboardContent() {
@@ -66,10 +67,7 @@ function DashboardContent() {
   if (!mounted || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
+        <LoadingState message="Loading..." />
       </div>
     )
   }
@@ -247,10 +245,7 @@ export default function DashboardPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
+        <LoadingState message="Loading..." />
       </div>
     }>
       <DashboardContent />

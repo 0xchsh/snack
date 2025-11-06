@@ -12,6 +12,7 @@ import { CreateList } from '@/components/create-list'
 import { ListWithLinks, CreateListForm, LinkCreatePayload } from '@/types'
 import { getRandomEmoji } from '@/lib/emoji'
 import { useAuth } from '@/hooks/useAuth'
+import { LoadingState } from '@/components/loading-state'
 
 interface ListPageProps {
   params: Promise<{
@@ -221,10 +222,7 @@ export default function ListPage({ params }: ListPageProps) {
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading list...</p>
-        </div>
+        <LoadingState message="Loading list..." />
       </div>
     )
   }
