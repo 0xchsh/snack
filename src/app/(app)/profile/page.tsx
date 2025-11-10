@@ -4,18 +4,17 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Bookmark, CreditCard, Edit, Eye, EyeOff, ExternalLink, Loader2, Mail, Shield, Trash2, User } from 'lucide-react'
+import { LogOut, Edit, Loader2, Trash2, User } from 'lucide-react'
 
 import { Button } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 import { LoadingState } from '@/components/loading-state'
-
-type ProfileTab = 'account' | 'billing' | 'security'
+import { AppContainer } from '@/components/primitives'
+import { Breadcrumb } from '@/components/breadcrumb'
 
 export default function ProfilePage() {
   const router = useRouter()
   const { user, loading } = useAuth()
-  const [activeTab, setActiveTab] = useState<ProfileTab>('account')
   const [mounted, setMounted] = useState(false)
 
   // Handle client-side mounting
@@ -52,65 +51,28 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-6 py-8">
-        {/* Navigation Tabs */}
-        <div className="flex items-center justify-center mb-12">
-          <div className="flex items-center bg-muted rounded-full p-1">
-            <Button
-              type="button"
-              onClick={() => setActiveTab('account')}
-              variant={activeTab === 'account' ? 'secondary' : 'ghost'}
-              size="sm"
-              className={`gap-2 px-6 py-3 rounded-full font-semibold text-sm ${
-                activeTab === 'account'
-                  ? 'text-foreground bg-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-transparent'
-              }`}
-            >
-              <User className="w-4 h-4" />
-              Account
-            </Button>
-            <Button
-              type="button"
-              onClick={() => setActiveTab('billing')}
-              variant={activeTab === 'billing' ? 'secondary' : 'ghost'}
-              size="sm"
-              className={`gap-2 px-6 py-3 rounded-full font-semibold text-sm ${
-                activeTab === 'billing'
-                  ? 'text-foreground bg-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-transparent'
-              }`}
-            >
-              <Eye className="w-4 h-4" />
-              Analytics
-            </Button>
-            <Button
-              type="button"
-              onClick={() => setActiveTab('security')}
-              variant={activeTab === 'security' ? 'secondary' : 'ghost'}
-              size="sm"
-              className={`gap-2 px-6 py-3 rounded-full font-semibold text-sm ${
-                activeTab === 'security'
-                  ? 'text-foreground bg-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-transparent'
-              }`}
-            >
-              <Shield className="w-4 h-4" />
-              Security
-            </Button>
+      <AppContainer variant="app">
+        <div className="py-8">
+          <div className="max-w-[560px] w-full mx-auto">
+            {/* Breadcrumb */}
+            <div className="mb-6">
+              <Breadcrumb
+                username={user.username || 'User'}
+                currentPage="Profile"
+                profilePictureUrl={user.profile_picture_url}
+              />
+            </div>
+
+            <AccountTab user={user} />
           </div>
         </div>
-
-        {/* Tab Content */}
-        {activeTab === 'account' && <AccountTab user={user} />}
-        {activeTab === 'billing' && <BillingTab user={user} />}
-        {activeTab === 'security' && <SecurityTab user={user} />}
-      </div>
+      </AppContainer>
     </div>
   )
 }
 
 function AccountTab({ user }: { user: any }) {
+  const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [uploadingPicture, setUploadingPicture] = useState(false)
@@ -132,6 +94,17 @@ function AccountTab({ user }: { user: any }) {
     profile_is_public: user.profile_is_public ?? true,
   })
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleLogout = async () => {
+    try {
+      // Clear any auth cookies/tokens
+      await fetch('/api/auth/signout', { method: 'POST' })
+      // Redirect to sign in
+      router.push('/auth/sign-in')
+    } catch (error) {
+      console.error('Error logging out:', error)
+    }
+  }
 
   // Reset form when user data changes
   useEffect(() => {
@@ -265,18 +238,7 @@ function AccountTab({ user }: { user: any }) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      <div>
-        <h2 
-          className="text-2xl font-bold mb-2"
-        >
-          Account Settings
-        </h2>
-        <p className="text-muted-foreground">
-          Update your account information and profile settings.
-        </p>
-      </div>
-
+    <div className="space-y-3">
       {/* Status Message */}
       {message && (
         <div className={`p-4 rounded-lg ${
@@ -468,225 +430,27 @@ function AccountTab({ user }: { user: any }) {
           </div>
         )}
       </div>
-    </div>
-  )
-}
 
-type AnalyticsSummary = {
-  totalViews: number
-  totalClicks: number
-  totalSaves: number
-  topLists: Array<{
-    id: string
-    public_id: string | null
-    title: string | null
-    emoji: string | null
-    view_count: number
-    click_count: number
-    save_count: number
-  }>
-}
-
-function BillingTab({ user }: { user: any }) {
-  const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        const response = await fetch('/api/analytics/stats')
-        if (response.ok) {
-          const data = await response.json() as AnalyticsSummary
-          setAnalytics({
-            totalViews: data.totalViews ?? 0,
-            totalClicks: data.totalClicks ?? 0,
-            totalSaves: data.totalSaves ?? 0,
-            topLists: Array.isArray(data.topLists) ? data.topLists : [],
-          })
-        }
-      } catch (error) {
-        console.error('Failed to fetch analytics:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchAnalytics()
-  }, [])
-
-  return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div>
-        <h2 
-          className="text-2xl font-bold mb-2"
-        >
-          Analytics & Insights
-        </h2>
-        <p className="text-muted-foreground">
-          Track your list performance and engagement metrics.
-        </p>
-      </div>
-
-      {/* Analytics Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-background border border-border rounded-xl p-6">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-medium text-muted-foreground">Total Views</h3>
-            <Eye className="w-5 h-5 text-muted-foreground" />
-          </div>
-          <div className="text-3xl font-bold">
-            {loading ? (
-              <div className="h-8 w-20 bg-muted animate-pulse rounded"></div>
-            ) : (
-              analytics?.totalViews.toLocaleString() || '0'
-            )}
-          </div>
-        </div>
-
-        <div className="bg-background border border-border rounded-xl p-6">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-medium text-muted-foreground">Link Clicks</h3>
-            <ExternalLink className="w-5 h-5 text-muted-foreground" />
-          </div>
-          <div className="text-3xl font-bold">
-            {loading ? (
-              <div className="h-8 w-20 bg-muted animate-pulse rounded"></div>
-            ) : (
-              analytics?.totalClicks.toLocaleString() || '0'
-            )}
-          </div>
-        </div>
-
-        <div className="bg-background border border-border rounded-xl p-6">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-medium text-muted-foreground">Total Saves</h3>
-            <Bookmark className="w-5 h-5 text-muted-foreground" />
-          </div>
-          <div className="text-3xl font-bold">
-            {loading ? (
-              <div className="h-8 w-20 bg-muted animate-pulse rounded"></div>
-            ) : (
-              analytics?.totalSaves.toLocaleString() || '0'
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Top 5 Most Popular Lists */}
+      {/* Logout Section */}
       <div className="bg-background border border-border rounded-xl p-6">
-        <h3 className="font-semibold mb-6">
-          Your Top 5 Most Popular Lists
-        </h3>
-        
-        {loading ? (
-          <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center justify-between p-4 bg-muted rounded-lg animate-pulse">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-accent rounded"></div>
-                  <div className="h-4 w-32 bg-accent rounded"></div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="h-4 w-16 bg-accent rounded"></div>
-                  <div className="h-4 w-16 bg-accent rounded"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : analytics?.topLists && analytics.topLists.length > 0 ? (
-          <div className="space-y-3">
-            {analytics.topLists.map((list, index) => (
-              <div key={list.id} className="flex items-center justify-between p-4 bg-muted rounded-lg hover:bg-accent transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full text-sm font-bold text-primary">
-                    {index + 1}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{list.emoji}</span>
-                    <Link 
-                      href={`/${user?.username}/${list.public_id || list.id}`}
-                      className="font-semibold hover:text-primary transition-colors"
-                    >
-                      {list.title}
-                    </Link>
-                  </div>
-                </div>
-                <div className="flex gap-6 text-sm">
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Eye className="w-4 h-4" />
-                    <span>{list.view_count.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <ExternalLink className="w-4 h-4" />
-                    <span>{list.click_count.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Bookmark className="w-4 h-4" />
-                    <span>{list.save_count.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            No list data available yet. Share your lists to start tracking analytics!
-          </div>
-        )}
-      </div>
-
-      {/* Current Plan */}
-      <div className="bg-background border border-border rounded-xl p-6">
-        <h3 className="font-semibold mb-4">Current Plan</h3>
-        <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+        <div className="flex items-center justify-between">
           <div>
-            <div className="font-semibold text-lg">Free Plan</div>
-            <div className="text-muted-foreground text-sm">Unlimited lists with analytics tracking</div>
+            <h3 className="font-semibold mb-1">Log Out</h3>
+            <p className="text-sm text-muted-foreground">Sign out of your account</p>
           </div>
+          <Button
+            type="button"
+            onClick={handleLogout}
+            variant="outline"
+            size="sm"
+            className="gap-2 border-destructive text-destructive hover:bg-destructive/10"
+          >
+            <LogOut className="w-4 h-4" />
+            Log Out
+          </Button>
         </div>
       </div>
     </div>
   )
 }
 
-function SecurityTab({ user }: { user: any }) {
-  return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      <div>
-        <h2 
-          className="text-2xl font-bold mb-2"
-        >
-          Security Settings
-        </h2>
-        <p className="text-muted-foreground">
-          Manage your account security and privacy settings.
-        </p>
-      </div>
-
-      {/* Account Deletion */}
-      <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-xl p-6">
-        <div className="flex items-start gap-4">
-          <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
-            <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-red-900 dark:text-red-200 mb-2">
-              Delete Account
-            </h3>
-            <p className="text-red-700 dark:text-red-300 text-sm mb-4">
-              Permanently delete your account and all associated data. This action cannot be undone.
-            </p>
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              className="px-6 py-2"
-            >
-              Delete Account
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}

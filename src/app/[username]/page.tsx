@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { List, Link2, Eye, Bookmark } from 'lucide-react'
+import { List, Link2, Eye, Heart } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -34,6 +34,8 @@ interface PublicProfile {
   stats: {
     total_public_lists: number
     total_saves_received: number
+    total_links: number
+    total_views: number
   }
 }
 
@@ -193,15 +195,15 @@ export default function UsernamePage() {
             <div className="flex items-center gap-3 sm:gap-3 text-muted-foreground">
               <div className="flex items-center gap-1.5">
                 <Link2 className="w-4 h-4" />
-                <span className="text-sm sm:text-base">100</span>
+                <span className="text-sm sm:text-base">{profile.stats.total_links}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Eye className="w-4 h-4" />
-                <span className="text-sm sm:text-base">6.9K</span>
+                <span className="text-sm sm:text-base">{profile.stats.total_views}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Bookmark className="w-4 h-4" />
-                <span className="text-sm sm:text-base">69K</span>
+                <Heart className="w-4 h-4" />
+                <span className="text-sm sm:text-base">{profile.stats.total_saves_received}</span>
               </div>
             </div>
           </div>

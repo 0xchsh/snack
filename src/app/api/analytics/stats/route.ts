@@ -68,54 +68,47 @@ export async function GET(request: NextRequest) {
     const typedLists: ListSummary[] = (listsData ?? []) as ListSummary[]
     const totalSaves = typedLists.reduce((sum, list) => sum + (list.save_count || 0), 0)
 
-    // Get top 5 lists with analytics if available
-    let topLists: TopList[] = []
-    if (typedLists.length > 0) {
-      if (hasAnalyticsTables) {
-        // Get view and click counts for each list
-        const listsWithAnalytics = await Promise.all(
-          typedLists.slice(0, 5).map(async (list) => {
-            const { count: views } = await supabase
-              .from('list_views')
-              .select('*', { count: 'exact', head: true })
-              .eq('list_id', list.id)
+    // Get per-list stats for all lists
+    const listStats: Record<string, { views: number; clicks: number }> = {}
 
-            const { count: clicks } = await supabase
-              .from('link_clicks')
-              .select('*', { count: 'exact', head: true })
-              .eq('list_id', list.id)
+    if (typedLists.length > 0 && hasAnalyticsTables) {
+      // Get view and click counts for each list
+      await Promise.all(
+        typedLists.map(async (list) => {
+          const listId = list.public_id || list.id
 
-            return {
-              ...list,
-              view_count: views || 0,
-              click_count: clicks || 0
-            }
-          })
-        )
-        
-        // Sort by views, then by saves
-        topLists = listsWithAnalytics
-          .sort((a, b) => {
-            if (b.view_count !== a.view_count) {
-              return b.view_count - a.view_count
-            }
-            return b.save_count - a.save_count
-          })
-      } else {
-        // No analytics tables, just use save_count for sorting
-        topLists = typedLists.slice(0, 5).map(list => ({
-          ...list,
-          view_count: 0,
-          click_count: 0
-        }))
-      }
+          const { count: views } = await supabase
+            .from('list_views')
+            .select('*', { count: 'exact', head: true })
+            .eq('list_id', list.id)
+
+          const { count: clicks } = await supabase
+            .from('link_clicks')
+            .select('*', { count: 'exact', head: true })
+            .eq('list_id', list.id)
+
+          listStats[listId] = {
+            views: views || 0,
+            clicks: clicks || 0
+          }
+        })
+      )
+    } else {
+      // No analytics tables, set all to 0
+      typedLists.forEach(list => {
+        const listId = list.public_id || list.id
+        listStats[listId] = { views: 0, clicks: 0 }
+      })
     }
 
     return NextResponse.json({
-      totalViews,
-      totalClicks,
-      totalSaves,
-      topLists
+      success: true,
+      data: {
+        totalViews,
+        totalClicks,
+        totalSaves,
+        listStats
+      }
     })
   } catch (error) {
     console.error('Error fetching analytics stats:', error)

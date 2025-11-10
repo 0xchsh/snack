@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Bookmark, BarChart3 } from 'lucide-react'
+import { Star, BarChart3 } from 'lucide-react'
 import { useEffect, Suspense } from 'react'
 
 import { Button } from '@/components/ui'
@@ -76,7 +76,7 @@ function AppLayoutContent({
             aria-label="Saved lists"
           >
             <Link href="/dashboard?tab=saved">
-              <Bookmark className="w-4 h-4" />
+              <Star className="w-4 h-4" />
             </Link>
           </Button>
           <Button

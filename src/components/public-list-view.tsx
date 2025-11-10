@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, memo } from 'react'
-import { Copy, Clock, Link as LinkIcon, Eye, Bookmark, Edit } from 'lucide-react'
+import { Copy, Clock, Link as LinkIcon, Eye, Star, Edit } from 'lucide-react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -28,13 +28,35 @@ function formatCount(count: number): string {
   return count.toString()
 }
 
-export function PublicListView({ list }: PublicListViewProps) {
+function getRelativeTime(dateString: string): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+  if (diffInSeconds < 86400) return 'Today'
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d`
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 604800)}w`
+  if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}m`
+
+  return `${Math.floor(diffInSeconds / 31536000)}y`
+}
+
+export function PublicListView({ list: initialList }: PublicListViewProps) {
+  const [list, setList] = useState(initialList)
   const [clickedLinks, setClickedLinks] = useState<Set<string>>(new Set())
   const [hasAnimated, setHasAnimated] = useState(false)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [showCopySuccess, setShowCopySuccess] = useState(false)
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false)
+  const [isSaved, setIsSaved] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const router = useRouter()
   const { user } = useAuth()
+
+  // Update local list when prop changes
+  useEffect(() => {
+    setList(initialList)
+  }, [initialList])
 
   // Get view mode from list data, default to 'row' if not set
   const viewMode: ViewMode = list.view_mode === 'card' ? 'card' : 'row'
@@ -108,6 +130,73 @@ export function PublicListView({ list }: PublicListViewProps) {
     }
   }
 
+  const handleSave = async () => {
+    if (!user) {
+      router.push('/auth/sign-in')
+      return
+    }
+
+    if (isSaving) return
+
+    setIsSaving(true)
+    try {
+      if (isSaved) {
+        // Unsave
+        const response = await fetch(`/api/lists/${list.id}/save`, {
+          method: 'DELETE',
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          setIsSaved(false)
+
+          // Update save count from API response
+          if (data.data && typeof data.data.save_count === 'number') {
+            setList(prev => ({
+              ...prev,
+              save_count: data.data.save_count
+            }))
+          }
+
+          // Refresh the router to invalidate cache
+          router.refresh()
+        }
+      } else {
+        // Save
+        const response = await fetch(`/api/lists/${list.id}/save`, {
+          method: 'POST',
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          console.log('Save API response:', data)
+          setIsSaved(true)
+          setShowSaveSuccess(true)
+          setTimeout(() => setShowSaveSuccess(false), 2000)
+
+          // Update save count from API response
+          if (data.data && typeof data.data.save_count === 'number') {
+            console.log('Updating save_count to:', data.data.save_count)
+            setList(prev => ({
+              ...prev,
+              save_count: data.data.save_count
+            }))
+          } else {
+            console.warn('No save_count in API response:', data)
+          }
+
+          // Refresh the router to invalidate cache
+          router.refresh()
+        }
+      }
+    } catch (error) {
+      // Silently handle error
+      console.error('Error saving/unsaving list:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   const handleLogin = () => {
     router.push('/auth/sign-in')
   }
@@ -154,6 +243,25 @@ export function PublicListView({ list }: PublicListViewProps) {
     trackView()
   }, [list.id])
 
+  // Check if list is saved by current user
+  useEffect(() => {
+    const checkSaveStatus = async () => {
+      if (!user || isOwner) return // Don't check for owners or unauthenticated users
+
+      try {
+        const response = await fetch(`/api/lists/${list.id}/save`)
+        const data = await response.json()
+        if (data.success && data.data) {
+          setIsSaved(data.data.isSaved)
+        }
+      } catch (error) {
+        // Silently fail
+      }
+    }
+
+    checkSaveStatus()
+  }, [list.id, user, isOwner])
+
   return (
     <div className="min-h-screen bg-background">
       {/* Copy Success Toast */}
@@ -168,6 +276,22 @@ export function PublicListView({ list }: PublicListViewProps) {
           >
             <Copy className="w-4 h-4" />
             <span className="font-medium">Link copied to clipboard!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Save Success Toast */}
+      <AnimatePresence>
+        {showSaveSuccess && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, x: '-50%' }}
+            animate={{ opacity: 1, scale: 1, x: '-50%' }}
+            exit={{ opacity: 0, scale: 0.95, x: '-50%' }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-4 left-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
+          >
+            <Star className="w-4 h-4" />
+            <span className="font-medium">Saved successfully!</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -204,6 +328,22 @@ export function PublicListView({ list }: PublicListViewProps) {
           logoHref="/"
           username={user?.username || list.user?.username || ''}
           buttons={user ? [
+            {
+              type: 'custom',
+              icon: isSaved ? (
+                <Star className="w-5 h-5 fill-yellow-500 text-yellow-500" />
+              ) : (
+                <Star className="w-5 h-5" />
+              ),
+              onClick: handleSave,
+              className: "w-icon-button h-icon-button p-0 flex items-center justify-center"
+            },
+            {
+              type: 'custom',
+              icon: <Copy className="w-5 h-5" />,
+              onClick: handleCopy,
+              className: "w-icon-button h-icon-button p-0 flex items-center justify-center"
+            },
             {
               type: 'custom',
               label: 'Dashboard',
@@ -273,22 +413,18 @@ export function PublicListView({ list }: PublicListViewProps) {
               )}
             </div>
 
-            {/* Right: Links, Views, Saves */}
+            {/* Right: Links, Time, Saves */}
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               <div className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm sm:text-base text-muted-foreground">Today</span>
+                <span className="text-sm sm:text-base text-muted-foreground">{getRelativeTime(list.created_at)}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <LinkIcon className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm sm:text-base text-muted-foreground">{list.links?.length || 0}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Eye className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm sm:text-base text-muted-foreground">{formatCount(list.view_count || 0)}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Bookmark className="w-4 h-4 text-muted-foreground" />
+                <Star className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm sm:text-base text-muted-foreground">{formatCount(list.save_count || 0)}</span>
               </div>
             </div>

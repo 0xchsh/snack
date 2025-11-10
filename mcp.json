@@ -21,6 +21,14 @@
       "env": {
           "APP_ID": "${OPENGRAPH_IO_API_KEY}"
       }
+    },
+    "supabase": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-supabase",
+          "postgresql://postgres:LC51yRhBP3dEIIyV@db.fwahxwlbsilzlbgeotyk.supabase.co:5432/postgres"
+        ]
     }
   }
 }

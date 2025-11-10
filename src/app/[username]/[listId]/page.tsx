@@ -5,7 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, Copy, ExternalLink, Eye } from 'lucide-react'
+import { ArrowLeft, Check, Copy, ExternalLink, Eye, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { TopBar, BrandMark, PageActions, AppContainer } from '@/components/primitives'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -28,6 +28,8 @@ export default function UserListPage() {
   const [isListPublic, setIsListPublic] = useState(true)
   const [isListPaid, setIsListPaid] = useState(false)
   const [showCopySuccess, setShowCopySuccess] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const { user } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -220,6 +222,29 @@ export default function UserListPage() {
     router.push('/auth/sign-in')
   }
 
+  const handleDelete = async () => {
+    if (!currentList) return
+
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`/api/lists/${currentList.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete list')
+      }
+
+      // Redirect to dashboard and refresh to invalidate cache
+      router.push('/dashboard')
+      router.refresh()
+    } catch (error) {
+      console.error('Error deleting list:', error)
+      setIsDeleting(false)
+      setShowDeleteModal(false)
+    }
+  }
+
   // Show loading state
   if (loading) {
     return (
@@ -292,6 +317,14 @@ export default function UserListPage() {
 
         <TopBar.Right>
           <Button
+            onClick={() => setShowDeleteModal(true)}
+            variant="muted"
+            size="icon"
+            aria-label="Delete list"
+          >
+            <Trash2 className="w-5 h-5" />
+          </Button>
+          <Button
             onClick={() => {
               router.push(`/${username}/${currentList.public_id || listId}`)
             }}
@@ -299,7 +332,7 @@ export default function UserListPage() {
             size="icon"
             aria-label="Preview public view"
           >
-            <Eye className="w-5 h-5" />
+            <Check className="w-5 h-5" />
           </Button>
           <Button
             onClick={async () => {
@@ -320,7 +353,7 @@ export default function UserListPage() {
 
       {/* Main Content */}
       <AppContainer variant="app">
-        <div className="py-8">
+        <div className="pt-8 pb-16">
           <div className="max-w-[560px] w-full mx-auto">
             <ListEditor
               list={currentList}
@@ -338,6 +371,39 @@ export default function UserListPage() {
           onCreateList={handleCreateList}
           onClose={() => setShowCreateList(false)}
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-background border border-border rounded-lg p-6 max-w-md w-full shadow-lg"
+          >
+            <h3 className="text-xl font-semibold mb-2">Delete List?</h3>
+            <p className="text-muted-foreground mb-6">
+              Are you sure you want to delete &quot;{currentList.title || 'Untitled List'}&quot;? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-md transition-colors disabled:opacity-50"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
     )

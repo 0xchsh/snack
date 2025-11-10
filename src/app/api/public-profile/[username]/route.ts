@@ -47,6 +47,7 @@ export async function GET(
         emoji,
         emoji_3d,
         save_count,
+        view_count,
         created_at,
         updated_at,
         links(count)
@@ -101,6 +102,8 @@ export async function GET(
     }) || []
 
     const totalSavesReceived = processedLists.reduce((sum, list) => sum + (list.save_count || 0), 0)
+    const totalLinks = processedLists.reduce((sum, list) => sum + (list.links?.[0]?.count || 0), 0)
+    const totalViews = processedLists.reduce((sum, list) => sum + (list.view_count || 0), 0)
 
     return NextResponse.json({
       data: {
@@ -108,7 +111,9 @@ export async function GET(
         lists: processedLists,
         stats: {
           total_public_lists: processedLists.length,
-          total_saves_received: totalSavesReceived
+          total_saves_received: totalSavesReceived,
+          total_links: totalLinks,
+          total_views: totalViews
         }
       }
     })

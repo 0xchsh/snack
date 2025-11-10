@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Eye, Link2, List, Plus, Users } from 'lucide-react'
+import { Eye, Star, Link2, List, Plus } from 'lucide-react'
 
 import { Button } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
@@ -13,18 +13,31 @@ import { Breadcrumb } from '@/components/breadcrumb'
 import { LoadingState } from '@/components/loading-state'
 import { ListWithLinks } from '@/types'
 
+function formatCount(count: number): string {
+  if (count >= 1000000) {
+    return `${(count / 1000000).toFixed(1)}M`
+  }
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}K`
+  }
+  return count.toString()
+}
+
 function DashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const tab = searchParams?.get('tab') || 'your-lists'
 
   const { user, loading } = useAuth()
-  const { lists, loading: listsLoading, createEmptyList } = useLists()
+  const { lists, loading: listsLoading, createEmptyList, refreshLists } = useLists()
   const [mounted, setMounted] = useState(false)
   const [creatingList, setCreatingList] = useState(false)
+  const [savedLists, setSavedLists] = useState<ListWithLinks[]>([])
+  const [savedListsLoading, setSavedListsLoading] = useState(false)
   const [analyticsData, setAnalyticsData] = useState<{
     totalViews: number
     totalClicks: number
+    totalSaves: number
     listStats: Record<string, { views: number; clicks: number }>
   } | null>(null)
 
@@ -32,13 +45,40 @@ function DashboardContent() {
     setMounted(true)
   }, [])
 
+  // Refresh lists when viewing the "your-lists" tab to ensure fresh data
+  useEffect(() => {
+    if (tab === 'your-lists' || !tab) {
+      refreshLists()
+    }
+  }, [tab, refreshLists])
+
+  // Fetch saved lists when on saved tab
+  useEffect(() => {
+    if (tab === 'saved' && user) {
+      setSavedListsLoading(true)
+      fetch('/api/saved-lists')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setSavedLists(data.data)
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching saved lists:', error)
+        })
+        .finally(() => {
+          setSavedListsLoading(false)
+        })
+    }
+  }, [tab, user])
+
   // Fetch analytics data when on stats tab
   useEffect(() => {
     if (tab === 'stats' && user) {
       fetch('/api/analytics/stats')
         .then(res => res.json())
         .then(data => {
-          if (data.success) {
+          if (data.success && data.data) {
             setAnalyticsData(data.data)
           }
         })
@@ -58,6 +98,8 @@ function DashboardContent() {
       } else {
         router.push(`/list/${newList.public_id || newList.id}?view=edit`)
       }
+      // Refresh router cache to ensure dashboard shows updated lists when navigating back
+      router.refresh()
     } catch (error) {
       console.error('Error creating list:', error)
     } finally {
@@ -91,6 +133,7 @@ function DashboardContent() {
               <Breadcrumb
                 username={user.username || 'User'}
                 currentPage="Your Lists"
+                profilePictureUrl={user.profile_picture_url}
               />
             </div>
 
@@ -160,12 +203,62 @@ function DashboardContent() {
               <Breadcrumb
                 username={user.username || 'User'}
                 currentPage="Saved Lists"
+                profilePictureUrl={user.profile_picture_url}
               />
             </div>
-            <div className="text-center py-16">
-              <p className="text-muted-foreground">See your saved lists here</p>
-              <p className="text-muted-foreground mt-2">Click on the bookmark icon on any list to see it here.</p>
+
+            {/* Header with count */}
+            <div className="flex items-center gap-2 text-muted-foreground mb-3">
+              <Star className="w-4 h-4" />
+              <span className="text-base">{savedLists.length} saved lists</span>
             </div>
+
+            {/* Lists */}
+            {savedListsLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <LoadingState message="Loading saved lists..." />
+              </div>
+            ) : savedLists.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="w-16 h-16 bg-secondary flex items-center justify-center text-2xl mx-auto mb-4">
+                  💾
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No saved lists yet</h3>
+                <p className="text-muted-foreground">
+                  Click on the bookmark icon on any list to save it here.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {savedLists.map((list) => {
+                  const listOwner = list.user?.username || 'unknown'
+                  return (
+                    <div key={list.id}>
+                      <Link
+                        href={`/${listOwner}/${list.public_id || list.id}`}
+                        className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-colors rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="text-base">{list.emoji || '📋'}</span>
+                          <div className="min-w-0">
+                            <span className="text-base text-foreground group-hover:text-primary transition-colors block">
+                              {list.title || 'Untitled List'}
+                            </span>
+                            <span className="text-sm text-muted-foreground">
+                              by @{listOwner}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground flex-shrink-0">
+                          <Star className="h-4 w-4" />
+                          <span>{list.save_count || 0}</span>
+                        </div>
+                      </Link>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         ) : tab === 'stats' ? (
           <div className="max-w-[560px] w-full mx-auto">
@@ -173,26 +266,27 @@ function DashboardContent() {
               <Breadcrumb
                 username={user.username || 'User'}
                 currentPage="Your Stats"
+                profilePictureUrl={user.profile_picture_url}
               />
             </div>
 
             {/* Summary Stats */}
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="text-center border border-border rounded-md py-4">
-                <div className="text-2xl font-bold text-foreground">{lists.length}</div>
+                <div className="text-2xl font-bold text-foreground">{formatCount(lists.length)}</div>
                 <div className="text-sm text-muted-foreground">lists</div>
               </div>
               <div className="text-center border border-border rounded-md py-4">
                 <div className="text-2xl font-bold text-foreground">
-                  {analyticsData ? analyticsData.totalClicks.toLocaleString() : '0'}
+                  {analyticsData ? formatCount(analyticsData.totalViews) : '0'}
                 </div>
-                <div className="text-sm text-muted-foreground">clicks</div>
+                <div className="text-sm text-muted-foreground">views</div>
               </div>
               <div className="text-center border border-border rounded-md py-4">
                 <div className="text-2xl font-bold text-foreground">
-                  {analyticsData ? analyticsData.totalViews.toLocaleString() : '0'}
+                  {analyticsData ? formatCount(analyticsData.totalSaves) : '0'}
                 </div>
-                <div className="text-sm text-muted-foreground">views</div>
+                <div className="text-sm text-muted-foreground">stars</div>
               </div>
             </div>
 
@@ -218,15 +312,15 @@ function DashboardContent() {
                       <div className="flex items-center gap-4 text-sm text-muted-foreground flex-shrink-0">
                         <div className="flex items-center gap-1">
                           <Link2 className="h-4 w-4" aria-hidden="true" />
-                          <span>{list.links?.length || 0}</span>
+                          <span>{formatCount(list.links?.length || 0)}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Eye className="h-4 w-4" aria-hidden="true" />
-                          <span>{stats.views.toLocaleString()}</span>
+                          <span>{formatCount(stats.views)}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4" aria-hidden="true" />
-                          <span>{stats.clicks.toLocaleString()}</span>
+                          <Star className="h-4 w-4" aria-hidden="true" />
+                          <span>{formatCount(list.save_count || 0)}</span>
                         </div>
                       </div>
                     </div>

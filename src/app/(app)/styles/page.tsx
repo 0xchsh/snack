@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ArrowLeft, BarChart3, Bookmark, Copy, ExternalLink, Moon, MoreVertical, Settings, Sun, User } from 'lucide-react'
+import { ArrowLeft, BarChart3, Heart, Copy, ExternalLink, Moon, MoreVertical, Settings, Sun, User } from 'lucide-react'
 
 import { Button, Card, CardDescription, CardFooter, CardHeader, CardTitle, Input, Label, Textarea } from '@/components/ui'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -210,7 +210,7 @@ export default function StylesPage() {
                   <Button asChild variant="muted" className="gap-2 font-medium">
                     <Link href="#">
                       Saved
-                      <Bookmark className="w-4 h-4" />
+                      <Heart className="w-4 h-4" />
                     </Link>
                   </Button>
                   <Button asChild variant="muted" className="gap-2 font-medium">
@@ -580,8 +580,8 @@ className="w-full px-4 py-2 text-left text-sm
                 <p className="text-xs text-muted-foreground">Settings</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <Bookmark className="w-6 h-6 text-foreground" />
-                <p className="text-xs text-muted-foreground">Bookmark</p>
+                <Heart className="w-6 h-6 text-foreground" />
+                <p className="text-xs text-muted-foreground">Heart</p>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <BarChart3 className="w-6 h-6 text-foreground" />

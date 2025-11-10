@@ -3,6 +3,10 @@ import { createClient } from '@/lib/supabase'
 import { validateUsername } from '@/lib/username-utils'
 import { getEmoji3D, getDefaultEmoji3D } from '@/lib/emoji'
 
+// Disable caching for this route
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 // GET /api/users/[username]/lists/[listId] - Get a specific list by username and listId
 export async function GET(
   request: NextRequest,

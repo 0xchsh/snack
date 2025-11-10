@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Rows2, List, GripVertical, Trash2, RefreshCw, MoreHorizontal, Clipboard, FileText, Eye, Link2 } from 'lucide-react'
+import { Menu, StretchHorizontal, GripVertical, Trash2, RefreshCw, MoreHorizontal, Clipboard, FileText, Eye, Link2 } from 'lucide-react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ListWithLinks, Link, Emoji3D, LinkCreatePayload } from '@/types'
@@ -730,7 +730,7 @@ export function ListEditor({
   // Removed view mode change handler - fixed to menu view only
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-18">
       {/* Copy Success Toast */}
       <AnimatePresence>
         {showCopySuccess && (
@@ -808,7 +808,7 @@ export function ListEditor({
               }`}
               title="Row view"
             >
-              <List className="w-4 h-4" />
+              <Menu className="w-4 h-4" />
             </Button>
             <Button
               type="button"
@@ -825,7 +825,7 @@ export function ListEditor({
               }`}
               title="Card view"
             >
-              <Rows2 className="w-4 h-4" />
+              <StretchHorizontal className="w-4 h-4" />
             </Button>
           </div>
 
@@ -875,7 +875,7 @@ export function ListEditor({
         ))}
 
         {/* Draggable list */}
-        <div className={`relative draggable-list-container flex flex-col ${viewMode === 'card' ? 'gap-6' : 'gap-3'}`}>
+        <div className={`relative draggable-list-container flex flex-col ${viewMode === 'card' ? 'gap-8' : 'gap-3'}`}>
           {(optimisticList.links || []).map((link, index) => {
             // Show skeleton loader if link is being refreshed
             if (refreshingLinkIds[link.id]) {
@@ -995,7 +995,7 @@ function LinkItem({
 
         <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0 ml-auto">
           <div className="h-icon-button w-icon-button flex items-center justify-center text-muted-foreground cursor-grab rounded-md" title="Drag to reorder">
-            <GripVertical className="w-5 h-5" />
+            <GripVertical className="w-4 h-4" />
           </div>
           <Button
             type="button"
@@ -1096,43 +1096,41 @@ function LinkItem({
         )}
 
         {/* Actions overlay */}
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0">
-          <div className="h-icon-button w-icon-button flex items-center justify-center bg-muted text-muted-foreground rounded-md cursor-grab" title="Drag to reorder">
-            <GripVertical className="w-5 h-5" />
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="bg-muted rounded-md px-2 py-2 flex items-center gap-4">
+            <div className="flex items-center justify-center text-muted-foreground cursor-grab" title="Drag to reorder">
+              <GripVertical className="w-4 h-4" />
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onRefresh()
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation()
+              }}
+              className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+              title="Refresh link preview"
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onRemove()
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation()
+              }}
+              className="text-muted-foreground hover:text-destructive transition-colors"
+              title="Delete link"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
           </div>
-          <Button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              onRefresh()
-            }}
-            onMouseDown={(e) => {
-              e.stopPropagation()
-            }}
-            variant="ghost"
-            size="icon"
-            className="bg-muted text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-md h-8 w-8 disabled:opacity-50"
-            title="Refresh link preview"
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </Button>
-          <Button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              onRemove()
-            }}
-            onMouseDown={(e) => {
-              e.stopPropagation()
-            }}
-            variant="ghost"
-            size="icon"
-            className="bg-muted text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-md h-8 w-8"
-            title="Delete link"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
         </div>
       </div>
 

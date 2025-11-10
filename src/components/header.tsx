@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState, ReactNode } from 'react'
-import { BarChart3, Bookmark, Copy, ExternalLink, MoreVertical, Settings, User } from 'lucide-react'
+import { BarChart3, Star, Copy, ExternalLink, MoreVertical, Settings, User } from 'lucide-react'
 
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
@@ -141,7 +141,7 @@ export function Header({
           >
             <Link href={button.href || '/dashboard?tab=saved'}>
               {button.label || 'Saved'}
-              <Bookmark className="w-4 h-4" />
+              <Star className="w-4 h-4" />
             </Link>
           </Button>
         )
