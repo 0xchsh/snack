@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { List, Link2, Eye, Heart } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { List, Link2, Star, Copy } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -46,6 +47,7 @@ export default function UsernamePage() {
   const [profile, setProfile] = useState<PublicProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showCopySuccess, setShowCopySuccess] = useState(false)
 
   useEffect(() => {
     if (!username) return
@@ -131,8 +133,30 @@ export default function UsernamePage() {
     year: 'numeric'
   })
 
+  const handleCopyProfile = async () => {
+    const url = `${window.location.origin}/${profile.user.username}`
+    await navigator.clipboard.writeText(url)
+    setShowCopySuccess(true)
+    setTimeout(() => setShowCopySuccess(false), 2000)
+  }
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Copy Success Toast */}
+      <AnimatePresence>
+        {showCopySuccess && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, x: '-50%' }}
+            animate={{ opacity: 1, scale: 1, x: '-50%' }}
+            exit={{ opacity: 0, scale: 0.95, x: '-50%' }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-4 left-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
+          >
+            <Copy className="w-4 h-4" />
+            <span className="font-medium">Profile link copied!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Header */}
       <div className="bg-background">
         <div className="mx-auto w-full max-w-container-app px-6 py-6">
@@ -175,9 +199,18 @@ export default function UsernamePage() {
 
           {/* Username and Join Date */}
           <div className="flex flex-col gap-1">
-            <div className="flex items-start text-xl font-normal leading-[1.5]">
-              <span className="text-neutral-400">@</span>
-              <span className="text-foreground">{profile.user.username}</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-start text-xl font-normal leading-[1.5]">
+                <span className="text-neutral-400">@</span>
+                <span className="text-foreground">{profile.user.username}</span>
+              </div>
+              <button
+                onClick={handleCopyProfile}
+                className="p-1.5 hover:bg-accent rounded-md transition-colors flex items-center justify-center"
+                aria-label="Copy profile link"
+              >
+                <Copy className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+              </button>
             </div>
             <div className="flex items-center gap-1.5">
               <p className="text-base font-normal text-neutral-400">
@@ -198,11 +231,7 @@ export default function UsernamePage() {
                 <span className="text-sm sm:text-base">{profile.stats.total_links}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Eye className="w-4 h-4" />
-                <span className="text-sm sm:text-base">{profile.stats.total_views}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Heart className="w-4 h-4" />
+                <Star className="w-4 h-4" />
                 <span className="text-sm sm:text-base">{profile.stats.total_saves_received}</span>
               </div>
             </div>

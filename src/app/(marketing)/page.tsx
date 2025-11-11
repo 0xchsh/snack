@@ -88,7 +88,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <Button asChild size="lg" variant="primary" className="w-full">
+          <Button asChild size="lg" variant="outline" className="w-full">
             <Link href="/auth/sign-in">
               Sign In with Email
             </Link>

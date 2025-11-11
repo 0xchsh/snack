@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Eye, Heart, Link2, Clock } from 'lucide-react'
+import { Star, Link2 } from 'lucide-react'
 import { LoadingState } from '@/components/loading-state'
 
 interface PublicList {
@@ -96,7 +96,7 @@ export default function DiscoverPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto py-6 md:py-12 max-w-[800px] px-4 md:px-0">
-        <div className="mb-8">
+        <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-foreground mb-2">Discover Lists</h1>
           <p className="text-muted-foreground">Explore curated lists from the community</p>
         </div>
@@ -110,68 +110,61 @@ export default function DiscoverPage() {
             <p className="text-muted-foreground">No public lists yet. Be the first to create one!</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {lists.map((list) => {
               const username = list.users?.username || 'unknown'
               const listSlug = list.public_id || list.id
               const displayName = getDisplayName(list)
               const profilePicUrl = list.users?.avatar_url
+              const linkCount = list.links?.length || 0
 
               return (
                 <Link
                   key={list.id}
                   href={`/${username}/${listSlug}`}
-                  className="block"
+                  className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-md group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  <div className="bg-background border border-border rounded-xl p-6 hover:bg-accent/50 transition-colors">
-                    {/* Header with emoji and title */}
-                    <div className="flex items-start gap-4 mb-4">
-                      <div className="text-4xl flex-shrink-0">
-                        {list.emoji || '📋'}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xl font-semibold text-foreground mb-1 truncate">
-                          {list.title || 'Untitled List'}
-                        </h3>
-
-                        {/* Creator info */}
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
-                            {profilePicUrl ? (
-                              <Image
-                                src={profilePicUrl}
-                                alt={`${displayName}'s profile`}
-                                width={20}
-                                height={20}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <span className="text-[10px] font-bold text-muted-foreground">
-                                {displayName.charAt(0).toUpperCase()}
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-sm text-muted-foreground">
-                            {displayName}
-                          </span>
+                  {/* Left side - emoji and title */}
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="text-2xl flex-shrink-0">
+                      {list.emoji || '📋'}
+                    </div>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <span className="text-base font-medium text-foreground truncate">
+                        {list.title || 'Untitled List'}
+                      </span>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <div className="w-4 h-4 bg-muted rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                          {profilePicUrl ? (
+                            <Image
+                              src={profilePicUrl}
+                              alt={`${displayName}'s profile`}
+                              width={16}
+                              height={16}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-[9px] font-bold text-muted-foreground">
+                              {displayName.charAt(0).toUpperCase()}
+                            </span>
+                          )}
                         </div>
-
-                        {/* Stats */}
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-                          <div className="flex items-center gap-1.5">
-                            <Clock className="w-4 h-4" />
-                            <span>{getRelativeTime(list.created_at)}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Link2 className="w-4 h-4" />
-                            <span>{list.links?.length || 0}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Heart className="w-4 h-4" />
-                            <span>{list.save_count || 0}</span>
-                          </div>
-                        </div>
+                        <span className="text-sm text-neutral-400 truncate">
+                          {displayName}
+                        </span>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Right side - stats */}
+                  <div className="flex items-center gap-3 ml-4 flex-shrink-0 text-neutral-400">
+                    <div className="flex items-center gap-1.5">
+                      <Link2 className="w-4 h-4" />
+                      <span className="text-sm">{linkCount}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Star className="w-4 h-4" />
+                      <span className="text-sm">{list.save_count || 0}</span>
                     </div>
                   </div>
                 </Link>
