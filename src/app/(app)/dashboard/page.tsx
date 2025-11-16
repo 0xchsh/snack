@@ -57,7 +57,11 @@ function DashboardContent() {
     if (tab === 'saved' && user) {
       setSavedListsLoading(true)
       fetch('/api/saved-lists')
-        .then(res => res.json())
+        .then(async res => {
+          const text = await res.text()
+          if (!text) return { success: false, data: [] }
+          return JSON.parse(text)
+        })
         .then(data => {
           if (data.success) {
             setSavedLists(data.data)
@@ -76,7 +80,11 @@ function DashboardContent() {
   useEffect(() => {
     if (tab === 'stats' && user) {
       fetch('/api/analytics/stats')
-        .then(res => res.json())
+        .then(async res => {
+          const text = await res.text()
+          if (!text) return { success: false, data: null }
+          return JSON.parse(text)
+        })
         .then(data => {
           if (data.success && data.data) {
             setAnalyticsData(data.data)

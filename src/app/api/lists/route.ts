@@ -18,9 +18,9 @@ export async function GET() {
     const { data: lists, error } = await supabase
       .from('lists')
       .select(`
-        *,
+        id, public_id, title, emoji, is_public, price_cents, currency, view_mode, user_id, created_at, updated_at,
         links (
-          *
+          id, list_id, title, url, description, image_url, position, created_at, updated_at
         )
       `)
       .eq('user_id', user.id)
@@ -70,7 +70,6 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         title: body.title,
         emoji: body.emoji || '🎯',
-        emoji_3d: body.emoji_3d || null,
         is_public: body.is_public !== undefined ? body.is_public : true
       })
       .select()

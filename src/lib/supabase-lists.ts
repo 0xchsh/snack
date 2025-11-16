@@ -1,6 +1,6 @@
 import { ListWithLinks, CreateListForm, User } from '@/types'
 import { createClient } from '@/lib/supabase'
-import { getRandomEmoji, getDefaultEmoji3D } from '@/lib/emoji'
+import { getRandomEmoji } from '@/lib/emoji'
 import { fetchOGDataClient } from './og-client'
 
 // Supabase database service for lists
@@ -22,7 +22,7 @@ export class SupabaseListDatabase {
       
       const { data: lists, error } = await this.supabase
         .from('lists')
-        .select('*')
+        .select('id, public_id, title, emoji, is_public, price_cents, currency, view_mode, user_id, created_at, updated_at')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
       
@@ -59,7 +59,7 @@ export class SupabaseListDatabase {
           try {
             const { data: listLinks, error: linksError } = await this.supabase
               .from('links')
-              .select('*')
+              .select('id, list_id, title, url, description, image_url, position, created_at, updated_at')
               .eq('list_id', list.id)
               .order('position', { ascending: true })
 
@@ -72,25 +72,8 @@ export class SupabaseListDatabase {
             console.warn('Failed to fetch links for list', list.id)
           }
 
-          // Handle emoji_3d which can be a string (JSON) or already an object
-          let emoji3d = null
-          if (list.emoji_3d) {
-            if (typeof list.emoji_3d === 'string') {
-              try {
-                emoji3d = JSON.parse(list.emoji_3d)
-              } catch (e) {
-                console.warn('Failed to parse emoji_3d for list', list.id)
-                emoji3d = null
-              }
-            } else {
-              // Already an object
-              emoji3d = list.emoji_3d
-            }
-          }
-
           return {
             ...list,
-            emoji_3d: emoji3d,
             links,
             user: {
               id: list.user_id,
@@ -146,26 +129,9 @@ export class SupabaseListDatabase {
         .eq('id', list.user_id)
         .single()
 
-      // Handle emoji_3d which can be a string (JSON) or already an object
-      let emoji3d = null
-      if (list.emoji_3d) {
-        if (typeof list.emoji_3d === 'string') {
-          try {
-            emoji3d = JSON.parse(list.emoji_3d)
-          } catch (e) {
-            console.warn('Failed to parse emoji_3d for list', list.id)
-            emoji3d = null
-          }
-        } else {
-          // Already an object
-          emoji3d = list.emoji_3d
-        }
-      }
-
       // Transform the data to match our ListWithLinks type
       return {
         ...list,
-        emoji_3d: emoji3d,
         links: list.links || [],
         user: {
           id: list.user_id,
@@ -182,29 +148,27 @@ export class SupabaseListDatabase {
   async createEmptyList(user: User): Promise<ListWithLinks> {
     try {
       console.log('Creating empty list for user:', user.id)
-      
+
       // Check if we have a valid Supabase session
       const { data: { session }, error: sessionError } = await this.supabase.auth.getSession()
-      
+
       if (sessionError) {
         console.error('Error getting session:', sessionError)
         throw new Error('Failed to verify authentication')
       }
-      
+
       if (!session) {
         console.error('No active Supabase session')
         throw new Error('You must be signed in to create lists')
       }
-      
+
       console.log('Session found for user:', session.user.id, 'email:', session.user.email)
-      
-      const defaultEmoji = getDefaultEmoji3D()
+
       const newListData = {
         id: crypto.randomUUID(), // Generate a UUID for the list
         public_id: crypto.randomUUID(), // Generate a UUID for public access
         title: 'New list', // Default title - user can edit
-        emoji: defaultEmoji.unicode, // Default pretzel emoji
-        emoji_3d: JSON.stringify(defaultEmoji), // Now that column exists
+        emoji: '🥨', // Default pretzel emoji
         is_public: true,
         price_cents: null, // Now that column exists
         view_mode: 'row', // Default view mode
@@ -232,10 +196,9 @@ export class SupabaseListDatabase {
       }
 
       console.log('Created new empty list:', list)
-      
+
       return {
         ...list,
-        emoji_3d: list.emoji_3d ? JSON.parse(list.emoji_3d) : defaultEmoji,
         links: [],
         user: {
           id: user.id,
@@ -299,10 +262,9 @@ export class SupabaseListDatabase {
       }
 
       console.log('Created new list:', list)
-      
+
       return {
         ...list,
-        emoji_3d: list.emoji_3d ? JSON.parse(list.emoji_3d) : null,
         links: [],
         user: {
           id: user.id,
@@ -366,10 +328,9 @@ export class SupabaseListDatabase {
 
       // Prepare the update data, excluding read-only fields
       const updateData: any = {}
-      
+
       if (updates.title !== undefined) updateData.title = updates.title
       if (updates.emoji !== undefined) updateData.emoji = updates.emoji
-      if (updates.emoji_3d !== undefined) updateData.emoji_3d = updates.emoji_3d ? JSON.stringify(updates.emoji_3d) : null
       if (updates.is_public !== undefined) updateData.is_public = updates.is_public
       if (updates.price_cents !== undefined) updateData.price_cents = updates.price_cents
       if (updates.view_mode !== undefined) updateData.view_mode = updates.view_mode
@@ -406,10 +367,9 @@ export class SupabaseListDatabase {
         .single()
 
       console.log('Updated list:', list)
-      
+
       return {
         ...list,
-        emoji_3d: list.emoji_3d ? JSON.parse(list.emoji_3d) : null,
         links: list.links || [],
         user: {
           id: list.user_id,

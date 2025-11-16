@@ -6,11 +6,13 @@ import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ListWithLinks, Link as LinkType } from '@/types'
+import { ListWithLinks, Link as LinkType, Currency } from '@/types'
 import { getHostname } from '@/lib/url-utils'
 import { Favicon } from './favicon'
 import { useAuth } from '@/hooks/useAuth'
 import { Header } from './header'
+import { ListPaywall } from './list-paywall'
+import { isListFree } from '@/lib/pricing'
 
 type ViewMode = 'row' | 'card'
 
@@ -50,6 +52,8 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
   const [showSaveSuccess, setShowSaveSuccess] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [hasAccess, setHasAccess] = useState(true) // Assume access by default
+  const [checkingAccess, setCheckingAccess] = useState(false)
   const router = useRouter()
   const { user } = useAuth()
 
@@ -262,6 +266,45 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
     checkSaveStatus()
   }, [list.id, user, isOwner])
 
+  // Check purchase status for paid lists
+  useEffect(() => {
+    const checkPurchaseStatus = async () => {
+      // If list is free, user has access
+      if (isListFree(list.price_cents)) {
+        setHasAccess(true)
+        return
+      }
+
+      // If user is owner, they have access
+      if (isOwner) {
+        setHasAccess(true)
+        return
+      }
+
+      setCheckingAccess(true)
+
+      try {
+        const response = await fetch(`/api/lists/${list.id}/purchase-status`)
+        const data = await response.json()
+
+        if (data.success && data.data) {
+          setHasAccess(data.data.has_access)
+        } else {
+          // If API fails, default to no access for paid lists
+          setHasAccess(false)
+        }
+      } catch (error) {
+        console.error('Error checking purchase status:', error)
+        // On error, default to no access for paid lists
+        setHasAccess(false)
+      } finally {
+        setCheckingAccess(false)
+      }
+    }
+
+    checkPurchaseStatus()
+  }, [list.id, list.price_cents, isOwner])
+
   return (
     <div className="min-h-screen bg-background">
       {/* Copy Success Toast */}
@@ -344,12 +387,12 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
               onClick: handleCopy,
               className: "w-icon-button h-icon-button p-0 flex items-center justify-center"
             },
-            {
-              type: 'custom',
+            ...(isOwner ? [{
+              type: 'custom' as const,
               label: 'Dashboard',
               onClick: () => router.push('/dashboard'),
               className: "px-4 py-2 text-base font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-            }
+            }] : [])
           ] : [
             {
               type: 'custom',
@@ -430,27 +473,38 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
             </div>
           </div>
 
-          {/* Links List */}
-          <div className={viewMode === 'card' ? 'space-y-6' : 'space-y-3'}>
-            {list.links && list.links.length > 0 ? (
-              list.links.map((link, index) => (
-                <PublicLinkItem
-                  key={link.id}
-                  link={link}
-                  onClick={() => handleLinkClick(link.id, link.url)}
-                  isClicked={clickedLinks.has(link.id)}
-                  index={index}
-                  viewMode={viewMode}
-                  hasAnimated={hasAnimated}
-                  prefersReducedMotion={prefersReducedMotion}
-                />
-              ))
-            ) : (
-              <div className="py-12 text-muted-foreground text-center">
-                <p>This list is empty</p>
-              </div>
-            )}
-          </div>
+          {/* Links List or Paywall */}
+          {!hasAccess && !isListFree(list.price_cents) ? (
+            <ListPaywall
+              listId={list.id}
+              title={list.title}
+              emoji={list.emoji}
+              priceCents={list.price_cents!}
+              currency={(list.currency as Currency) || 'usd'}
+              creatorName={displayName}
+            />
+          ) : (
+            <div className={viewMode === 'card' ? 'space-y-6' : 'space-y-3'}>
+              {list.links && list.links.length > 0 ? (
+                list.links.map((link, index) => (
+                  <PublicLinkItem
+                    key={link.id}
+                    link={link}
+                    onClick={() => handleLinkClick(link.id, link.url)}
+                    isClicked={clickedLinks.has(link.id)}
+                    index={index}
+                    viewMode={viewMode}
+                    hasAnimated={hasAnimated}
+                    prefersReducedMotion={prefersReducedMotion}
+                  />
+                ))
+              ) : (
+                <div className="py-12 text-muted-foreground text-center">
+                  <p>This list is empty</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

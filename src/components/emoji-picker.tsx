@@ -3,14 +3,13 @@
 import { useRef, useEffect, useState } from 'react'
 import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
-import { Emoji3D } from '@/types'
 import { useTheme } from './theme-provider'
 
 interface EmojiPickerProps {
   isOpen: boolean
   triggerRef: React.RefObject<HTMLElement | HTMLButtonElement | null>
-  currentEmoji: Emoji3D
-  onSelectEmoji: (emoji: Emoji3D) => void
+  currentEmoji: string
+  onSelectEmoji: (emoji: string) => void
   onClose: () => void
 }
 
@@ -63,13 +62,7 @@ export function EmojiPicker({
   }, [isOpen, triggerRef])
 
   const handleEmojiSelect = (emoji: any) => {
-    const emoji3D: Emoji3D = {
-      unicode: emoji.native,
-      url: '', // No URL needed for native emojis
-      name: emoji.name
-    }
-
-    onSelectEmoji(emoji3D)
+    onSelectEmoji(emoji.native)
     onClose()
   }
 

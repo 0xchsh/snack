@@ -1,22 +1,41 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 // Disable caching for this route
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-// GET /api/discover - Get all public lists
-export async function GET() {
+// GET /api/discover - Get public lists with pagination
+export async function GET(request: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient()
+    const searchParams = request.nextUrl.searchParams
 
-    // Fetch all public lists
+    // Get pagination parameters
+    const page = parseInt(searchParams.get('page') || '1', 10)
+    const limit = parseInt(searchParams.get('limit') || '30', 10)
+
+    // Calculate offset for pagination
+    const offset = (page - 1) * limit
+
+    // Get total count of public lists
+    const { count: totalCount, error: countError } = await supabase
+      .from('lists')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_public', true)
+
+    if (countError) {
+      console.error('Error fetching total count:', countError)
+    }
+
+    // Fetch public lists with pagination
     const { data: lists, error: listsError } = await supabase
       .from('lists')
       .select('id, public_id, title, emoji, is_public, view_count, save_count, created_at, user_id')
       .eq('is_public', true)
       .order('created_at', { ascending: false })
-      .limit(50)
+      .range(offset, offset + limit - 1)
 
     if (listsError) {
       console.error('Error fetching public lists:', listsError)
@@ -29,7 +48,13 @@ export async function GET() {
     if (!lists || lists.length === 0) {
       return NextResponse.json({
         success: true,
-        data: []
+        data: [],
+        pagination: {
+          page,
+          limit,
+          hasMore: false,
+          total: totalCount || 0
+        }
       })
     }
 
@@ -74,9 +99,18 @@ export async function GET() {
       links: linksMap.get(list.id) || []
     }))
 
+    // Check if there are more pages
+    const hasMore = enrichedLists.length === limit
+
     return NextResponse.json({
       success: true,
-      data: enrichedLists
+      data: enrichedLists,
+      pagination: {
+        page,
+        limit,
+        hasMore,
+        total: totalCount || 0
+      }
     })
   } catch (error) {
     console.error('Error in discover endpoint:', error)

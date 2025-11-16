@@ -14,7 +14,7 @@ import { Breadcrumb } from '@/components/breadcrumb'
 
 export default function ProfilePage() {
   const router = useRouter()
-  const { user, loading } = useAuth()
+  const { user, loading, signOut } = useAuth()
   const [mounted, setMounted] = useState(false)
 
   // Handle client-side mounting
@@ -63,7 +63,7 @@ export default function ProfilePage() {
               />
             </div>
 
-            <AccountTab user={user} />
+            <AccountTab user={user} signOut={signOut} />
           </div>
         </div>
       </AppContainer>
@@ -71,11 +71,12 @@ export default function ProfilePage() {
   )
 }
 
-function AccountTab({ user }: { user: any }) {
+function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void> }) {
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [uploadingPicture, setUploadingPicture] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [currentUser, setCurrentUser] = useState(user)
   const [formData, setFormData] = useState<{
@@ -97,12 +98,18 @@ function AccountTab({ user }: { user: any }) {
 
   const handleLogout = async () => {
     try {
-      // Clear any auth cookies/tokens
-      await fetch('/api/auth/signout', { method: 'POST' })
-      // Redirect to sign in
-      router.push('/auth/sign-in')
+      setIsLoggingOut(true)
+      setMessage(null)
+
+      // Use the auth context signOut method
+      await signOut()
+
+      // The signOut method in useAuth already handles redirect to '/'
+      // No need to manually redirect here
     } catch (error) {
       console.error('Error logging out:', error)
+      setMessage({ type: 'error', text: 'Failed to sign out. Please try again.' })
+      setIsLoggingOut(false)
     }
   }
 
@@ -444,9 +451,19 @@ function AccountTab({ user }: { user: any }) {
             variant="outline"
             size="sm"
             className="gap-2 border-destructive text-destructive hover:bg-destructive/10"
+            disabled={isLoggingOut}
           >
-            <LogOut className="w-4 h-4" />
-            Log Out
+            {isLoggingOut ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Signing out...
+              </>
+            ) : (
+              <>
+                <LogOut className="w-4 h-4" />
+                Log Out
+              </>
+            )}
           </Button>
         </div>
       </div>

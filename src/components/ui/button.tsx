@@ -20,7 +20,7 @@ const buttonVariants = cva(
           'bg-destructive text-destructive-foreground hover:bg-destructive/90',
       },
       size: {
-        default: 'px-4 py-2 rounded-lg text-sm',
+        default: 'h-icon-button px-4 rounded-lg text-sm',
         sm: 'px-3 py-2 rounded-md text-sm',
         lg: 'px-6 py-3 rounded-lg text-base',
         icon: 'h-icon-button w-icon-button rounded-md',

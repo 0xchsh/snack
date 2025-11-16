@@ -13,7 +13,7 @@ type ListRow = Database['public']['Tables']['lists']['Row']
 type UserRow = Database['public']['Tables']['users']['Row']
 
 type SavedListWithListRow = SavedListRow & {
-  lists: Pick<ListRow, 'id' | 'public_id' | 'user_id' | 'title' | 'description' | 'emoji' | 'emoji_3d' | 'view_mode' | 'is_public' | 'save_count' | 'created_at' | 'updated_at'> | null
+  lists: Pick<ListRow, 'id' | 'public_id' | 'user_id' | 'title' | 'description' | 'emoji' | 'view_mode' | 'is_public' | 'save_count' | 'created_at' | 'updated_at'> | null
 }
 
 type SavedListCardRow = SavedListRow & {
@@ -137,7 +137,7 @@ export class OptimizedSavedListsDB {
         .select(`
           *,
           lists (
-            id, public_id, user_id, title, description, emoji, emoji_3d, view_mode, is_public,
+            id, public_id, user_id, title, description, emoji, view_mode, is_public,
             save_count, created_at, updated_at
           )
         `)

@@ -16,6 +16,16 @@ export type SavedList = Database['public']['Tables']['saved_lists']['Row']
 export type SavedListInsert = Database['public']['Tables']['saved_lists']['Insert']
 export type SavedListUpdate = Database['public']['Tables']['saved_lists']['Update']
 
+// Paywalled lists & payments types
+export type ListPurchase = Database['public']['Tables']['list_purchases']['Row']
+export type ListPurchaseInsert = Database['public']['Tables']['list_purchases']['Insert']
+export type ListPurchaseUpdate = Database['public']['Tables']['list_purchases']['Update']
+
+export type CreatorPayout = Database['public']['Tables']['creator_payouts']['Row']
+export type CreatorPayoutInsert = Database['public']['Tables']['creator_payouts']['Insert']
+export type CreatorPayoutUpdate = Database['public']['Tables']['creator_payouts']['Update']
+
+// Legacy subscription types (not currently used)
 export type Subscription = Database['public']['Tables']['subscriptions']['Row']
 export type SubscriptionInsert = Database['public']['Tables']['subscriptions']['Insert']
 export type SubscriptionUpdate = Database['public']['Tables']['subscriptions']['Update']
@@ -59,18 +69,10 @@ export type SavedListCard = {
   user: Pick<User, 'id' | 'username'>
 }
 
-// 3D Emoji data structure
-export interface Emoji3D {
-  unicode: string
-  url?: string | undefined
-  name?: string | undefined
-}
-
 // Form types
 export interface CreateListForm {
   title: string
   emoji?: string
-  emoji_3d?: Emoji3D
   is_public: boolean
   price_cents?: number
 }
@@ -116,4 +118,132 @@ export interface ListAnalytics {
 export interface LinkAnalytics {
   clicks: number
   click_rate: number
+}
+
+// ============================================================================
+// Payment & Monetization Types
+// ============================================================================
+
+// Supported currencies
+export type Currency = 'usd' | 'eur' | 'gbp' | 'cad' | 'aud' | 'jpy' | 'inr'
+
+// Stripe account status
+export type StripeAccountStatus = 'not_connected' | 'pending' | 'active' | 'restricted'
+
+// Payout status
+export type PayoutStatus = 'pending' | 'processing' | 'paid' | 'failed' | 'cancelled'
+
+// Extended User type with Stripe info
+export type UserWithStripe = User & {
+  stripe_account_id: string | null
+  stripe_account_status: StripeAccountStatus
+  stripe_customer_id: string | null
+  stripe_connected_at: string | null
+}
+
+// List with purchase info
+export type ListWithPurchaseInfo = List & {
+  is_purchased?: boolean
+  purchase_date?: string | null
+  is_free: boolean // Computed: price_cents is null or 0
+}
+
+// Purchase with related data
+export type PurchaseWithList = ListPurchase & {
+  list: {
+    id: string
+    title: string
+    emoji: string | null
+    user_id: string
+  }
+}
+
+export type PurchaseWithDetails = ListPurchase & {
+  list: ListWithUser
+}
+
+// Creator earnings data
+export interface CreatorEarnings {
+  total_earnings: number // in cents
+  total_purchases: number
+  currency: Currency
+}
+
+// Creator balance for payouts
+export interface CreatorBalance {
+  available_balance: number // in cents, available for payout
+  pending_payouts: number // in cents, in pending payouts
+  total_earned: number // in cents, all-time earnings
+}
+
+// Pricing calculation result
+export interface PricingBreakdown {
+  amount_cents: number // Total amount charged
+  platform_fee: number // Platform's cut in cents
+  creator_earnings: number // Creator receives in cents
+  platform_fee_percentage: number // e.g., 0.10 for 10%
+}
+
+// Stripe Checkout session data
+export interface CheckoutSessionData {
+  session_id: string
+  url: string
+  list_id: string
+  amount: number
+  currency: Currency
+}
+
+// Payment Intent metadata
+export interface PaymentIntentMetadata {
+  list_id: string
+  list_title: string
+  creator_id: string
+  buyer_id: string
+  amount_cents: number
+  currency: Currency
+  platform_fee: number
+  creator_earnings: number
+}
+
+// Purchase status response
+export interface PurchaseStatus {
+  is_purchased: boolean
+  purchase_date: string | null
+  amount_paid: number | null
+  currency: Currency | null
+}
+
+// Creator dashboard stats
+export interface CreatorDashboardStats {
+  total_earnings: number
+  pending_payouts: number
+  available_balance: number
+  total_sales: number
+  total_lists: number
+  paid_lists: number
+  currency: Currency
+}
+
+// List pricing form
+export interface ListPricingForm {
+  price_cents: number | null // null = free, >0 = paid
+  currency: Currency
+}
+
+// Payout request form
+export interface PayoutRequestForm {
+  amount: number // in cents
+  currency: Currency
+}
+
+// Earnings by list
+export interface ListEarnings {
+  list_id: string
+  list_title: string
+  total_purchases: number
+  total_earnings: number // in cents
+  total_platform_fees: number // in cents
+  currency: Currency
+  first_purchase: string | null
+  latest_purchase: string | null
 }

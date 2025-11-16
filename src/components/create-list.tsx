@@ -5,8 +5,7 @@ import { useRef, useState } from 'react'
 import { X } from 'lucide-react'
 
 import { Button, Input, Label } from '@/components/ui'
-import { getDefaultEmoji3D } from '@/lib/emoji'
-import { CreateListForm, Emoji3D } from '@/types'
+import { CreateListForm } from '@/types'
 import { EmojiPicker } from './emoji-picker'
 
 interface CreateListProps {
@@ -15,13 +14,12 @@ interface CreateListProps {
 }
 
 export function CreateList({ onCreateList, onClose }: CreateListProps) {
-  const defaultEmoji3D = getDefaultEmoji3D()
   const [formData, setFormData] = useState<CreateListForm>({
     title: '',
-    emoji: defaultEmoji3D.unicode,
+    emoji: '🥨',
     is_public: true
   })
-  const [currentEmoji3D, setCurrentEmoji3D] = useState<Emoji3D>(defaultEmoji3D)
+  const [currentEmoji, setCurrentEmoji] = useState<string>('🥨')
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
@@ -37,8 +35,7 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
       await onCreateList({
         ...formData,
         title: formData.title.trim(),
-        emoji: currentEmoji3D.unicode,
-        emoji_3d: currentEmoji3D
+        emoji: currentEmoji
       })
       onClose()
     } catch (error) {
@@ -83,18 +80,7 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
                 variant="secondary"
                 className="w-20 h-20 rounded-2xl text-4xl mx-auto mb-3 hover:bg-secondary/80"
               >
-                {currentEmoji3D.url ? (
-                  <Image
-                    src={currentEmoji3D.url}
-                    alt={currentEmoji3D.name || 'emoji'}
-                    width={56}
-                    height={56}
-                    className="w-14 h-14 object-contain"
-                    unoptimized
-                  />
-                ) : (
-                  <span>{currentEmoji3D.unicode}</span>
-                )}
+                <span>{currentEmoji}</span>
               </Button>
               <p 
                 className="text-sm text-muted-foreground"
@@ -196,10 +182,10 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
       <EmojiPicker
         isOpen={showEmojiPicker}
         triggerRef={emojiButtonRef}
-        currentEmoji={currentEmoji3D}
-        onSelectEmoji={(emoji3D) => {
-          setCurrentEmoji3D(emoji3D)
-          setFormData(prev => ({ ...prev, emoji: emoji3D.unicode }))
+        currentEmoji={currentEmoji}
+        onSelectEmoji={(emoji) => {
+          setCurrentEmoji(emoji)
+          setFormData(prev => ({ ...prev, emoji: emoji }))
           setShowEmojiPicker(false)
         }}
         onClose={() => setShowEmojiPicker(false)}

@@ -27,7 +27,6 @@ interface PublicProfile {
     title: string
     description: string | null
     emoji: string | null
-    emoji_3d: any | null
     save_count: number
     created_at: string
     links: Array<{ count: number }>
@@ -250,18 +249,7 @@ export default function UsernamePage() {
                     >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-                          {list.emoji_3d?.url ? (
-                            <Image
-                              src={list.emoji_3d.url}
-                              alt={list.emoji_3d.name || 'emoji'}
-                              width={16}
-                              height={16}
-                              className="w-4 h-4 object-contain"
-                              unoptimized
-                            />
-                          ) : (
-                            <span className="text-base">{list.emoji || '📋'}</span>
-                          )}
+                          <span className="text-base">{list.emoji || '📋'}</span>
                         </div>
                         <span className="text-base text-foreground truncate">
                           {list.title || 'Untitled List'}

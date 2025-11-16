@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Star, Link2 } from 'lucide-react'
+import { Star, Link2, List, Loader2 } from 'lucide-react'
+import { useInView } from 'react-intersection-observer'
 import { LoadingState } from '@/components/loading-state'
 
 interface PublicList {
@@ -28,16 +29,29 @@ interface PublicList {
   }>
 }
 
+type SortOption = 'recent' | 'links' | 'stars'
+
 export default function DiscoverPage() {
   const [lists, setLists] = useState<PublicList[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [sortBy, setSortBy] = useState<SortOption>('recent')
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const [totalCount, setTotalCount] = useState(0)
 
+  const { ref: loadMoreRef, inView } = useInView({
+    threshold: 0,
+    rootMargin: '100px'
+  })
+
+  // Initial fetch
   useEffect(() => {
     const fetchPublicLists = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/discover')
+        const response = await fetch('/api/discover?page=1&limit=30')
 
         if (!response.ok) {
           throw new Error('Failed to fetch public lists')
@@ -45,6 +59,9 @@ export default function DiscoverPage() {
 
         const data = await response.json()
         setLists(data.data || [])
+        setHasMore(data.pagination?.hasMore ?? false)
+        setTotalCount(data.pagination?.total ?? 0)
+        setPage(1)
       } catch (err) {
         console.error('Error fetching public lists:', err)
         setError('Failed to load lists')
@@ -55,6 +72,45 @@ export default function DiscoverPage() {
 
     fetchPublicLists()
   }, [])
+
+  // Load more when user scrolls near bottom
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return
+
+    try {
+      setLoadingMore(true)
+      const nextPage = page + 1
+      const response = await fetch(`/api/discover?page=${nextPage}&limit=20`)
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch more lists')
+      }
+
+      const data = await response.json()
+      const newLists = data.data || []
+
+      // Filter out any duplicates based on list ID
+      setLists(prev => {
+        const existingIds = new Set(prev.map(list => list.id))
+        const uniqueNewLists = newLists.filter((list: PublicList) => !existingIds.has(list.id))
+        return [...prev, ...uniqueNewLists]
+      })
+
+      setHasMore(data.pagination?.hasMore ?? false)
+      setPage(nextPage)
+    } catch (err) {
+      console.error('Error fetching more lists:', err)
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [page, hasMore, loadingMore])
+
+  // Trigger load more when scroll sentinel is in view
+  useEffect(() => {
+    if (inView && hasMore && !loading) {
+      loadMore()
+    }
+  }, [inView, hasMore, loading, loadMore])
 
   const getDisplayName = (list: PublicList) => {
     if (!list.users) return 'Unknown User'
@@ -85,6 +141,19 @@ export default function DiscoverPage() {
     return `${Math.floor(diffInSeconds / 31536000)}y`
   }
 
+  const sortedLists = [...lists].sort((a, b) => {
+    switch (sortBy) {
+      case 'recent':
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      case 'links':
+        return (b.links?.length || 0) - (a.links?.length || 0)
+      case 'stars':
+        return (b.save_count || 0) - (a.save_count || 0)
+      default:
+        return 0
+    }
+  })
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -101,6 +170,51 @@ export default function DiscoverPage() {
           <p className="text-muted-foreground">Explore curated lists from the community</p>
         </div>
 
+        {/* Stats and Sort Controls */}
+        {lists.length > 0 && (
+          <div className="mb-6 flex items-center justify-between gap-4">
+            {/* Left side - Total lists */}
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <List className="w-4 h-4" />
+              <span className="text-sm sm:text-base">{totalCount} {totalCount === 1 ? 'list' : 'lists'}</span>
+            </div>
+
+            {/* Right side - Sort controls */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setSortBy('recent')}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  sortBy === 'recent'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-accent'
+                }`}
+              >
+                Recent
+              </button>
+              <button
+                onClick={() => setSortBy('links')}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  sortBy === 'links'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-accent'
+                }`}
+              >
+                Links
+              </button>
+              <button
+                onClick={() => setSortBy('stars')}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  sortBy === 'stars'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-accent'
+                }`}
+              >
+                Stars
+              </button>
+            </div>
+          </div>
+        )}
+
         {error ? (
           <div className="text-center py-16">
             <p className="text-muted-foreground">{error}</p>
@@ -111,7 +225,7 @@ export default function DiscoverPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {lists.map((list) => {
+            {sortedLists.map((list) => {
               const username = list.users?.username || 'unknown'
               const listSlug = list.public_id || list.id
               const displayName = getDisplayName(list)
@@ -122,10 +236,10 @@ export default function DiscoverPage() {
                 <Link
                   key={list.id}
                   href={`/${username}/${listSlug}`}
-                  className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-md group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="flex items-center justify-between px-6 py-4 bg-background border border-border hover:bg-accent/50 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-md group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   {/* Left side - emoji and title */}
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div className="text-2xl flex-shrink-0">
                       {list.emoji || '📋'}
                     </div>
@@ -170,6 +284,25 @@ export default function DiscoverPage() {
                 </Link>
               )
             })}
+          </div>
+        )}
+
+        {/* Loading more indicator */}
+        {!loading && hasMore && (
+          <div ref={loadMoreRef} className="py-8 flex justify-center">
+            {loadingMore && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span className="text-sm">Loading more lists...</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* End of results message */}
+        {!loading && !hasMore && lists.length > 0 && (
+          <div className="py-8 text-center">
+            <p className="text-sm text-muted-foreground">You've reached the end of the list</p>
           </div>
         )}
       </div>

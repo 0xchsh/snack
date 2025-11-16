@@ -53,14 +53,14 @@ export default async function Image({ params }: { params: Promise<{ username: st
     (
       <div
         style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'white',
           width: '100%',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
           padding: 60,
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          color: 'white',
+          color: 'black',
         }}
       >
         <div style={{ display: 'flex', fontSize: 64 }}>
@@ -68,18 +68,18 @@ export default async function Image({ params }: { params: Promise<{ username: st
         </div>
 
         <div style={{ display: 'flex', flex: 1, flexDirection: 'column', justifyContent: 'center', gap: 20 }}>
-          <div style={{ display: 'flex', fontSize: 72, fontWeight: 'bold', lineHeight: 1.1 }}>
+          <div style={{ display: 'flex', fontSize: 96, fontWeight: 'bold', lineHeight: 1.1, color: 'black' }}>
             {title.length > 50 ? title.substring(0, 50) + '...' : title}
           </div>
 
           {description && (
-            <div style={{ display: 'flex', fontSize: 32, opacity: 0.9, lineHeight: 1.4 }}>
+            <div style={{ display: 'flex', fontSize: 32, color: '#666666', lineHeight: 1.4 }}>
               {description.length > 100 ? description.substring(0, 100) + '...' : description}
             </div>
           )}
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: 0.9 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#666666' }}>
           <div style={{ display: 'flex', fontSize: 32, fontWeight: 500 }}>
             @{displayUsername}
           </div>

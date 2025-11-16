@@ -50,27 +50,54 @@ export default function UserListPage() {
       return
     }
 
+    const queryString = searchParams?.toString() ?? ''
+
     const fetchList = async () => {
       try {
         setLoading(true)
         setError(null)
         
+        const encodedUsername = encodeURIComponent(username)
+        const encodedListId = encodeURIComponent(listId)
+
         // Use new API endpoint that resolves by username and listId
-        const response = await fetch(`/api/users/${encodeURIComponent(username)}/lists/${encodeURIComponent(listId)}`)
-        const data = await response.json()
+        const response = await fetch(`/api/users/${encodedUsername}/lists/${encodedListId}`)
         
-        if (!response.ok) {
-          if (response.status === 404) {
-            setError('List not found')
-          } else if (response.status === 403) {
-            setError('This list is private')
-          } else {
-            setError(data.error || 'Failed to load list')
-          }
+        if (response.ok) {
+          const data = await response.json()
+          setCurrentList(data.data)
           return
         }
-        
-        setCurrentList(data.data)
+
+        if (response.status === 404) {
+          // Fall back to the generic list endpoint which can resolve by id or public_id
+          const fallbackResponse = await fetch(`/api/lists/${encodedListId}`, { cache: 'no-store' })
+          
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json()
+            const fallbackList = fallbackData.data
+            
+            setCurrentList(fallbackList)
+            setError(null)
+
+            // Redirect to the canonical username route if this slug belongs to someone else
+            if (fallbackList?.user?.username && fallbackList.user.username !== username) {
+              router.replace(`/${fallbackList.user.username}/${listId}${queryString ? `?${queryString}` : ''}`)
+            }
+            return
+          }
+
+          setError('List not found')
+          return
+        }
+
+        if (response.status === 403) {
+          setError('This list is private')
+          return
+        }
+
+        const data = await response.json().catch(() => ({}))
+        setError(data.error || 'Failed to load list')
       } catch (err) {
         console.error('Error fetching list:', err)
         setError('Failed to load list')
@@ -80,7 +107,7 @@ export default function UserListPage() {
     }
     
     fetchList()
-  }, [username, listId])
+  }, [username, listId, router, searchParams])
   
   // Determine if user can edit this list
   const canEdit = isAuthenticated && currentUserId === currentList?.user_id

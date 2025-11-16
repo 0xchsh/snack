@@ -4,12 +4,11 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { Menu, StretchHorizontal, GripVertical, Trash2, RefreshCw, MoreHorizontal, Clipboard, FileText, Eye, Link2 } from 'lucide-react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ListWithLinks, Link, Emoji3D, LinkCreatePayload } from '@/types'
+import { ListWithLinks, Link, LinkCreatePayload } from '@/types'
 import { EmojiPicker } from './emoji-picker'
 import { validateAndNormalizeUrl, getHostname } from '@/lib/url-utils'
 import { Favicon } from './favicon'
 import { fetchOGDataClient } from '@/lib/og-client'
-import { getDefaultEmoji3D } from '@/lib/emoji'
 import { Button } from '@/components/ui'
 
 interface ListEditorProps {
@@ -62,13 +61,7 @@ export function ListEditor({
   const [title, setTitle] = useState(list.title || '') // Ensure title is never undefined
   const [linkInput, setLinkInput] = useState('')
   const [linkError, setLinkError] = useState('')
-  const [currentEmoji3D, setCurrentEmoji3D] = useState<Emoji3D>(
-    list.emoji_3d || {
-      unicode: list.emoji || '🥨',
-      url: getDefaultEmoji3D().url,
-      name: getDefaultEmoji3D().name
-    }
-  )
+  const [currentEmoji, setCurrentEmoji] = useState<string>(list.emoji || '🥨')
   const [isRefreshingOG, setIsRefreshingOG] = useState(false)
   const [showMoreMenu, setShowMoreMenu] = useState(false)
   const [loadingLinks, setLoadingLinks] = useState<string[]>([])
@@ -183,17 +176,10 @@ export function ListEditor({
 
   // Update emoji when list changes
   useEffect(() => {
-    if (list.emoji_3d) {
-      setCurrentEmoji3D(list.emoji_3d)
-    } else if (list.emoji) {
-      // Fallback to emoji if emoji_3d is not available
-      setCurrentEmoji3D({
-        unicode: list.emoji,
-        url: getDefaultEmoji3D().url,
-        name: getDefaultEmoji3D().name
-      })
+    if (list.emoji) {
+      setCurrentEmoji(list.emoji)
     }
-  }, [list.emoji_3d, list.emoji])
+  }, [list.emoji])
 
   // Adjust textarea height when editing starts
   useEffect(() => {
@@ -756,7 +742,7 @@ export function ListEditor({
           variant="outline"
           className="flex-shrink-0 w-[62px] h-[62px] p-0 rounded-md text-3xl bg-background hover:border-muted-foreground"
         >
-          <span>{currentEmoji3D.unicode}</span>
+          <span>{currentEmoji}</span>
         </Button>
 
         {isEditingTitle ? (
@@ -946,12 +932,11 @@ export function ListEditor({
       <EmojiPicker
         isOpen={showEmojiPicker}
         triggerRef={emojiButtonRef}
-        currentEmoji={currentEmoji3D}
-        onSelectEmoji={(emoji3D) => {
-          setCurrentEmoji3D(emoji3D)
-          onUpdateList?.({ 
-            emoji: emoji3D.unicode,
-            emoji_3d: emoji3D 
+        currentEmoji={currentEmoji}
+        onSelectEmoji={(emoji) => {
+          setCurrentEmoji(emoji)
+          onUpdateList?.({
+            emoji: emoji
           })
           setShowEmojiPicker(false)
         }}

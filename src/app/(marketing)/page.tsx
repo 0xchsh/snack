@@ -84,13 +84,13 @@ export default function HomePage() {
               <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-background text-muted-foreground">Or</span>
+              <span className="px-2 bg-background text-muted-foreground">or</span>
             </div>
           </div>
 
           <Button asChild size="lg" variant="outline" className="w-full">
             <Link href="/auth/sign-in">
-              Sign In with Email
+              Sign in with email
             </Link>
           </Button>
         </div>

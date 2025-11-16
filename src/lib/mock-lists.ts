@@ -1,5 +1,5 @@
 import { ListWithLinks, CreateListForm, User, Link } from '@/types'
-import { getRandomEmoji, getDefaultEmoji3D } from '@/lib/emoji'
+import { getRandomEmoji } from '@/lib/emoji'
 import { fetchOGDataClient } from './og-client'
 
 const LISTS_STORAGE_KEY = 'snack-mock-lists'
@@ -55,15 +55,13 @@ export class MockListDatabase {
 
   // Create a new empty list for a user
   createEmptyList(user: User): ListWithLinks {
-    const defaultEmoji = getDefaultEmoji3D()
     const newList: ListWithLinks = {
       id: this.generateListId(),
       public_id: this.generateListId(),
       user_id: user.id,
       title: 'New list',
       description: null,
-      emoji: defaultEmoji.unicode,
-      emoji_3d: defaultEmoji,
+      emoji: '🥨',
       view_mode: 'row',
       is_public: true,
       save_count: 0,
@@ -96,7 +94,6 @@ export class MockListDatabase {
       title: formData.title,
       description: null,
       emoji: formData.emoji || getRandomEmoji(),
-      emoji_3d: formData.emoji_3d ?? null,
       view_mode: 'row',
       is_public: formData.is_public,
       save_count: 0,
@@ -140,7 +137,6 @@ export class MockListDatabase {
       title: updates.title ?? base.title,
       description: updates.description ?? base.description,
       emoji: updates.emoji ?? base.emoji,
-      emoji_3d: updates.emoji_3d ?? base.emoji_3d,
       view_mode: updates.view_mode ?? base.view_mode,
       is_public: updates.is_public ?? base.is_public,
       save_count: updates.save_count ?? base.save_count,

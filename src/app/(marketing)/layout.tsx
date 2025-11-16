@@ -1,8 +1,12 @@
+'use client'
+
 import Link from 'next/link'
+import { User } from 'lucide-react'
 
 import { TopBar, BrandMark } from '@/components/primitives'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui'
+import { useAuth } from '@/hooks/useAuth'
 
 /**
  * Marketing Layout
@@ -15,6 +19,8 @@ export default function MarketingLayout({
 }: {
   children: React.ReactNode
 }) {
+  const { user } = useAuth()
+
   return (
     <>
       {/* Skip to content link for accessibility */}
@@ -31,9 +37,24 @@ export default function MarketingLayout({
         </TopBar.Left>
 
         <TopBar.Right>
-          <Button asChild>
-            <Link href="http://localhost:3001/auth/sign-in">Get Started</Link>
-          </Button>
+          {user ? (
+            <>
+              <Button asChild variant="muted">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              {user.username && (
+                <Button asChild variant="muted" size="icon">
+                  <Link href={`/${user.username}`}>
+                    <User className="w-5 h-5" />
+                  </Link>
+                </Button>
+              )}
+            </>
+          ) : (
+            <Button asChild>
+              <Link href="http://localhost:3001/auth/sign-in">Get Started</Link>
+            </Button>
+          )}
           <ThemeToggle />
         </TopBar.Right>
       </TopBar>

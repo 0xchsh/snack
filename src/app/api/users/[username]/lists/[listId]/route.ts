@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
 import { validateUsername } from '@/lib/username-utils'
-import { getEmoji3D, getDefaultEmoji3D } from '@/lib/emoji'
 
 // Disable caching for this route
 export const dynamic = 'force-dynamic'
@@ -49,7 +48,6 @@ export async function GET(
       title,
       description,
       emoji,
-      emoji_3d,
       view_mode,
       is_public,
       save_count,
@@ -101,33 +99,12 @@ export async function GET(
       return NextResponse.json({ error: 'This list is private' }, { status: 403 })
     }
 
-    // Process emoji_3d data
-    let emoji3d = null
-    if (list.emoji_3d) {
-      try {
-        emoji3d = typeof list.emoji_3d === 'string' ? JSON.parse(list.emoji_3d) : list.emoji_3d
-      } catch (e) {
-        console.error('Failed to parse emoji_3d:', e)
-      }
-    }
-
-    // If no valid emoji_3d, try to get 3D version of the emoji
-    if (!emoji3d && list.emoji) {
-      emoji3d = getEmoji3D(list.emoji)
-    }
-
-    // If still no emoji_3d, use default
-    if (!emoji3d) {
-      emoji3d = getDefaultEmoji3D()
-    }
-
     // Sort links by position
-    const sortedLinks = list.links ? 
+    const sortedLinks = list.links ?
       [...list.links].sort((a, b) => a.position - b.position) : []
 
     const processedList = {
       ...list,
-      emoji_3d: emoji3d,
       links: sortedLinks,
       user: {
         username: user.username
