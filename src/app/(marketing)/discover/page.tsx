@@ -166,13 +166,13 @@ export default function DiscoverPage() {
     <div className="min-h-screen bg-background">
       <div className="mx-auto py-6 md:py-12 max-w-[800px] px-4 md:px-0">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Discover Lists</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Discover Lists</h1>
           <p className="text-muted-foreground">Explore curated lists from the community</p>
         </div>
 
         {/* Stats and Sort Controls */}
         {lists.length > 0 && (
-          <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             {/* Left side - Total lists */}
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <List className="w-4 h-4" />
@@ -180,10 +180,10 @@ export default function DiscoverPage() {
             </div>
 
             {/* Right side - Sort controls */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               <button
                 onClick={() => setSortBy('recent')}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   sortBy === 'recent'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-accent'
@@ -193,7 +193,7 @@ export default function DiscoverPage() {
               </button>
               <button
                 onClick={() => setSortBy('links')}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   sortBy === 'links'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-accent'
@@ -203,7 +203,7 @@ export default function DiscoverPage() {
               </button>
               <button
                 onClick={() => setSortBy('stars')}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   sortBy === 'stars'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-accent'
@@ -236,7 +236,7 @@ export default function DiscoverPage() {
                 <Link
                   key={list.id}
                   href={`/${username}/${listSlug}`}
-                  className="flex items-center justify-between px-6 py-4 bg-background border border-border hover:bg-accent/50 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-md group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 bg-background border border-border hover:bg-accent/50 transition-transform transform hover:scale-[0.99] active:scale-[0.97] rounded-md group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   {/* Left side - emoji and title */}
                   <div className="flex items-center gap-4 flex-1 min-w-0">

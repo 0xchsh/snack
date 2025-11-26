@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LoadingState } from '@/components/loading-state'
+import { Button } from '@/components/ui'
 
 interface PublicProfile {
   user: {
@@ -171,6 +172,14 @@ export default function UsernamePage() {
             </Link>
 
             <div className="flex items-center gap-3">
+              <Button
+                onClick={handleCopyProfile}
+                variant="muted"
+                size="icon"
+                aria-label="Copy profile link"
+              >
+                <Copy className="w-5 h-5" />
+              </Button>
               <ThemeToggle />
             </div>
           </div>
@@ -198,18 +207,9 @@ export default function UsernamePage() {
 
           {/* Username and Join Date */}
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <div className="flex items-start text-xl font-normal leading-[1.5]">
-                <span className="text-neutral-400">@</span>
-                <span className="text-foreground">{profile.user.username}</span>
-              </div>
-              <button
-                onClick={handleCopyProfile}
-                className="p-1.5 hover:bg-accent rounded-md transition-colors flex items-center justify-center"
-                aria-label="Copy profile link"
-              >
-                <Copy className="w-4 h-4 text-muted-foreground hover:text-foreground" />
-              </button>
+            <div className="flex items-start text-xl font-normal leading-[1.5]">
+              <span className="text-neutral-400">@</span>
+              <span className="text-foreground">{profile.user.username}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <p className="text-base font-normal text-neutral-400">

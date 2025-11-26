@@ -28,8 +28,8 @@ export function AppContainer({
   return (
     <div className={cn(
       'container mx-auto',
-      'px-nav-x',
-      'sm:px-nav-x-mobile',
+      'px-nav-x-mobile',
+      'sm:px-nav-x',
       maxWidthClass,
       className
     )}>

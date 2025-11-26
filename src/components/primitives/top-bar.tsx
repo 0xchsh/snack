@@ -19,7 +19,7 @@ export function TopBar({ children, className, variant = 'app' }: TopBarProps) {
     <header className="bg-background">
       <div className={cn(
         'mx-auto w-full',
-        'px-6 py-6',
+        'px-4 py-6 sm:px-6',
         maxWidth,
         className
       )}>

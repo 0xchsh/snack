@@ -139,7 +139,7 @@ export function ListPricingSettings({
             </div>
             {error && <p className="text-sm text-destructive mt-1">{error}</p>}
             <p className="text-xs text-muted-foreground mt-2">
-              Minimum: $0.99 • Maximum: $999.00 • Platform fee: 20%
+              Minimum: $0.99 • Maximum: $999.00
             </p>
           </div>
 
@@ -148,7 +148,7 @@ export function ListPricingSettings({
           </Button>
 
           <div className="bg-accent/50 rounded-md p-3 text-sm">
-            <p className="font-medium mb-1">What you'll earn:</p>
+            <p className="font-medium mb-1">You'll earn:</p>
             <p className="text-muted-foreground">
               {priceInput && parseCurrencyToCents(priceInput) ? (
                 <>
@@ -156,7 +156,7 @@ export function ListPricingSettings({
                     Math.round(parseCurrencyToCents(priceInput)! * 0.8),
                     currency
                   )}{' '}
-                  per purchase (80% after platform fee)
+                  per purchase
                 </>
               ) : (
                 'Enter a price to see earnings'

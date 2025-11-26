@@ -14,7 +14,7 @@ import { useAuth } from '@/hooks/useAuth'
  * Used for public-facing pages: home, auth pages
  * Features larger branding and auth CTAs
  */
-export default function MarketingLayout({
+function MarketingLayoutContent({
   children,
 }: {
   children: React.ReactNode
@@ -52,7 +52,7 @@ export default function MarketingLayout({
             </>
           ) : (
             <Button asChild>
-              <Link href="http://localhost:3001/auth/sign-in">Get Started</Link>
+              <Link href="/auth/sign-in">Get Started</Link>
             </Button>
           )}
           <ThemeToggle />
@@ -63,5 +63,15 @@ export default function MarketingLayout({
         {children}
       </main>
     </>
+  )
+}
+
+export default function MarketingLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <MarketingLayoutContent>{children}</MarketingLayoutContent>
   )
 }

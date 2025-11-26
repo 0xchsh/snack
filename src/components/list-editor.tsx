@@ -734,13 +734,13 @@ export function ListEditor({
       </AnimatePresence>
 
       {/* Emoji + Title */}
-      <div className="flex items-start gap-4">
+      <div className="flex items-center gap-4">
         <Button
           ref={emojiButtonRef}
           type="button"
           onClick={() => setShowEmojiPicker(true)}
           variant="outline"
-          className="flex-shrink-0 w-[62px] h-[62px] p-0 rounded-md text-3xl bg-background hover:border-muted-foreground"
+          className="flex-shrink-0 !w-[62px] !h-[62px] p-0 rounded-md text-3xl bg-background hover:border-muted-foreground"
         >
           <span>{currentEmoji}</span>
         </Button>
@@ -758,7 +758,7 @@ export function ListEditor({
               }
             }}
             placeholder="Untitled List"
-            className="flex-1 min-w-0 w-full text-3xl font-normal text-foreground bg-background border border-border rounded-md px-4 py-3 outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder:text-muted-foreground break-all"
+            className="flex-1 min-w-0 w-full !h-[62px] text-3xl font-normal text-foreground bg-background border border-border rounded-md px-4 outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder:text-muted-foreground break-all"
             maxLength={60}
             autoFocus
           />
@@ -767,7 +767,7 @@ export function ListEditor({
             type="button"
             onClick={() => setIsEditingTitle(true)}
             variant="outline"
-            className="flex-1 min-w-0 justify-start text-left text-3xl font-normal text-foreground bg-background border-border px-4 py-3 hover:border-muted-foreground break-all hyphens-auto"
+            className="flex-1 min-w-0 !h-[62px] justify-start text-left text-3xl font-normal text-foreground bg-background border-border px-4 hover:border-muted-foreground break-all hyphens-auto"
           >
             {list.title || <span className="text-muted-foreground">Untitled List</span>}
           </Button>

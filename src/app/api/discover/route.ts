@@ -2,9 +2,8 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Disable caching for this route
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+// Cache for 60 seconds (public content changes infrequently)
+export const revalidate = 60
 
 // GET /api/discover - Get public lists with pagination
 export async function GET(request: NextRequest) {

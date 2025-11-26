@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { DollarSign, TrendingUp, ShoppingCart, CreditCard, Loader2, AlertCircle } from 'lucide-react'
-import { Header } from '@/components/header'
+import { DollarSign, ShoppingCart, CreditCard, Loader2, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { StripeConnectButton } from '@/components/stripe-connect-button'
 import { formatCurrency } from '@/lib/pricing'
@@ -97,20 +96,6 @@ export default function EarningsDashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header
-        logoHref="/dashboard"
-        username={user?.username || ''}
-        buttons={[
-          {
-            type: 'custom',
-            label: 'Dashboard',
-            onClick: () => router.push('/dashboard'),
-            className:
-              'px-4 py-2 text-base font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors',
-          },
-        ]}
-      />
-
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Earnings</h1>
@@ -145,7 +130,7 @@ export default function EarningsDashboardPage() {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-muted-foreground">Total Earnings</h3>
@@ -162,15 +147,6 @@ export default function EarningsDashboardPage() {
               <ShoppingCart className="w-5 h-5 text-muted-foreground" />
             </div>
             <p className="text-3xl font-bold">{earningsData?.total_purchases || 0}</p>
-          </div>
-
-          <div className="bg-card border border-border rounded-lg p-6">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-muted-foreground">Platform Fee</h3>
-              <TrendingUp className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <p className="text-3xl font-bold">20%</p>
-            <p className="text-xs text-muted-foreground mt-1">You keep 80% of each sale</p>
           </div>
         </div>
 
@@ -219,7 +195,6 @@ export default function EarningsDashboardPage() {
               <li>• Payments are automatically transferred to your Stripe account</li>
               <li>• Stripe handles payouts to your bank account on a rolling basis</li>
               <li>• You can manage payout settings in your Stripe Dashboard</li>
-              <li>• Platform fee (20%) is automatically deducted from each sale</li>
             </ul>
           </div>
         )}

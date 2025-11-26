@@ -4,18 +4,32 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, Check, Copy, ExternalLink, Eye, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { TopBar, BrandMark, PageActions, AppContainer } from '@/components/primitives'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { ListEditor } from '@/components/list-editor'
-import { PublicListView } from '@/components/public-list-view'
-import { CreateList } from '@/components/create-list'
 import { ListWithLinks, CreateListForm, LinkCreatePayload } from '@/types'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
 import { LoadingState } from '@/components/loading-state'
+
+// Lazy load heavy components for better performance
+const ListEditor = dynamic(() => import('@/components/list-editor').then(mod => ({ default: mod.ListEditor })), {
+  loading: () => <LoadingState message="Loading editor..." />,
+  ssr: false
+})
+
+const PublicListView = dynamic(() => import('@/components/public-list-view').then(mod => ({ default: mod.PublicListView })), {
+  loading: () => <LoadingState message="Loading list..." />,
+  ssr: false
+})
+
+const CreateList = dynamic(() => import('@/components/create-list').then(mod => ({ default: mod.CreateList })), {
+  loading: () => <LoadingState message="Loading form..." />,
+  ssr: false
+})
 
 export default function UserListPage() {
   const params = useParams()
@@ -36,7 +50,10 @@ export default function UserListPage() {
   
   const isAuthenticated = !!user
   const currentUserId = user?.id || null
-  const forceEditView = searchParams.get('view') === 'edit'
+  const forceEditView = searchParams?.get('view') === 'edit'
+
+  // Get query string once to avoid recreating on every render
+  const queryString = searchParams?.toString() ?? ''
 
   // Fetch list data from API using username and listId
   useEffect(() => {
@@ -50,19 +67,17 @@ export default function UserListPage() {
       return
     }
 
-    const queryString = searchParams?.toString() ?? ''
-
     const fetchList = async () => {
       try {
         setLoading(true)
         setError(null)
-        
+
         const encodedUsername = encodeURIComponent(username)
         const encodedListId = encodeURIComponent(listId)
 
         // Use new API endpoint that resolves by username and listId
         const response = await fetch(`/api/users/${encodedUsername}/lists/${encodedListId}`)
-        
+
         if (response.ok) {
           const data = await response.json()
           setCurrentList(data.data)
@@ -72,11 +87,11 @@ export default function UserListPage() {
         if (response.status === 404) {
           // Fall back to the generic list endpoint which can resolve by id or public_id
           const fallbackResponse = await fetch(`/api/lists/${encodedListId}`, { cache: 'no-store' })
-          
+
           if (fallbackResponse.ok) {
             const fallbackData = await fallbackResponse.json()
             const fallbackList = fallbackData.data
-            
+
             setCurrentList(fallbackList)
             setError(null)
 
@@ -105,9 +120,9 @@ export default function UserListPage() {
         setLoading(false)
       }
     }
-    
+
     fetchList()
-  }, [username, listId, router, searchParams])
+  }, [username, listId, router, queryString])
   
   // Determine if user can edit this list
   const canEdit = isAuthenticated && currentUserId === currentList?.user_id
@@ -348,6 +363,7 @@ export default function UserListPage() {
             variant="muted"
             size="icon"
             aria-label="Delete list"
+            className="bg-red-500/10 text-red-600 hover:bg-red-500/20 hover:text-red-700 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20 dark:hover:text-red-300"
           >
             <Trash2 className="w-5 h-5" />
           </Button>
@@ -358,6 +374,7 @@ export default function UserListPage() {
             variant="muted"
             size="icon"
             aria-label="Preview public view"
+            className="bg-green-500/10 text-green-600 hover:bg-green-500/20 hover:text-green-700 dark:bg-green-500/10 dark:text-green-400 dark:hover:bg-green-500/20 dark:hover:text-green-300"
           >
             <Check className="w-5 h-5" />
           </Button>
@@ -407,7 +424,7 @@ export default function UserListPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-background border border-border rounded-lg p-6 max-w-md w-full shadow-lg"
+            className="bg-background border border-border rounded-lg p-4 sm:p-6 max-w-md w-full shadow-lg"
           >
             <h3 className="text-xl font-semibold mb-2">Delete List?</h3>
             <p className="text-muted-foreground mb-6">

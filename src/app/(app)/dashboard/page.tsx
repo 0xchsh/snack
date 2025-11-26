@@ -190,13 +190,13 @@ function DashboardContent() {
                       href={`/${user.username}/${list.public_id || list.id}`}
                       className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-colors rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
-                      <div className="flex items-center gap-3">
-                        <span className="text-base">{list.emoji || '📋'}</span>
-                        <span className="text-base text-foreground group-hover:text-primary transition-colors">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <span className="text-base flex-shrink-0">{list.emoji || '📋'}</span>
+                        <span className="text-base text-foreground group-hover:text-primary transition-colors truncate">
                           {list.title || 'Untitled List'}
                         </span>
                       </div>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground flex-shrink-0 ml-3">
                         {list.links?.length || 0} links
                       </span>
                     </Link>
@@ -246,18 +246,18 @@ function DashboardContent() {
                         href={`/${listOwner}/${list.public_id || list.id}`}
                         className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-colors rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <span className="text-base">{list.emoji || '📋'}</span>
-                          <div className="min-w-0">
-                            <span className="text-base text-foreground group-hover:text-primary transition-colors block">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <span className="text-base flex-shrink-0">{list.emoji || '📋'}</span>
+                          <div className="min-w-0 flex-1">
+                            <span className="text-base text-foreground group-hover:text-primary transition-colors block truncate">
                               {list.title || 'Untitled List'}
                             </span>
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-sm text-muted-foreground truncate block">
                               by @{listOwner}
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground flex-shrink-0">
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground flex-shrink-0 ml-3">
                           <Star className="h-4 w-4" />
                           <span>{list.save_count || 0}</span>
                         </div>
@@ -279,7 +279,7 @@ function DashboardContent() {
             </div>
 
             {/* Summary Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               <div className="text-center border border-border rounded-md py-4">
                 <div className="text-2xl font-bold text-foreground">{formatCount(lists.length)}</div>
                 <div className="text-sm text-muted-foreground">lists</div>

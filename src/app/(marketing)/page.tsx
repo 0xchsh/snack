@@ -57,7 +57,7 @@ export default function HomePage() {
       <div className="flex items-center justify-center px-4 py-12">
         <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-foreground mb-4">Welcome to Snack</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">Welcome to Snack</h1>
           <p className="text-muted-foreground mb-8">
             Create, organize, and share curated collections of links
           </p>

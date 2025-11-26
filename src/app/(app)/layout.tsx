@@ -9,6 +9,7 @@ import { TopBar, BrandMark, UserMenu } from '@/components/primitives'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LoadingState } from '@/components/loading-state'
 import { useAuth } from '@/hooks/useAuth'
+import { ListsProvider } from '@/hooks/useLists'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 /**
@@ -49,11 +50,15 @@ function AppLayoutContent({
 
   // Don't render anything if not authenticated
   if (!user) {
-    return null
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <LoadingState message="Redirecting..." />
+      </div>
+    )
   }
 
   return (
-    <>
+    <div>
       {/* Skip to content link for accessibility */}
       <a
         href="#main-content"
@@ -102,7 +107,7 @@ function AppLayoutContent({
       <main id="main-content">
         {children}
       </main>
-    </>
+    </div>
   )
 }
 
@@ -112,12 +117,14 @@ export default function AppLayout({
   children: React.ReactNode
 }) {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Loading..." />
-      </div>
-    }>
-      <AppLayoutContent>{children}</AppLayoutContent>
-    </Suspense>
+    <ListsProvider>
+      <Suspense fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <LoadingState message="Loading..." />
+        </div>
+      }>
+        <AppLayoutContent>{children}</AppLayoutContent>
+      </Suspense>
+    </ListsProvider>
   )
 }

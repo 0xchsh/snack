@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { AuthProvider } from '@/hooks/useAuth'
-import { ListsProvider } from '@/hooks/useLists'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ErrorBoundary } from '@/components/error-boundary'
 import { ToastProvider } from '@/components/toast'
+import { AuthProvider } from '@/hooks/useAuth'
 
 export const metadata: Metadata = {
   title: 'Snack - Curated Link Collections',
@@ -28,9 +27,7 @@ export default function RootLayout({
           <ErrorBoundary>
             <ToastProvider>
               <AuthProvider>
-                <ListsProvider>
-                  {children}
-                </ListsProvider>
+                {children}
               </AuthProvider>
             </ToastProvider>
           </ErrorBoundary>

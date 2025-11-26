@@ -49,7 +49,7 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
     <>
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40" onClick={onClose}>
         <div
-          className="bg-background rounded-2xl p-8 max-w-md w-full mx-4"
+          className="bg-background rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
