@@ -758,7 +758,7 @@ export function ListEditor({
               }
             }}
             placeholder="Untitled List"
-            className="flex-1 min-w-0 w-full !h-[62px] text-3xl font-normal text-foreground bg-background border border-border rounded-md px-4 outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder:text-muted-foreground break-all"
+            className="flex-1 min-w-0 w-full !h-[62px] text-3xl font-normal text-foreground bg-background border border-border rounded-md px-4 outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder:text-muted-foreground truncate"
             maxLength={60}
             autoFocus
           />
@@ -767,7 +767,7 @@ export function ListEditor({
             type="button"
             onClick={() => setIsEditingTitle(true)}
             variant="outline"
-            className="flex-1 min-w-0 !h-[62px] justify-start text-left text-3xl font-normal text-foreground bg-background border-border px-4 hover:border-muted-foreground break-all hyphens-auto"
+            className="flex-1 min-w-0 !h-[62px] justify-start text-left text-3xl font-normal text-foreground bg-background border-border px-4 hover:border-muted-foreground truncate"
           >
             {list.title || <span className="text-muted-foreground">Untitled List</span>}
           </Button>

@@ -413,13 +413,13 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
 
           {/* Title */}
           <div className="flex flex-col gap-4">
-            <h1 className="text-3xl font-medium text-foreground break-words leading-[1.5]">
+            <h1 className="text-3xl font-medium text-foreground break-words leading-tight">
               {list.title || 'Untitled List'}
             </h1>
           </div>
 
           {/* Stats */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex flex-row items-center justify-between gap-3">
             {/* Left: Creator */}
             <div>
               {list.user?.username && (
