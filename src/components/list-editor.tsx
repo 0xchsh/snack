@@ -447,6 +447,43 @@ export function ListEditor({
     setShowMoreMenu(false)
 
     try {
+      // Try modern Clipboard API with multiple format support
+      if ('read' in navigator.clipboard) {
+        try {
+          const items = await navigator.clipboard.read()
+          for (const item of items) {
+            // Try text/uri-list first
+            if (item.types.includes('text/uri-list')) {
+              const blob = await item.getType('text/uri-list')
+              const text = await blob.text()
+              await processPastedText(text)
+              return
+            }
+            // Fallback to text/html
+            if (item.types.includes('text/html')) {
+              const blob = await item.getType('text/html')
+              const html = await blob.text()
+              // Extract URLs from HTML
+              const urlMatch = html.match(/href=["']([^"']+)["']/i)
+              if (urlMatch && urlMatch[1]) {
+                await processPastedText(urlMatch[1])
+                return
+              }
+            }
+            // Fallback to text/plain
+            if (item.types.includes('text/plain')) {
+              const blob = await item.getType('text/plain')
+              const text = await blob.text()
+              await processPastedText(text)
+              return
+            }
+          }
+        } catch (readError) {
+          // Fall through to older API
+        }
+      }
+
+      // Fallback to older API
       const text = await navigator.clipboard.readText()
       await processPastedText(text)
     } catch (error) {
@@ -457,11 +494,37 @@ export function ListEditor({
   // Handle mobile paste input
   const handleMobilePaste = async (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault()
-    const text = e.clipboardData.getData('text')
 
     // Clear the input immediately
     if (mobilePasteInputRef.current) {
       mobilePasteInputRef.current.value = ''
+    }
+
+    // Try multiple clipboard formats for iOS Share Sheet compatibility
+    let text = ''
+
+    // Try text/uri-list first (standard format for URLs)
+    text = e.clipboardData.getData('text/uri-list')
+
+    // Fallback to text/html and extract URLs
+    if (!text) {
+      text = e.clipboardData.getData('text/html')
+      if (text && text.includes('href=')) {
+        const urlMatch = text.match(/href=["']([^"']+)["']/i)
+        if (urlMatch && urlMatch[1]) {
+          text = urlMatch[1]
+        }
+      }
+    }
+
+    // Fallback to plain text
+    if (!text) {
+      text = e.clipboardData.getData('text')
+    }
+
+    // Final fallback to text/plain
+    if (!text) {
+      text = e.clipboardData.getData('text/plain')
     }
 
     await processPastedText(text)
@@ -654,8 +717,12 @@ export function ListEditor({
       // Prevent default paste behavior
       e.preventDefault()
 
-      // Get clipboard text
-      const clipboardText = e.clipboardData?.getData('text')
+      // Get clipboard text - try multiple formats for iOS compatibility
+      let clipboardText = e.clipboardData?.getData('text/uri-list')
+      if (!clipboardText) clipboardText = e.clipboardData?.getData('text/html')
+      if (!clipboardText) clipboardText = e.clipboardData?.getData('text')
+      if (!clipboardText) clipboardText = e.clipboardData?.getData('text/plain')
+
       console.log('Clipboard text:', clipboardText)
       if (!clipboardText) return
 
@@ -838,7 +905,9 @@ export function ListEditor({
         {isMobile && (
           <input
             ref={mobilePasteInputRef}
-            type="text"
+            type="url"
+            inputMode="url"
+            autoComplete="url"
             placeholder="Paste links here"
             onPaste={handleMobilePaste}
             className="flex-1 px-4 py-2 bg-background text-foreground border border-border rounded-md text-base placeholder:text-muted-foreground focus:outline-none focus:border-muted-foreground transition-colors min-w-0"
