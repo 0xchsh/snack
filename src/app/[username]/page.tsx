@@ -186,7 +186,7 @@ export default function UsernamePage() {
         </div>
       </div>
 
-      <div className="mx-auto py-12 max-w-[560px]">
+      <div className="mx-auto py-12 max-w-[560px] px-4 md:px-0">
         <div className="flex flex-col gap-6">
           {/* Profile Picture - 48px */}
           <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden">
@@ -219,7 +219,7 @@ export default function UsernamePage() {
           </div>
 
           {/* Stats */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex flex-row items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <List className="w-4 h-4" />
               <span className="text-sm sm:text-base">{profile.stats.total_public_lists} lists</span>

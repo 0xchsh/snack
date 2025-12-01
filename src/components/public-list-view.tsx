@@ -102,26 +102,25 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
   const profilePictureUrl =
     (user && list.user_id === user.id ? user.profile_picture_url : list.user?.profile_picture_url) || null
 
-  const handleLinkClick = async (linkId: string, url: string) => {
+  const handleLinkClick = (linkId: string, url: string) => {
     setClickedLinks(prev => new Set(prev).add(linkId))
-    
-    // Track the click
-    try {
-      await fetch('/api/analytics/click', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          linkId: linkId,
-          listId: list.id
-        })
-      })
-    } catch (error) {
-      // Silently fail - analytics shouldn't block UX
-    }
-    
+
+    // Open link immediately to avoid popup blocking on mobile
     window.open(url, '_blank', 'noopener,noreferrer')
+
+    // Track the click asynchronously (don't await)
+    fetch('/api/analytics/click', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        linkId: linkId,
+        listId: list.id
+      })
+    }).catch(() => {
+      // Silently fail - analytics shouldn't block UX
+    })
   }
 
   const handleCopy = async () => {

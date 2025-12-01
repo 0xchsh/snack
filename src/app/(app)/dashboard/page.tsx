@@ -279,7 +279,7 @@ function DashboardContent() {
             </div>
 
             {/* Summary Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="text-center border border-border rounded-md py-4">
                 <div className="text-2xl font-bold text-foreground">{formatCount(lists.length)}</div>
                 <div className="text-sm text-muted-foreground">lists</div>
