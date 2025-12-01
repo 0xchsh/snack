@@ -9,6 +9,48 @@ interface OGImageData {
 }
 
 /**
+ * Extracts YouTube video ID from various YouTube URL formats
+ * @param url YouTube URL
+ * @returns Video ID or null if not found
+ */
+function getYouTubeVideoId(url: string): string | null {
+  try {
+    const urlObj = new URL(url)
+
+    // youtube.com/watch?v=VIDEO_ID
+    if (urlObj.hostname.includes('youtube.com')) {
+      const videoId = urlObj.searchParams.get('v')
+      if (videoId) return videoId
+    }
+
+    // youtu.be/VIDEO_ID
+    if (urlObj.hostname.includes('youtu.be')) {
+      const videoId = urlObj.pathname.slice(1).split('?')[0]
+      if (videoId) return videoId
+    }
+
+    return null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Generates YouTube thumbnail URL for a video ID
+ * @param videoId YouTube video ID
+ * @param quality Thumbnail quality (maxres = 1280x720)
+ * @returns Thumbnail URL
+ */
+function getYouTubeThumbnail(videoId: string, quality: 'default' | 'hq' | 'maxres' = 'maxres'): string {
+  const qualityMap = {
+    'default': 'default.jpg',      // 120x90
+    'hq': 'hqdefault.jpg',          // 480x360
+    'maxres': 'maxresdefault.jpg'   // 1280x720
+  }
+  return `https://img.youtube.com/vi/${videoId}/${qualityMap[quality]}`
+}
+
+/**
  * Fetches Open Graph image and metadata from a URL
  * @param url The URL to fetch OG data from
  * @returns Promise with OG image data
@@ -69,7 +111,16 @@ export async function fetchOGImage(url: string): Promise<OGImageData> {
       }
     }
 
-    if (hostname.includes('youtube.com')) {
+    if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) {
+      const videoId = getYouTubeVideoId(url)
+
+      if (videoId) {
+        return {
+          image_url: getYouTubeThumbnail(videoId, 'maxres')
+        }
+      }
+
+      // Generic fallback if video ID can't be extracted
       return {
         image_url: 'https://www.youtube.com/img/desktop/yt_1200.png'
       }
