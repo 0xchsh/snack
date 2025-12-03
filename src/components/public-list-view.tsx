@@ -14,8 +14,6 @@ import { Header } from './header'
 import { ListPaywall } from './list-paywall'
 import { isListFree } from '@/lib/pricing'
 
-type ViewMode = 'row' | 'card'
-
 interface PublicListViewProps {
   list: ListWithLinks
 }
@@ -61,9 +59,6 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
   useEffect(() => {
     setList(initialList)
   }, [initialList])
-
-  // Get view mode from list data, default to 'row' if not set
-  const viewMode: ViewMode = list.view_mode === 'card' ? 'card' : 'row'
 
   // Get display name - prioritize current user's data for their own lists
   const isOwner = user && list.user_id === user.id
@@ -483,7 +478,7 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
               creatorName={displayName}
             />
           ) : (
-            <div className={viewMode === 'card' ? 'space-y-6' : 'space-y-3'}>
+            <div className="space-y-6">
               {list.links && list.links.length > 0 ? (
                 list.links.map((link, index) => (
                   <PublicLinkItem
@@ -492,7 +487,6 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
                     onClick={() => handleLinkClick(link.id, link.url)}
                     isClicked={clickedLinks.has(link.id)}
                     index={index}
-                    viewMode={viewMode}
                     hasAnimated={hasAnimated}
                     prefersReducedMotion={prefersReducedMotion}
                   />
@@ -515,7 +509,6 @@ interface PublicLinkItemProps {
   onClick: () => void
   isClicked: boolean
   index: number
-  viewMode: ViewMode
   hasAnimated: boolean
   prefersReducedMotion: boolean
 }
@@ -525,38 +518,9 @@ const PublicLinkItem = memo(function PublicLinkItem({
   onClick,
   isClicked,
   index,
-  viewMode,
   hasAnimated,
   prefersReducedMotion
 }: PublicLinkItemProps) {
-  
-  if (viewMode === 'row') {
-    // Public list view layout with domain on right
-    return (
-      <div
-        className="flex items-center justify-between pb-3 hover:bg-accent/50 transition-colors group cursor-pointer border-b border-border last:border-0"
-        onClick={onClick}
-      >
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-4 h-4 overflow-hidden flex-shrink-0">
-            <Favicon
-              url={link.url}
-              size={16}
-            />
-          </div>
-
-          <span className="text-base text-foreground truncate">
-            {link.title || getHostname(link.url)}
-          </span>
-        </div>
-
-        <span className="text-sm text-muted-foreground ml-4 flex-shrink-0">
-          {getHostname(link.url)}
-        </span>
-      </div>
-    )
-  }
-
   // Card layout - largest cards with OG images (exact match to edit view)
   return (
     <motion.div

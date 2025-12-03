@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Menu, StretchHorizontal, GripVertical, Trash2, RefreshCw, MoreHorizontal, Clipboard, FileText, Eye, Link2 } from 'lucide-react'
+import { GripVertical, Trash2, RefreshCw, MoreHorizontal, Clipboard, FileText, Eye, Link2 } from 'lucide-react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ListWithLinks, Link, LinkCreatePayload } from '@/types'
@@ -19,24 +19,8 @@ interface ListEditorProps {
   onReorderLinks?: (links: string[]) => void
 }
 
-type ViewMode = 'row' | 'card'
-
-// Ghost loading component for different view modes
-function GhostLinkItem({ viewMode }: { viewMode: ViewMode }) {
-  if (viewMode === 'row') {
-    return (
-      <div className="bg-background border border-border rounded-md px-3 py-3 animate-pulse">
-        <div className="flex items-center gap-3">
-          <div className="w-5 h-5 rounded-md bg-accent flex-shrink-0" />
-          <div className="flex-1">
-            <div className="h-4 bg-accent rounded w-3/4" />
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Card layout
+// Ghost loading component for card view
+function GhostLinkItem() {
   return (
     <div className="flex flex-col gap-3 animate-pulse">
       <div className="aspect-video bg-accent rounded-md"></div>
@@ -48,14 +32,13 @@ function GhostLinkItem({ viewMode }: { viewMode: ViewMode }) {
   )
 }
 
-export function ListEditor({ 
-  list, 
-  onUpdateList, 
-  onAddLink, 
-  onRemoveLink, 
-  onReorderLinks 
+export function ListEditor({
+  list,
+  onUpdateList,
+  onAddLink,
+  onRemoveLink,
+  onReorderLinks
 }: ListEditorProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>((list.view_mode as ViewMode) || 'row')
   const [isEditingTitle, setIsEditingTitle] = useState(!list.title) // Start editing if title is empty
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [title, setTitle] = useState(list.title || '') // Ensure title is never undefined
@@ -264,26 +247,25 @@ export function ListEditor({
     if (newHoverIndex !== null) {
       setDragOverIndex(newHoverIndex)
     }
-  }, [isDragging, draggedItemId, viewMode])
+  }, [isDragging, draggedItemId])
 
   const handleMouseUp = useCallback((e: MouseEvent) => {
-    console.log('Mouse up:', { 
-      isDragging, 
-      draggedItemId, 
-      dragOverIndex, 
-      viewMode,
+    console.log('Mouse up:', {
+      isDragging,
+      draggedItemId,
+      dragOverIndex,
       hasLinks: !!list.links,
       linksCount: list.links?.length || 0
     })
-    
+
     if (!isDragging || !optimisticList.links || !draggedItemId) {
       cleanup()
       return
     }
-    
+
     const draggedIndex = optimisticList.links.findIndex(link => link.id === draggedItemId)
-    console.log('Drag indices:', { draggedIndex, dragOverIndex, viewMode })
-    
+    console.log('Drag indices:', { draggedIndex, dragOverIndex })
+
     if (draggedIndex !== -1 && dragOverIndex !== null && draggedIndex !== dragOverIndex) {
       // Reorder the links
       const newLinks = [...optimisticList.links]
@@ -293,14 +275,14 @@ export function ListEditor({
         return
       }
       newLinks.splice(dragOverIndex, 0, draggedItem)
-      
-      console.log('Reordering in', viewMode, ':', {
+
+      console.log('Reordering:', {
         from: draggedIndex,
         to: dragOverIndex,
         draggedItem: draggedItem.id,
         newOrder: newLinks.map(l => l.id)
       })
-      
+
       // Update the order
       onReorderLinks?.(newLinks.map(link => link.id))
     } else {
@@ -310,9 +292,9 @@ export function ListEditor({
         samePosition: draggedIndex === dragOverIndex
       })
     }
-    
+
     cleanup()
-  }, [isDragging, optimisticList.links, draggedItemId, dragOverIndex, onReorderLinks, viewMode])
+  }, [isDragging, optimisticList.links, draggedItemId, dragOverIndex, onReorderLinks])
   
   const cleanup = useCallback(() => {
     setIsDragging(false)
@@ -843,49 +825,9 @@ export function ListEditor({
 
       {/* Link count and Paste button/input */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          {/* View Mode Toggle */}
-          <div className="flex items-center gap-1 bg-muted rounded-md p-1">
-            <Button
-              type="button"
-              onClick={() => {
-                setViewMode('row')
-                onUpdateList?.({ view_mode: 'row' })
-              }}
-              variant={viewMode === 'row' ? 'secondary' : 'ghost'}
-              size="sm"
-              className={`p-2 rounded ${
-                viewMode === 'row'
-                  ? 'bg-background text-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-transparent'
-              }`}
-              title="Row view"
-            >
-              <Menu className="w-4 h-4" />
-            </Button>
-            <Button
-              type="button"
-              onClick={() => {
-                setViewMode('card')
-                onUpdateList?.({ view_mode: 'card' })
-              }}
-              variant={viewMode === 'card' ? 'secondary' : 'ghost'}
-              size="sm"
-              className={`p-2 rounded ${
-                viewMode === 'card'
-                  ? 'bg-background text-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-transparent'
-              }`}
-              title="Card view"
-            >
-              <StretchHorizontal className="w-4 h-4" />
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2 text-muted-foreground flex-shrink-0">
-            <Link2 className="w-4 h-4" />
-            <span className="text-base">{optimisticList.links?.length || 0} links</span>
-          </div>
+        <div className="flex items-center gap-2 text-muted-foreground flex-shrink-0">
+          <Link2 className="w-4 h-4" />
+          <span className="text-base">{optimisticList.links?.length || 0} links</span>
         </div>
 
         {/* Desktop: Paste button */}
@@ -922,19 +864,19 @@ export function ListEditor({
         </div>
       )}
 
-      {/* Links List - Menu View Only */}
-      <div className="flex flex-col gap-3">
+      {/* Links List - Card View Only */}
+      <div className="flex flex-col gap-8">
         {/* Ghost loading placeholders */}
         {loadingLinks.map((url, index) => (
-          <GhostLinkItem key={`ghost-${url}-${index}`} viewMode={viewMode} />
+          <GhostLinkItem key={`ghost-${url}-${index}`} />
         ))}
 
         {/* Draggable list */}
-        <div className={`relative draggable-list-container flex flex-col ${viewMode === 'card' ? 'gap-8' : 'gap-3'}`}>
+        <div className="relative draggable-list-container flex flex-col gap-8">
           {(optimisticList.links || []).map((link, index) => {
             // Show skeleton loader if link is being refreshed
             if (refreshingLinkIds[link.id]) {
-              return <GhostLinkItem key={`refreshing-${link.id}`} viewMode={viewMode} />
+              return <GhostLinkItem key={`refreshing-${link.id}`} />
             }
 
             return (
@@ -951,7 +893,6 @@ export function ListEditor({
               >
                 <LinkItem
                   link={link}
-                  viewMode={viewMode}
                   onRemove={() => handleDeleteLink(link.id)}
                   onRefresh={() => handleRefreshLink(link)}
                   isRefreshing={false}
@@ -979,7 +920,6 @@ export function ListEditor({
               >
                 <LinkItem
                   link={draggedLink}
-                  viewMode={viewMode}
                   onRemove={() => {}}
                   onRefresh={() => {}}
                   isRefreshing={false}
@@ -1017,80 +957,18 @@ export function ListEditor({
 
 interface LinkItemProps {
   link: Link
-  viewMode: ViewMode
   onRemove: () => void
   onRefresh: () => void
   isRefreshing: boolean
 }
 
-function LinkItem({ 
-  link, 
-  viewMode, 
+function LinkItem({
+  link,
   onRemove,
   onRefresh,
   isRefreshing
 }: LinkItemProps) {
-  if (viewMode === 'row') {
-    // Compact rows - clean list layout
-    return (
-      <div className="flex items-center gap-3 pl-3 pr-0 py-0 bg-background border border-border hover:bg-accent/50 transition-colors group cursor-grab rounded-md select-none">
-        <div className="w-5 h-5 flex-shrink-0">
-          <Favicon
-            url={link.url}
-            size={20}
-          />
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <h3 className="text-base font-medium text-foreground truncate">
-            {link.title || getHostname(link.url)}
-          </h3>
-        </div>
-
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0 ml-auto">
-          <div className="h-icon-button w-icon-button flex items-center justify-center text-muted-foreground cursor-grab rounded-md" title="Drag to reorder">
-            <GripVertical className="w-4 h-4" />
-          </div>
-          <Button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              onRefresh()
-            }}
-            onMouseDown={(e) => {
-              e.stopPropagation()
-            }}
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 p-1 text-muted-foreground hover:text-foreground disabled:opacity-50"
-            title="Refresh link preview"
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </Button>
-          <Button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              onRemove()
-            }}
-            onMouseDown={(e) => {
-              e.stopPropagation()
-            }}
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 p-1 text-red-600 hover:text-red-700"
-            title="Delete link"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   // Card layout - full-width cards with OG images
-
   return (
     <div
       className="rounded-md group cursor-grab flex flex-col gap-3 transition-transform active:scale-[0.98]"

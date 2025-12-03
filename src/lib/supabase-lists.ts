@@ -171,7 +171,7 @@ export class SupabaseListDatabase {
         emoji: '🥨', // Default pretzel emoji
         is_public: true,
         price_cents: null, // Now that column exists
-        view_mode: 'row', // Default view mode
+        view_mode: 'card', // Default view mode
         user_id: session.user.id, // Use the session user ID to ensure it matches auth
       }
 
@@ -239,7 +239,7 @@ export class SupabaseListDatabase {
         // emoji_3d: formData.emoji_3d ? JSON.stringify(formData.emoji_3d) : null, // Temporarily removed
         is_public: formData.is_public,
         // price_cents: formData.price_cents || null, // Temporarily removed
-        view_mode: 'row', // Default view mode
+        view_mode: 'card', // Default view mode
         user_id: session.user.id, // Use the session user ID to ensure it matches auth
       }
 
@@ -333,7 +333,6 @@ export class SupabaseListDatabase {
       if (updates.emoji !== undefined) updateData.emoji = updates.emoji
       if (updates.is_public !== undefined) updateData.is_public = updates.is_public
       if (updates.price_cents !== undefined) updateData.price_cents = updates.price_cents
-      if (updates.view_mode !== undefined) updateData.view_mode = updates.view_mode
 
       console.log('Updating list with data:', { listId, updateData })
 
