@@ -169,7 +169,7 @@ async function fallbackOgData(url: string): Promise<OGData> {
     return directData
   }
 
-  const fallbackData = getFallbackOGData(url)
+  const fallbackData = await getFallbackOGData(url)
   return mergeOgData(directData, fallbackData)
 }
 
@@ -198,7 +198,7 @@ function mergeOgData(primary: OGData, secondary: OGData): OGData {
  * @param url The URL to get fallback data for
  * @returns Fallback OG data
  */
-function getFallbackOGData(url: string): OGData {
+async function getFallbackOGData(url: string): Promise<OGData> {
   try {
     const hostname = new URL(url).hostname
 
@@ -265,8 +265,23 @@ function getFallbackOGData(url: string): OGData {
       const videoId = getYouTubeVideoId(url)
 
       if (videoId) {
+        // Try to fetch video title from YouTube oEmbed API (no API key required)
+        let videoTitle = 'YouTube'
+        try {
+          const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`
+          const response = await fetch(oembedUrl)
+          if (response.ok) {
+            const data = await response.json()
+            if (data.title) {
+              videoTitle = data.title
+            }
+          }
+        } catch (error) {
+          console.warn('Failed to fetch YouTube video title:', error)
+        }
+
         return {
-          title: 'YouTube',
+          title: videoTitle,
           description: 'Enjoy the videos and music you love',
           image_url: getYouTubeThumbnail(videoId, 'maxres'),
           favicon_url: 'https://www.youtube.com/s/desktop/f506e53b/img/favicon_32x32.png',

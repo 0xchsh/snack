@@ -13,7 +13,7 @@ interface ListData {
   description: string | null
   emoji: string | null
   links: Array<{ id: string }>
-  users: {
+  user: {
     username: string
   } | null
 }
@@ -44,7 +44,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
   const list = await fetchListData(username, listId)
 
   const linkCount = list?.links?.length || 0
-  const displayUsername = list?.users?.username || username
+  const displayUsername = list?.user?.username || username
   const title = list?.title || 'Untitled List'
   const description = list?.description || ''
   const emoji = list?.emoji || '📝'

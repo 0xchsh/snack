@@ -5,7 +5,7 @@ interface ListData {
   title: string
   description: string | null
   links: Array<{ id: string }>
-  users: {
+  user: {
     username: string
   } | null
   is_public: boolean
@@ -48,7 +48,7 @@ export async function generateMetadata({
   }
 
   const linkCount = list.links?.length || 0
-  const displayUsername = list.users?.username || username
+  const displayUsername = list.user?.username || username
   const title = list.title || 'Untitled List'
   const description = list.description || `Check out this curated collection of ${linkCount} ${linkCount === 1 ? 'link' : 'links'} by @${displayUsername}`
 
