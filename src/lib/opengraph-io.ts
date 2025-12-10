@@ -46,6 +46,90 @@ function getYouTubeThumbnail(videoId: string, quality: 'default' | 'hq' | 'maxre
   return `https://img.youtube.com/vi/${videoId}/${qualityMap[quality]}`
 }
 
+/**
+ * Extracts place information from Google Maps URLs
+ * Handles multiple URL formats: /maps/place/, /maps/search/, coordinate URLs
+ * @param url Google Maps URL
+ * @returns Place data or null if not a valid Maps URL
+ */
+function parseGoogleMapsUrl(url: string): {
+  placeName: string | null
+  coordinates: { lat: number; lng: number } | null
+  zoom: number | null
+} | null {
+  try {
+    const urlObj = new URL(url)
+    const hostname = urlObj.hostname
+
+    // Check if it's a Google Maps URL
+    if (!hostname.includes('google.com') && !hostname.includes('maps.app.goo.gl')) {
+      return null
+    }
+
+    let placeName: string | null = null
+    let coordinates: { lat: number; lng: number } | null = null
+    let zoom: number | null = null
+
+    // Extract coordinates from URL: /@lat,lng,zoom or /@lat,lng,zoomz
+    const coordPattern = /@(-?\d+\.?\d*),(-?\d+\.?\d*),(\d+\.?\d*)z?/
+    const coordMatch = url.match(coordPattern)
+
+    if (coordMatch) {
+      coordinates = {
+        lat: parseFloat(coordMatch[1]),
+        lng: parseFloat(coordMatch[2])
+      }
+      zoom = parseInt(coordMatch[3])
+    }
+
+    // Extract place name from /maps/place/PlaceName
+    if (url.includes('/maps/place/')) {
+      const placePattern = /\/maps\/place\/([^/@?]+)/
+      const placeMatch = url.match(placePattern)
+
+      if (placeMatch) {
+        // Decode URI component and replace + with spaces
+        placeName = decodeURIComponent(placeMatch[1]).replace(/\+/g, ' ')
+      }
+    }
+
+    // Extract search query from /maps/search/
+    else if (url.includes('/maps/search/')) {
+      const searchPattern = /\/maps\/search\/([^/@?]+)/
+      const searchMatch = url.match(searchPattern)
+
+      if (searchMatch) {
+        placeName = decodeURIComponent(searchMatch[1]).replace(/\+/g, ' ')
+      }
+    }
+
+    return {
+      placeName,
+      coordinates,
+      zoom
+    }
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Generates a static map image URL using Google Static Maps API
+ * @param lat Latitude
+ * @param lng Longitude
+ * @param zoom Zoom level (1-20)
+ * @returns Static map image URL
+ */
+function getGoogleMapsStaticImage(lat: number, lng: number, zoom: number): string {
+  // Use Google Static Maps API (works without API key for basic usage)
+  // Size optimized for OG images (1200x630 is standard)
+  // Scale=2 for higher resolution on retina displays
+  const markerColor = 'red'
+  const markerLabel = ''
+
+  return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=${zoom}&size=1200x630&scale=2&format=jpg&markers=color:${markerColor}%7C${lat},${lng}`
+}
+
 interface OpenGraphIOResponse {
   hybridGraph?: {
     title?: string
@@ -257,6 +341,36 @@ async function getFallbackOGData(url: string): Promise<OGData> {
         image_url: 'https://www.notion.so/images/meta/default.png',
         favicon_url: 'https://www.notion.so/images/favicon.ico',
         site_name: 'Notion'
+      }
+    }
+
+    // Google Maps
+    if (hostname.includes('google.com/maps') || hostname.includes('maps.google.com') || hostname.includes('maps.app.goo.gl')) {
+      const mapsData = parseGoogleMapsUrl(url)
+
+      if (mapsData && mapsData.coordinates) {
+        const { placeName, coordinates, zoom } = mapsData
+
+        return {
+          title: placeName || 'Location on Google Maps',
+          description: placeName ? `View ${placeName} on Google Maps` : 'View this location on Google Maps',
+          image_url: getGoogleMapsStaticImage(
+            coordinates.lat,
+            coordinates.lng,
+            zoom || 15
+          ),
+          favicon_url: 'https://www.gstatic.com/mapspro/images/favicon-001.ico',
+          site_name: 'Google Maps'
+        }
+      }
+
+      // Generic fallback if parsing fails
+      return {
+        title: 'Google Maps',
+        description: 'Explore places and get directions',
+        image_url: 'https://www.google.com/images/branding/product/2x/maps_96dp.png',
+        favicon_url: 'https://www.gstatic.com/mapspro/images/favicon-001.ico',
+        site_name: 'Google Maps'
       }
     }
 
