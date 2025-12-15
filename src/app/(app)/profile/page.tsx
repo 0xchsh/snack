@@ -288,7 +288,6 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
                 type="button"
                 variant="outline"
                 size="sm"
-                className="text-primary border-primary hover:bg-primary/5"
                 disabled={uploadingPicture}
                 onClick={() => fileInputRef.current?.click()}
               >
@@ -307,9 +306,9 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
                   type="button"
                   onClick={handleRemovePicture}
                   disabled={uploadingPicture}
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="text-destructive border-destructive hover:bg-destructive/10"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
                 >
                   Remove
                 </Button>
@@ -330,9 +329,9 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
             type="button"
             onClick={() => setIsEditing(!isEditing)}
             disabled={isSaving}
-            variant="outline"
+            variant="ghost"
             size="sm"
-            className="gap-2 border-primary text-primary hover:bg-primary/5"
+            className="gap-2"
           >
             <Edit className="w-4 h-4" />
             {isEditing ? 'Cancel' : 'Edit'}
@@ -429,8 +428,8 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
               type="button"
               onClick={handleCancel}
               disabled={isSaving}
-              variant="outline"
-              className="px-6 text-muted-foreground hover:bg-muted"
+              variant="ghost"
+              className="px-6"
             >
               Cancel
             </Button>
@@ -448,9 +447,9 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
           <Button
             type="button"
             onClick={handleLogout}
-            variant="outline"
+            variant="ghost"
             size="sm"
-            className="gap-2 border-destructive text-destructive hover:bg-destructive/10"
+            className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
             disabled={isLoggingOut}
           >
             {isLoggingOut ? (
