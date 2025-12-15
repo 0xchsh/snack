@@ -228,7 +228,7 @@ function DashboardContent() {
               </div>
             ) : savedLists.length === 0 ? (
               <div className="text-center py-16">
-                <div className="w-16 h-16 bg-secondary flex items-center justify-center text-2xl mx-auto mb-4">
+                <div className="w-16 h-16 bg-secondary flex items-center justify-center text-2xl mx-auto mb-4" style={{ borderRadius: '12px' }}>
                   💾
                 </div>
                 <h3 className="text-lg font-semibold mb-2">No saved lists yet</h3>
@@ -279,7 +279,7 @@ function DashboardContent() {
             </div>
 
             {/* Summary Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-3 gap-4 mb-6" style={{ marginBottom: '12px' }}>
               <div className="text-center border border-border rounded-md py-4">
                 <div className="text-2xl font-bold text-foreground">{formatCount(lists.length)}</div>
                 <div className="text-sm text-muted-foreground">lists</div>
