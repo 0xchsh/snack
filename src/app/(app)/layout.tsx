@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Star, BarChart3 } from 'lucide-react'
-import { useEffect, Suspense } from 'react'
+import { useEffect, Suspense, useState } from 'react'
 
 import { Button } from '@/components/ui'
 import { TopBar, BrandMark, UserMenu } from '@/components/primitives'
@@ -26,7 +26,13 @@ function AppLayoutContent({
   const { user, loading, signOut } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [mounted, setMounted] = useState(false)
   const activeTab = searchParams?.get('tab')
+
+  // Ensure component is mounted on client before rendering tab-specific UI
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (!loading && !user) {
@@ -39,8 +45,8 @@ function AppLayoutContent({
     router.push('/')
   }
 
-  // Show loading state while checking auth
-  if (loading) {
+  // Show loading state while checking auth or before client mount (prevents hydration mismatch)
+  if (loading || !mounted) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <LoadingState message="Loading..." />
