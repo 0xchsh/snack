@@ -11,6 +11,7 @@ import { validateUsername } from '@/lib/username-utils'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LoadingState } from '@/components/loading-state'
 import { Button } from '@/components/ui'
+import { DefaultAvatar } from '@/components/default-avatar'
 
 interface PublicProfile {
   user: {
@@ -122,8 +123,8 @@ export default function UsernamePage() {
     return char ? char.toUpperCase() : 'U'
   }
 
-  const displayName = profile.user.first_name && profile.user.last_name
-    ? `${profile.user.first_name} ${profile.user.last_name}`.trim()
+  const displayName = (profile.user.first_name || profile.user.last_name)
+    ? `${profile.user.first_name || ''} ${profile.user.last_name || ''}`.trim()
     : profile.user.username
 
   const profileInitial = resolveInitial(profile.user.username)
@@ -199,17 +200,20 @@ export default function UsernamePage() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-lg font-semibold text-muted-foreground">
-                {profileInitial}
-              </span>
+              <DefaultAvatar size={48} />
             )}
           </div>
 
-          {/* Username and Join Date */}
+          {/* Name, Username and Join Date */}
           <div className="flex flex-col gap-1">
-            <div className="flex items-start text-xl font-normal leading-[1.5]">
+            {(profile.user.first_name || profile.user.last_name) && displayName !== profile.user.username && (
+              <h1 className="text-xl font-semibold text-foreground">
+                {displayName}
+              </h1>
+            )}
+            <div className="flex items-start text-base font-normal leading-[1.5]">
               <span className="text-neutral-400">@</span>
-              <span className="text-foreground">{profile.user.username}</span>
+              <span className="text-neutral-400">{profile.user.username}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <p className="text-base font-normal text-neutral-400">

@@ -168,7 +168,7 @@ export class SupabaseListDatabase {
         id: crypto.randomUUID(), // Generate a UUID for the list
         public_id: crypto.randomUUID(), // Generate a UUID for public access
         title: 'New list', // Default title - user can edit
-        emoji: '🥨', // Default pretzel emoji
+        emoji: getRandomEmoji(), // Random emoji for each new list
         is_public: true,
         price_cents: null, // Now that column exists
         view_mode: 'card', // Default view mode

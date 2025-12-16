@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { Header } from './header'
 import { ListPaywall } from './list-paywall'
 import { isListFree } from '@/lib/pricing'
+import { DefaultAvatar } from '@/components/default-avatar'
 
 interface PublicListViewProps {
   list: ListWithLinks
@@ -429,21 +430,10 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
                         width={24}
                         height={24}
                         className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none'
-                          const fallback = e.currentTarget.nextElementSibling as HTMLElement
-                          if (fallback) {
-                            fallback.style.display = 'flex'
-                          }
-                        }}
                       />
-                    ) : null}
-                    <span
-                      className="text-muted-foreground text-[10px] font-bold"
-                      style={{ display: profilePictureUrl ? 'none' : 'flex' }}
-                    >
-                      {displayInitial}
-                    </span>
+                    ) : (
+                      <DefaultAvatar size={24} />
+                    )}
                   </div>
                   <span className="font-medium text-muted-foreground">{displayName}</span>
                 </Link>

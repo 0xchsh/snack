@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { DefaultAvatar } from '@/components/default-avatar'
 
 interface BreadcrumbProps {
   username: string
@@ -20,9 +21,7 @@ export function Breadcrumb({ username, currentPage, profilePictureUrl }: Breadcr
             className="object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-            {username.charAt(0).toUpperCase()}
-          </div>
+          <DefaultAvatar size={20} />
         )}
       </div>
       <Link

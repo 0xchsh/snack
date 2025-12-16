@@ -4,13 +4,14 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LogOut, Edit, Loader2, Trash2, User } from 'lucide-react'
+import { LogOut, Edit, Loader2, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 import { LoadingState } from '@/components/loading-state'
 import { AppContainer } from '@/components/primitives'
 import { Breadcrumb } from '@/components/breadcrumb'
+import { DefaultAvatar } from '@/components/default-avatar'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -271,7 +272,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <User className="w-6 h-6 text-muted-foreground" />
+                <DefaultAvatar size={80} />
               )}
             </div>
             {uploadingPicture && (
@@ -351,8 +352,8 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
                 disabled={isSaving}
               />
             ) : (
-              <div className="px-4 py-3 bg-muted rounded-lg text-foreground">
-                {currentUser.first_name || 'Not set'}
+              <div className="px-4 py-3 bg-muted rounded-lg text-foreground min-h-[46px]">
+                {currentUser.first_name || ''}
               </div>
             )}
           </div>
@@ -369,8 +370,8 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
                 disabled={isSaving}
               />
             ) : (
-              <div className="px-4 py-3 bg-muted rounded-lg text-foreground">
-                {currentUser.last_name || 'Not set'}
+              <div className="px-4 py-3 bg-muted rounded-lg text-foreground min-h-[46px]">
+                {currentUser.last_name || ''}
               </div>
             )}
           </div>

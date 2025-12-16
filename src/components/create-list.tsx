@@ -1,12 +1,13 @@
 'use client'
 
 import Image from 'next/image'
-import { useRef, useState } from 'react'
+import { useRef, useState, useMemo } from 'react'
 import { X } from 'lucide-react'
 
 import { Button, Input, Label } from '@/components/ui'
 import { CreateListForm } from '@/types'
 import { EmojiPicker } from './emoji-picker'
+import { getRandomEmoji3D } from '@/lib/emoji'
 
 interface CreateListProps {
   onCreateList: (list: CreateListForm) => void
@@ -14,12 +15,15 @@ interface CreateListProps {
 }
 
 export function CreateList({ onCreateList, onClose }: CreateListProps) {
+  // Generate random emoji once when component mounts
+  const initialEmoji = useMemo(() => getRandomEmoji3D().unicode, [])
+
   const [formData, setFormData] = useState<CreateListForm>({
     title: '',
-    emoji: '🥨',
+    emoji: initialEmoji,
     is_public: true
   })
-  const [currentEmoji, setCurrentEmoji] = useState<string>('🥨')
+  const [currentEmoji, setCurrentEmoji] = useState<string>(initialEmoji)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const emojiButtonRef = useRef<HTMLButtonElement>(null)

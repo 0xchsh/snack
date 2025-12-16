@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     // Fetch user data
     const { data: users, error: usersError } = await supabase
       .from('users')
-      .select('id, username, avatar_url, first_name, last_name')
+      .select('id, username, profile_picture_url, first_name, last_name')
       .in('id', userIds)
 
     if (usersError) {

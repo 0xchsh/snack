@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Star, Link2, List, Loader2 } from 'lucide-react'
 import { useInView } from 'react-intersection-observer'
 import { LoadingState } from '@/components/loading-state'
+import { DefaultAvatar } from '@/components/default-avatar'
 
 interface PublicList {
   id: string
@@ -18,7 +19,7 @@ interface PublicList {
   created_at: string
   users: {
     username: string | null
-    avatar_url: string | null
+    profile_picture_url: string | null
     first_name: string | null
     last_name: string | null
   } | null
@@ -229,7 +230,7 @@ export default function DiscoverPage() {
               const username = list.users?.username || 'unknown'
               const listSlug = list.public_id || list.id
               const displayName = getDisplayName(list)
-              const profilePicUrl = list.users?.avatar_url
+              const profilePicUrl = list.users?.profile_picture_url
               const linkCount = list.links?.length || 0
 
               return (
@@ -258,9 +259,7 @@ export default function DiscoverPage() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <span className="text-[9px] font-bold text-muted-foreground">
-                              {displayName.charAt(0).toUpperCase()}
-                            </span>
+                            <DefaultAvatar size={16} />
                           )}
                         </div>
                         <span className="text-sm text-neutral-400 truncate">
