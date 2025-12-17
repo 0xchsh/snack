@@ -2,17 +2,15 @@ import { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
 
 interface ListData {
+  id: string
   title: string
   description: string | null
   emoji: string | null
-  is_public: boolean
   links_count: number
-  username: string
 }
 
 async function fetchListData(username: string, listId: string): Promise<ListData | null> {
   try {
-    // Create Supabase client directly (no cookies needed for public data)
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -23,63 +21,46 @@ async function fetchListData(username: string, listId: string): Promise<ListData
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-    // First get the user by username
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('id, username')
-      .eq('username', username)
-      .single()
-
-    if (userError || !user) {
-      console.error('User not found:', username)
-      return null
-    }
-
-    // Then get the list - try public_id first, then fall back to id
-    let list = null
-
-    // Try public_id first
-    const { data: listByPublicId, error: publicIdError } = await supabase
+    // Query list directly - RLS will only return public lists for anonymous users
+    // Try by public_id first, then by id
+    const { data: listByPublicId } = await supabase
       .from('lists')
-      .select('title, description, emoji, is_public')
+      .select('id, title, description, emoji')
       .eq('public_id', listId)
-      .eq('user_id', user.id)
-      .single()
+      .eq('is_public', true)
+      .maybeSingle()
 
-    if (listByPublicId && !publicIdError) {
-      list = listByPublicId
-    } else {
-      // Fall back to id
-      const { data: listById, error: idError } = await supabase
+    let list = listByPublicId
+
+    if (!list) {
+      // Try by id
+      const { data: listById } = await supabase
         .from('lists')
-        .select('title, description, emoji, is_public')
+        .select('id, title, description, emoji')
         .eq('id', listId)
-        .eq('user_id', user.id)
-        .single()
+        .eq('is_public', true)
+        .maybeSingle()
 
-      if (listById && !idError) {
-        list = listById
-      }
+      list = listById
     }
 
     if (!list) {
-      console.error('List not found:', listId)
+      console.error('List not found or not public:', listId)
       return null
     }
 
-    // Get link count
+    // Get link count using the actual list id
     const { count: linksCount } = await supabase
       .from('links')
       .select('id', { count: 'exact', head: true })
-      .eq('list_id', listId)
+      .eq('list_id', list.id)
 
     return {
+      id: list.id,
       title: list.title,
       description: list.description,
       emoji: list.emoji,
-      is_public: list.is_public,
       links_count: linksCount || 0,
-      username: user.username,
     }
   } catch (error) {
     console.error('Error fetching list data for metadata:', error)
@@ -103,7 +84,7 @@ export async function generateMetadata({
   }
 
   const title = list.title || 'Untitled List'
-  const description = list.description || `A curated collection of ${list.links_count} ${list.links_count === 1 ? 'link' : 'links'} by @${list.username}`
+  const description = list.description || `A curated collection of ${list.links_count} ${list.links_count === 1 ? 'link' : 'links'} by @${username}`
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL
     || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')

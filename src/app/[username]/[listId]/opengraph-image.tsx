@@ -16,7 +16,6 @@ interface ListData {
 
 async function fetchListData(username: string, listId: string): Promise<ListData | null> {
   try {
-    // Create Supabase client directly for edge runtime (no cookies needed for public data)
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -27,54 +26,33 @@ async function fetchListData(username: string, listId: string): Promise<ListData
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-    // First get the user by username
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('username', username)
-      .single()
-
-    if (userError || !user) {
-      console.error('User not found:', username)
-      return null
-    }
-
-    // Then get the list - try public_id first, then fall back to id
-    let list = null
-
-    // Try public_id first
-    const { data: listByPublicId, error: publicIdError } = await supabase
+    // Query list directly - RLS will only return public lists for anonymous users
+    // Try by public_id first, then by id
+    const { data: listByPublicId } = await supabase
       .from('lists')
-      .select('title, emoji, is_public')
+      .select('title, emoji')
       .eq('public_id', listId)
-      .eq('user_id', user.id)
-      .single()
+      .eq('is_public', true)
+      .maybeSingle()
 
-    if (listByPublicId && !publicIdError) {
-      list = listByPublicId
-    } else {
-      // Fall back to id
-      const { data: listById, error: idError } = await supabase
-        .from('lists')
-        .select('title, emoji, is_public')
-        .eq('id', listId)
-        .eq('user_id', user.id)
-        .single()
-
-      if (listById && !idError) {
-        list = listById
-      }
+    if (listByPublicId) {
+      return { title: listByPublicId.title, emoji: listByPublicId.emoji }
     }
 
-    if (!list) {
-      console.error('List not found:', listId)
-      return null
+    // Try by id
+    const { data: listById } = await supabase
+      .from('lists')
+      .select('title, emoji')
+      .eq('id', listId)
+      .eq('is_public', true)
+      .maybeSingle()
+
+    if (listById) {
+      return { title: listById.title, emoji: listById.emoji }
     }
 
-    return {
-      title: list.title,
-      emoji: list.emoji,
-    }
+    console.error('List not found or not public:', listId)
+    return null
   } catch (error) {
     console.error('Error fetching list data for OG image:', error)
     return null
