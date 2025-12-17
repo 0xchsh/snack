@@ -2,11 +2,9 @@ import { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
 
 interface ListData {
-  id: string
   title: string
   description: string | null
   emoji: string | null
-  links_count: number
 }
 
 async function fetchListData(username: string, listId: string): Promise<ListData | null> {
@@ -25,43 +23,29 @@ async function fetchListData(username: string, listId: string): Promise<ListData
     // Try by public_id first, then by id
     const { data: listByPublicId } = await supabase
       .from('lists')
-      .select('id, title, description, emoji')
+      .select('title, description, emoji')
       .eq('public_id', listId)
       .eq('is_public', true)
       .maybeSingle()
 
-    let list = listByPublicId
-
-    if (!list) {
-      // Try by id
-      const { data: listById } = await supabase
-        .from('lists')
-        .select('id, title, description, emoji')
-        .eq('id', listId)
-        .eq('is_public', true)
-        .maybeSingle()
-
-      list = listById
+    if (listByPublicId) {
+      return listByPublicId
     }
 
-    if (!list) {
-      console.error('List not found or not public:', listId)
-      return null
+    // Try by id
+    const { data: listById } = await supabase
+      .from('lists')
+      .select('title, description, emoji')
+      .eq('id', listId)
+      .eq('is_public', true)
+      .maybeSingle()
+
+    if (listById) {
+      return listById
     }
 
-    // Get link count using the actual list id
-    const { count: linksCount } = await supabase
-      .from('links')
-      .select('id', { count: 'exact', head: true })
-      .eq('list_id', list.id)
-
-    return {
-      id: list.id,
-      title: list.title,
-      description: list.description,
-      emoji: list.emoji,
-      links_count: linksCount || 0,
-    }
+    console.error('List not found or not public:', listId)
+    return null
   } catch (error) {
     console.error('Error fetching list data for metadata:', error)
     return null
@@ -84,7 +68,7 @@ export async function generateMetadata({
   }
 
   const title = list.title || 'Untitled List'
-  const description = list.description || `A curated collection of ${list.links_count} ${list.links_count === 1 ? 'link' : 'links'} by @${username}`
+  const description = list.description || `A curated collection of links by @${username}`
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL
     || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
