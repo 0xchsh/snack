@@ -1,5 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/privacy',
+        destination: 'https://ratlabs.notion.site/Snack-Privacy-Policy-10a4ae896ea680888ce5f97188203979',
+        permanent: true,
+      },
+    ]
+  },
   images: {
     remotePatterns: [
       {
