@@ -12,7 +12,7 @@ export default function TermsPage() {
       <div className="mx-auto py-6 md:py-12 max-w-[800px] px-4 md:px-0">
         <div className="mb-8 text-center">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Terms of Service</h1>
-          <p className="text-muted-foreground">Last updated: November 2025</p>
+          <p className="text-muted-foreground">Last updated: January 1, 2026</p>
         </div>
 
         <div className="space-y-8">
