@@ -26,7 +26,7 @@ export function Breadcrumb({ username, currentPage, profilePictureUrl }: Breadcr
       </div>
       <Link
         href={`/${username}`}
-        className="text-foreground hover:text-primary transition-colors"
+        className="text-foreground hover:text-primary transition-colors font-semibold"
       >
         {username}
       </Link>

@@ -1,19 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async redirects() {
-    return [
-      {
-        source: '/privacy',
-        destination: 'https://ratlabs.notion.site/Snack-Privacy-Policy-10a4ae896ea680888ce5f97188203979',
-        permanent: true,
-      },
-      {
-        source: '/terms',
-        destination: 'https://ratlabs.notion.site/Snack-Terms-of-Service-10a4ae896ea6805187e4d6e704e3e35c',
-        permanent: true,
-      },
-    ]
-  },
   images: {
     remotePatterns: [
       {
