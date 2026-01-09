@@ -5,13 +5,13 @@ import { Loader2, CheckCircle, AlertCircle, CreditCard } from 'lucide-react'
 import { Button } from './ui/button'
 
 interface StripeConnectButtonProps {
-  variant?: 'default' | 'outline' | 'secondary'
+  variant?: 'primary' | 'outline' | 'secondary'
   size?: 'default' | 'sm' | 'lg'
   className?: string
 }
 
 export function StripeConnectButton({
-  variant = 'default',
+  variant = 'primary',
   size = 'default',
   className,
 }: StripeConnectButtonProps) {

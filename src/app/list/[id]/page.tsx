@@ -2,7 +2,6 @@
 
 import { useState, useEffect, use } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft, Copy, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui'
@@ -10,9 +9,14 @@ import { ListEditor } from '@/components/list-editor'
 import { PublicListView } from '@/components/public-list-view'
 import { CreateList } from '@/components/create-list'
 import { ListWithLinks, CreateListForm, LinkCreatePayload } from '@/types'
-import { getRandomEmoji } from '@/lib/emoji'
 import { useAuth } from '@/hooks/useAuth'
 import { LoadingState } from '@/components/loading-state'
+import {
+  useUpdateListMutation,
+  useAddLinkMutation,
+  useDeleteLinkMutation,
+  useReorderLinksMutation,
+} from '@/hooks/queries'
 
 interface ListPageProps {
   params: Promise<{
@@ -29,7 +33,13 @@ export default function ListPage({ params }: ListPageProps) {
   const { user } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
-  
+
+  // TanStack Query mutations
+  const updateListMutation = useUpdateListMutation()
+  const addLinkMutation = useAddLinkMutation()
+  const deleteLinkMutation = useDeleteLinkMutation()
+  const reorderLinksMutation = useReorderLinksMutation()
+
   const isAuthenticated = !!user
   const currentUserId = user?.id || null
   const forcePublicView = searchParams.get('view') === 'public'
@@ -90,132 +100,93 @@ export default function ListPage({ params }: ListPageProps) {
 
   const handleUpdateList = async (updates: Partial<ListWithLinks>) => {
     if (!currentList) return
-    
+
     try {
-      const response = await fetch(`/api/lists/${currentList.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updates),
+      const updatedList = await updateListMutation.mutateAsync({
+        listId: currentList.id,
+        updates,
       })
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || `Failed to update list (${response.status})`)
-      }
-      
-      const data = await response.json()
-      
-      // If the API returned updated data, use it
-      if (data.data) {
-        setCurrentList(data.data)
-      } else if (data.success) {
-        // Update succeeded but no data returned, just apply the updates locally
-        setCurrentList(prev => prev ? { ...prev, ...updates } : null)
-      }
+      setCurrentList(updatedList)
     } catch (error) {
       console.error('Error updating list:', error)
-      // Could add toast notification here
     }
   }
 
   const handleAddLink = async (linkData: LinkCreatePayload) => {
     if (!currentList) return
-    
+
     try {
-      const response = await fetch(`/api/lists/${currentList.id}/links`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(linkData),
+      const updatedList = await addLinkMutation.mutateAsync({
+        listId: currentList.id,
+        link: linkData,
       })
-      
-      if (!response.ok) {
-        throw new Error('Failed to add link')
-      }
-      
-      const data = await response.json()
-      
-      // Re-fetch the list to get correct positions for all links
-      const listResponse = await fetch(`/api/lists/${currentList.id}`, {
-        cache: 'no-store'
-      })
-      
-      if (listResponse.ok) {
-        const listData = await listResponse.json()
-        setCurrentList(listData.data)
-      }
+      setCurrentList(updatedList)
     } catch (error) {
       console.error('Error adding link:', error)
-      // Could add toast notification here
     }
   }
 
   const handleRemoveLink = async (linkId: string) => {
     if (!currentList) return
-    
+
+    // Optimistic update
+    setCurrentList(prev =>
+      prev
+        ? { ...prev, links: prev.links?.filter(link => link.id !== linkId) || [] }
+        : null
+    )
+
     try {
-      const response = await fetch(`/api/lists/${currentList.id}/links/${linkId}`, {
-        method: 'DELETE',
+      await deleteLinkMutation.mutateAsync({
+        listId: currentList.id,
+        linkId,
       })
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || `Failed to remove link (${response.status})`)
-      }
-      
-      setCurrentList(prev => prev ? {
-        ...prev,
-        links: prev.links?.filter(link => link.id !== linkId) || []
-      } : null)
     } catch (error) {
       console.error('Error removing link:', error)
-      // Could add toast notification here
+      // Rollback by refetching
+      const response = await fetch(`/api/lists/${currentList.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setCurrentList(data.data)
+      }
     }
   }
 
   const handleReorderLinks = async (linkIds: string[]) => {
     if (!currentList) return
-    
+
+    // Optimistic update
+    const linkMap = new Map(currentList.links?.map(link => [link.id, link]) || [])
+    const reorderedLinks = linkIds
+      .map(id => linkMap.get(id))
+      .filter(Boolean) as typeof currentList.links
+
+    setCurrentList(prev =>
+      prev
+        ? {
+            ...prev,
+            links: reorderedLinks.map((link, index) => ({
+              ...link,
+              position: index,
+            })),
+          }
+        : null
+    )
+
     try {
-      // Update local state immediately for better UX
-      const linkMap = new Map(currentList.links?.map(link => [link.id, link]) || [])
-      const reorderedLinks = linkIds.map(id => linkMap.get(id)).filter(Boolean) as typeof currentList.links
-      
-      setCurrentList(prev => prev ? {
-        ...prev,
-        links: reorderedLinks.map((link, index) => ({
-          ...link,
-          position: index
-        }))
-      } : null)
-      
-      // Then sync with server
-      const response = await fetch(`/api/lists/${currentList.id}/links`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ linkIds }),
+      await reorderLinksMutation.mutateAsync({
+        listId: currentList.id,
+        linkIds,
       })
-      
-      if (!response.ok) {
-        // Revert on failure
-        setCurrentList(currentList)
-        throw new Error('Failed to reorder links')
-      }
     } catch (error) {
       console.error('Error reordering links:', error)
-      // Could add toast notification here
+      // Rollback by refetching
+      const response = await fetch(`/api/lists/${currentList.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setCurrentList(data.data)
+      }
     }
-  }
-
-
-  const handleLogout = async () => {
-    // TODO: Implement proper logout functionality
-    router.push('/auth/sign-in')
   }
 
   // Show loading state

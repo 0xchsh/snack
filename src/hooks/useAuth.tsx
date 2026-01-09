@@ -47,49 +47,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Fallback to basic user data from auth with safe defaults
         return {
           id: supabaseUser.id,
-          email: supabaseUser.email || '',
+          email: supabaseUser.email || null,
           username: supabaseUser.user_metadata?.username || supabaseUser.email?.split('@')[0] || 'user',
           first_name: null,
           last_name: null,
           profile_picture_url: null,
           profile_is_public: true,
           bio: null,
-          subscription_status: 'free',
-          subscription_tier: 'free',
+          avatar_url: null,
+          stripe_account_id: null,
+          stripe_account_status: null,
+          stripe_connected_at: null,
+          stripe_customer_id: null,
           created_at: supabaseUser.created_at,
           updated_at: supabaseUser.updated_at || supabaseUser.created_at
         }
       }
 
-      // Ensure all required fields exist (for compatibility with older schema)
-      return {
-        id: userProfile.id,
-        username: userProfile.username,
-        first_name: userProfile.first_name || null,
-        last_name: userProfile.last_name || null,
-        email: userProfile.email || supabaseUser.email || '',
-        profile_picture_url: userProfile.profile_picture_url || null,
-        profile_is_public: userProfile.profile_is_public ?? true,
-        bio: userProfile.bio || null,
-        subscription_status: userProfile.subscription_status || 'free',
-        subscription_tier: userProfile.subscription_tier || 'free',
-        created_at: userProfile.created_at,
-        updated_at: userProfile.updated_at
-      }
+      // Return the user profile from database
+      return userProfile
     } catch (error) {
       console.log('Could not fetch user profile, using auth data')
       // Return basic user data as final fallback
       return {
         id: supabaseUser.id,
-        email: supabaseUser.email || '',
+        email: supabaseUser.email || null,
         username: supabaseUser.user_metadata?.username || supabaseUser.email?.split('@')[0] || 'user',
         first_name: null,
         last_name: null,
         profile_picture_url: null,
         profile_is_public: true,
         bio: null,
-        subscription_status: 'free',
-        subscription_tier: 'free',
+        avatar_url: null,
+        stripe_account_id: null,
+        stripe_account_status: null,
+        stripe_connected_at: null,
+        stripe_customer_id: null,
         created_at: supabaseUser.created_at,
         updated_at: supabaseUser.updated_at || supabaseUser.created_at
       }
@@ -140,15 +133,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
          const emailPrefix = session.user.email?.split('@')[0] || 'user'
          const basicUser: User = {
            id: session.user.id,
-           email: session.user.email || '',
+           email: session.user.email || null,
            username: session.user.user_metadata?.username || `@${emailPrefix}`,
            first_name: session.user.user_metadata?.first_name || null,
            last_name: session.user.user_metadata?.last_name || null,
            profile_picture_url: session.user.user_metadata?.avatar_url || null,
             profile_is_public: true,
             bio: null,
-            subscription_status: 'free',
-            subscription_tier: 'free',
+            avatar_url: null,
+            stripe_account_id: null,
+            stripe_account_status: null,
+            stripe_connected_at: null,
+            stripe_customer_id: null,
             created_at: session.user.created_at,
             updated_at: session.user.updated_at || session.user.created_at
          }
@@ -202,15 +198,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         const basicUser: User = {
           id: session.user.id,
-          email: session.user.email || '',
+          email: session.user.email || null,
           username: session.user.user_metadata?.username || session.user.email?.split('@')[0] || 'user',
           first_name: null,
           last_name: null,
           profile_picture_url: null,
           profile_is_public: true,
           bio: null,
-          subscription_status: 'free',
-          subscription_tier: 'free',
+          avatar_url: null,
+          stripe_account_id: null,
+          stripe_account_status: null,
+          stripe_connected_at: null,
+          stripe_customer_id: null,
           created_at: session.user.created_at,
           updated_at: session.user.updated_at || session.user.created_at
         }
@@ -369,15 +368,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('Session found for:', session.user.email)
         const basicUser: User = {
           id: session.user.id,
-          email: session.user.email || '',
+          email: session.user.email || null,
           username: session.user.user_metadata?.username || session.user.email?.split('@')[0] || 'user',
           first_name: session.user.user_metadata?.first_name || null,
           last_name: session.user.user_metadata?.last_name || null,
           profile_picture_url: session.user.user_metadata?.avatar_url || null,
           profile_is_public: true,
           bio: session.user.user_metadata?.bio || null,
-          subscription_status: 'free',
-          subscription_tier: 'free',
+          avatar_url: null,
+          stripe_account_id: null,
+          stripe_account_status: null,
+          stripe_connected_at: null,
+          stripe_customer_id: null,
           created_at: session.user.created_at,
           updated_at: session.user.updated_at || session.user.created_at
         }

@@ -407,10 +407,15 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
           </div>
 
           {/* Title */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-medium text-foreground break-words leading-tight">
               {list.title || 'Untitled List'}
             </h1>
+            {list.description && (
+              <p className="text-base text-muted-foreground leading-relaxed">
+                {list.description}
+              </p>
+            )}
           </div>
 
           {/* Stats */}
@@ -586,10 +591,7 @@ const PublicLinkItem = memo(function PublicLinkItem({
             {link.title || getHostname(link.url)}
           </h3>
         </div>
-        <p
-          className="text-sm text-muted-foreground flex-shrink-0"
-          style={{ color: 'var(--muted-foreground)' }}
-        >
+        <p className="text-sm text-muted-foreground flex-shrink-0">
           {getHostname(link.url)}
         </p>
       </div>

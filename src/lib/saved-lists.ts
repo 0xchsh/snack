@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/database'
+import type { Database } from '@/types/database.types'
 import type { SavedList, SavedListInsert, SavedListWithDetails, SavedListCard, User, ListWithUser } from '@/types'
 
 // Initialize Supabase client

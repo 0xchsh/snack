@@ -2,18 +2,25 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import Image from 'next/image'
-import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, Check, Copy, ExternalLink, Eye, Trash2 } from 'lucide-react'
+import { Check, Copy, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui'
-import { TopBar, BrandMark, PageActions, AppContainer } from '@/components/primitives'
+import { TopBar, BrandMark, AppContainer } from '@/components/primitives'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { ListWithLinks, CreateListForm, LinkCreatePayload } from '@/types'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
 import { LoadingState } from '@/components/loading-state'
+import {
+  useUpdateListMutation,
+  useDeleteListMutation,
+  useAddLinkMutation,
+  useDeleteLinkMutation,
+  useReorderLinksMutation,
+  listKeys,
+} from '@/hooks/queries'
+import { useQueryClient } from '@tanstack/react-query'
 
 // Lazy load heavy components for better performance
 const ListEditor = dynamic(() => import('@/components/list-editor').then(mod => ({ default: mod.ListEditor })), {
@@ -39,15 +46,20 @@ export default function UserListPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showCreateList, setShowCreateList] = useState(false)
-  const [isListPublic, setIsListPublic] = useState(true)
-  const [isListPaid, setIsListPaid] = useState(false)
   const [showCopySuccess, setShowCopySuccess] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
   const { user } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
-  
+  const queryClient = useQueryClient()
+
+  // TanStack Query mutations
+  const updateListMutation = useUpdateListMutation()
+  const deleteListMutation = useDeleteListMutation()
+  const addLinkMutation = useAddLinkMutation()
+  const deleteLinkMutation = useDeleteLinkMutation()
+  const reorderLinksMutation = useReorderLinksMutation()
+
   const isAuthenticated = !!user
   const currentUserId = user?.id || null
   const forceEditView = searchParams?.get('view') === 'edit'
@@ -137,152 +149,109 @@ export default function UserListPage() {
 
   const handleUpdateList = async (updates: Partial<ListWithLinks>) => {
     if (!currentList) return
-    
+
     try {
-      const response = await fetch(`/api/lists/${currentList.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updates),
+      const updatedList = await updateListMutation.mutateAsync({
+        listId: currentList.id,
+        updates,
       })
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || `Failed to update list (${response.status})`)
-      }
-      
-      const data = await response.json()
-      
-      // If the API returned updated data, use it
-      if (data.data) {
-        setCurrentList(data.data)
-      } else if (data.success) {
-        // Update succeeded but no data returned, just apply the updates locally
-        setCurrentList(prev => prev ? { ...prev, ...updates } : null)
-      }
+      // Update local state with the response
+      setCurrentList(updatedList)
     } catch (error) {
       console.error('Error updating list:', error)
-      // Could add toast notification here
     }
   }
 
   const handleAddLink = async (linkData: LinkCreatePayload) => {
     if (!currentList) return
-    
+
     try {
-      const response = await fetch(`/api/lists/${currentList.id}/links`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(linkData),
+      const updatedList = await addLinkMutation.mutateAsync({
+        listId: currentList.id,
+        link: linkData,
       })
-      
-      if (!response.ok) {
-        throw new Error('Failed to add link')
-      }
-      
-      const data = await response.json()
-      
-      // Re-fetch the list to get correct positions for all links
-      const listResponse = await fetch(`/api/users/${username}/lists/${listId}`, {
-        cache: 'no-store'
-      })
-      
-      if (listResponse.ok) {
-        const listData = await listResponse.json()
-        setCurrentList(listData.data)
-      }
+      // Update local state with the response (has real IDs, OG data)
+      setCurrentList(updatedList)
     } catch (error) {
       console.error('Error adding link:', error)
-      // Could add toast notification here
     }
   }
 
   const handleRemoveLink = async (linkId: string) => {
     if (!currentList) return
-    
+
+    // Optimistic update for local state
+    setCurrentList(prev =>
+      prev
+        ? {
+            ...prev,
+            links: prev.links?.filter(link => link.id !== linkId) || [],
+          }
+        : null
+    )
+
     try {
-      const response = await fetch(`/api/lists/${currentList.id}/links/${linkId}`, {
-        method: 'DELETE',
+      await deleteLinkMutation.mutateAsync({
+        listId: currentList.id,
+        linkId,
       })
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || `Failed to remove link (${response.status})`)
-      }
-      
-      setCurrentList(prev => prev ? {
-        ...prev,
-        links: prev.links?.filter(link => link.id !== linkId) || []
-      } : null)
     } catch (error) {
       console.error('Error removing link:', error)
-      // Could add toast notification here
+      // Rollback handled by mutation, but also refresh local state
+      const response = await fetch(`/api/users/${username}/lists/${listId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setCurrentList(data.data)
+      }
     }
   }
 
   const handleReorderLinks = async (linkIds: string[]) => {
     if (!currentList) return
-    
+
+    // Optimistic update for local state
+    const linkMap = new Map(currentList.links?.map(link => [link.id, link]) || [])
+    const reorderedLinks = linkIds
+      .map(id => linkMap.get(id))
+      .filter(Boolean) as typeof currentList.links
+
+    setCurrentList(prev =>
+      prev
+        ? {
+            ...prev,
+            links: reorderedLinks.map((link, index) => ({
+              ...link,
+              position: index,
+            })),
+          }
+        : null
+    )
+
     try {
-      // Update local state immediately for better UX
-      const linkMap = new Map(currentList.links?.map(link => [link.id, link]) || [])
-      const reorderedLinks = linkIds.map(id => linkMap.get(id)).filter(Boolean) as typeof currentList.links
-      
-      setCurrentList(prev => prev ? {
-        ...prev,
-        links: reorderedLinks.map((link, index) => ({
-          ...link,
-          position: index
-        }))
-      } : null)
-      
-      // Then sync with server
-      const response = await fetch(`/api/lists/${currentList.id}/links`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ linkIds }),
+      await reorderLinksMutation.mutateAsync({
+        listId: currentList.id,
+        linkIds,
       })
-      
-      if (!response.ok) {
-        // Revert on failure
-        setCurrentList(currentList)
-        throw new Error('Failed to reorder links')
-      }
     } catch (error) {
       console.error('Error reordering links:', error)
-      // Could add toast notification here
+      // Rollback by refetching
+      const response = await fetch(`/api/users/${username}/lists/${listId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setCurrentList(data.data)
+      }
     }
-  }
-
-  const handleLogout = async () => {
-    // TODO: Implement proper logout functionality
-    router.push('/auth/sign-in')
   }
 
   const handleDelete = async () => {
     if (!currentList) return
 
-    setIsDeleting(true)
     try {
-      const response = await fetch(`/api/lists/${currentList.id}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete list')
-      }
-
-      // Redirect to dashboard and refresh to invalidate cache
+      await deleteListMutation.mutateAsync(currentList.id)
+      // Redirect to dashboard
       router.push('/dashboard')
-      router.refresh()
     } catch (error) {
       console.error('Error deleting list:', error)
-      setIsDeleting(false)
       setShowDeleteModal(false)
     }
   }
@@ -433,17 +402,17 @@ export default function UserListPage() {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                disabled={isDeleting}
+                disabled={deleteListMutation.isPending}
                 className="px-4 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                disabled={isDeleting}
+                disabled={deleteListMutation.isPending}
                 className="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-md transition-colors disabled:opacity-50"
               >
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {deleteListMutation.isPending ? 'Deleting...' : 'Delete'}
               </button>
             </div>
           </motion.div>

@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { ErrorBoundary } from '@/components/error-boundary'
 import { ToastProvider } from '@/components/toast'
 import { AuthProvider } from '@/hooks/useAuth'
+import { QueryProvider } from '@/providers/query-provider'
 
 export const metadata: Metadata = {
   title: 'Snack - Curated Link Collections',
@@ -25,11 +26,13 @@ export default function RootLayout({
       <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider defaultTheme="system" storageKey="snack-theme">
           <ErrorBoundary>
-            <ToastProvider>
-              <AuthProvider>
-                {children}
-              </AuthProvider>
-            </ToastProvider>
+            <QueryProvider>
+              <ToastProvider>
+                <AuthProvider>
+                  {children}
+                </AuthProvider>
+              </ToastProvider>
+            </QueryProvider>
           </ErrorBoundary>
         </ThemeProvider>
       </body>

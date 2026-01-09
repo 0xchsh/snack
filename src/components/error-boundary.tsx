@@ -120,7 +120,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <div className="flex gap-3">
                 <Button
                   onClick={this.handleReset}
-                  variant="default"
+                  variant="primary"
                   size="sm"
                   className="flex-1 gap-2"
                 >

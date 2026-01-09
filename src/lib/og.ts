@@ -36,7 +36,7 @@ export async function fetchOGData(url: string): Promise<OGData> {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.9'
           },
-          signal,
+          ...(signal && { signal }),
         })
       } catch (error) {
         console.warn('Direct OG fetch error, falling back to proxy', { url, error })
@@ -143,7 +143,7 @@ function parseOGTags(html: string, baseUrl: URL): OGData {
       }
     }
 
-    if (relMatch && hrefMatch && relMatch[1]?.toLowerCase().includes('icon')) {
+    if (relMatch && hrefMatch?.[1] && relMatch[1]?.toLowerCase().includes('icon')) {
       ogData.favicon_url = resolveUrl(hrefMatch[1], baseUrl)
     }
   }
@@ -184,14 +184,14 @@ function decodeHtmlEntities(value: string): string {
     .replace(/&#39;/g, '\'')
 }
 
-function createTimeoutSignal(timeoutMs: number): { signal?: AbortSignal; cleanup?: () => void } {
+function createTimeoutSignal(timeoutMs: number): { signal: AbortSignal | null; cleanup?: () => void } {
   const abortSignalTimeout = (AbortSignal as unknown as { timeout?: (ms: number) => AbortSignal })?.timeout
   if (typeof abortSignalTimeout === 'function') {
     return { signal: abortSignalTimeout(timeoutMs) }
   }
 
   if (typeof AbortController === 'undefined') {
-    return { signal: undefined }
+    return { signal: null }
   }
 
   const controller = new AbortController()
@@ -214,7 +214,7 @@ async function fetchHtmlViaProxy(url: URL): Promise<string | null> {
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
           'Accept-Language': 'en-US,en;q=0.9',
         },
-        signal,
+        ...(signal && { signal }),
       })
 
       if (!response.ok) {

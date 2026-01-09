@@ -78,8 +78,11 @@ export const auth = {
         profile_picture_url: authUser.user_metadata?.avatar_url || null,
         profile_is_public: true,
         bio: authUser.user_metadata?.bio || null,
-        subscription_status: 'free',
-        subscription_tier: 'free',
+        avatar_url: null,
+        stripe_account_id: null,
+        stripe_account_status: null,
+        stripe_connected_at: null,
+        stripe_customer_id: null,
         created_at: authUser.created_at,
         updated_at: authUser.updated_at || authUser.created_at
       }

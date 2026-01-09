@@ -212,11 +212,11 @@ export default function UsernamePage() {
               </h1>
             )}
             <div className="flex items-start text-base font-normal leading-[1.5]">
-              <span className="text-neutral-400">@</span>
-              <span className="text-neutral-400">{profile.user.username}</span>
+              <span className="text-muted-foreground">@</span>
+              <span className="text-muted-foreground">{profile.user.username}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <p className="text-base font-normal text-neutral-400">
+              <p className="text-base font-normal text-muted-foreground">
                 Joined {joinDate}
               </p>
             </div>
@@ -259,7 +259,7 @@ export default function UsernamePage() {
                           {list.title || 'Untitled List'}
                         </span>
                       </div>
-                      <span className="text-base text-neutral-400 ml-4 flex-shrink-0">
+                      <span className="text-base text-muted-foreground ml-4 flex-shrink-0">
                         {linkCount} {linkCount === 1 ? 'link' : 'links'}
                       </span>
                     </Link>

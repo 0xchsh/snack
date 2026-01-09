@@ -74,7 +74,7 @@ function parseGoogleMapsUrl(url: string): {
     const coordPattern = /@(-?\d+\.?\d*),(-?\d+\.?\d*),(\d+\.?\d*)z?/
     const coordMatch = url.match(coordPattern)
 
-    if (coordMatch) {
+    if (coordMatch && coordMatch[1] && coordMatch[2] && coordMatch[3]) {
       coordinates = {
         lat: parseFloat(coordMatch[1]),
         lng: parseFloat(coordMatch[2])
@@ -87,7 +87,7 @@ function parseGoogleMapsUrl(url: string): {
       const placePattern = /\/maps\/place\/([^/@?]+)/
       const placeMatch = url.match(placePattern)
 
-      if (placeMatch) {
+      if (placeMatch?.[1]) {
         // Decode URI component and replace + with spaces
         placeName = decodeURIComponent(placeMatch[1]).replace(/\+/g, ' ')
       }
@@ -98,7 +98,7 @@ function parseGoogleMapsUrl(url: string): {
       const searchPattern = /\/maps\/search\/([^/@?]+)/
       const searchMatch = url.match(searchPattern)
 
-      if (searchMatch) {
+      if (searchMatch?.[1]) {
         placeName = decodeURIComponent(searchMatch[1]).replace(/\+/g, ' ')
       }
     }

@@ -7,11 +7,15 @@ import { Eye, Star, Link2, List, Plus } from 'lucide-react'
 
 import { Button } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
-import { useLists } from '@/hooks/useLists'
+import {
+  useListsQuery,
+  useCreateEmptyListMutation,
+  useSavedListsQuery,
+  useAnalyticsStatsQuery,
+} from '@/hooks/queries'
 import { AppContainer } from '@/components/primitives'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { LoadingState } from '@/components/loading-state'
-import { ListWithLinks } from '@/types'
 
 function formatCount(count: number): string {
   if (count >= 1000000) {
@@ -29,89 +33,29 @@ function DashboardContent() {
   const tab = searchParams?.get('tab') || 'your-lists'
 
   const { user, loading } = useAuth()
-  const { lists, loading: listsLoading, createEmptyList, refreshLists } = useLists()
   const [mounted, setMounted] = useState(false)
-  const [creatingList, setCreatingList] = useState(false)
-  const [savedLists, setSavedLists] = useState<ListWithLinks[]>([])
-  const [savedListsLoading, setSavedListsLoading] = useState(false)
-  const [analyticsData, setAnalyticsData] = useState<{
-    totalViews: number
-    totalClicks: number
-    totalSaves: number
-    listStats: Record<string, { views: number; clicks: number }>
-  } | null>(null)
+
+  // TanStack Query hooks
+  const { data: lists = [], isLoading: listsLoading } = useListsQuery()
+  const { data: savedLists = [], isLoading: savedListsLoading } = useSavedListsQuery()
+  const { data: analyticsData } = useAnalyticsStatsQuery()
+  const createEmptyListMutation = useCreateEmptyListMutation()
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Refresh lists when viewing the "your-lists" tab to ensure fresh data
-  useEffect(() => {
-    if (tab === 'your-lists' || !tab) {
-      refreshLists()
-    }
-  }, [tab, refreshLists])
-
-  // Fetch saved lists when on saved tab
-  useEffect(() => {
-    if (tab === 'saved' && user) {
-      setSavedListsLoading(true)
-      fetch('/api/saved-lists')
-        .then(async res => {
-          const text = await res.text()
-          if (!text) return { success: false, data: [] }
-          return JSON.parse(text)
-        })
-        .then(data => {
-          if (data.success) {
-            setSavedLists(data.data)
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching saved lists:', error)
-        })
-        .finally(() => {
-          setSavedListsLoading(false)
-        })
-    }
-  }, [tab, user])
-
-  // Fetch analytics data when on stats tab
-  useEffect(() => {
-    if (tab === 'stats' && user) {
-      fetch('/api/analytics/stats')
-        .then(async res => {
-          const text = await res.text()
-          if (!text) return { success: false, data: null }
-          return JSON.parse(text)
-        })
-        .then(data => {
-          if (data.success && data.data) {
-            setAnalyticsData(data.data)
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching analytics:', error)
-        })
-    }
-  }, [tab, user])
-
   const handleCreateList = async () => {
-    setCreatingList(true)
     try {
-      const newList = await createEmptyList()
+      const newList = await createEmptyListMutation.mutateAsync()
       if (user?.username) {
         // New lists should open in edit mode so user can add content
         router.push(`/${user.username}/${newList.public_id || newList.id}?view=edit`)
       } else {
         router.push(`/list/${newList.public_id || newList.id}?view=edit`)
       }
-      // Refresh router cache to ensure dashboard shows updated lists when navigating back
-      router.refresh()
     } catch (error) {
       console.error('Error creating list:', error)
-    } finally {
-      setCreatingList(false)
     }
   }
 
@@ -130,12 +74,16 @@ function DashboardContent() {
 
   const totalLinks = lists.reduce((acc, list) => acc + (list.links?.length || 0), 0)
 
+  const currentTab = tab || 'your-lists'
+
   return (
     <div className="min-h-screen bg-background">
       <AppContainer variant="app">
         <div className="py-8">
-        {tab === 'your-lists' || !tab ? (
           <div className="max-w-[560px] w-full mx-auto">
+
+        {currentTab === 'your-lists' ? (
+          <>
             {/* Breadcrumb */}
             <div className="mb-6">
               <Breadcrumb
@@ -153,7 +101,7 @@ function DashboardContent() {
               </div>
               <Button
                 onClick={handleCreateList}
-                disabled={creatingList}
+                disabled={createEmptyListMutation.isPending}
                 variant="secondary"
                 size="default"
                 className="gap-2"
@@ -176,11 +124,11 @@ function DashboardContent() {
                   </p>
                   <Button
                     onClick={handleCreateList}
-                    disabled={creatingList}
+                    disabled={createEmptyListMutation.isPending}
                     size="lg"
                     className="px-6 py-3"
                   >
-                    {creatingList ? 'Creating...' : 'Create Your First List'}
+                    {createEmptyListMutation.isPending ? 'Creating...' : 'Create Your First List'}
                   </Button>
                 </div>
               ) : (
@@ -204,13 +152,14 @@ function DashboardContent() {
                 ))
               )}
             </div>
-          </div>
-        ) : tab === 'saved' ? (
-          <div className="max-w-[560px] w-full mx-auto">
+          </>
+        ) : currentTab === 'saved' ? (
+          <>
+            {/* Breadcrumb */}
             <div className="mb-6">
               <Breadcrumb
                 username={user.username || 'User'}
-                currentPage="Saved Lists"
+                currentPage="Saved"
                 profilePictureUrl={user.profile_picture_url}
               />
             </div>
@@ -233,7 +182,7 @@ function DashboardContent() {
                 </div>
                 <h3 className="text-lg font-semibold mb-2">No saved lists yet</h3>
                 <p className="text-muted-foreground">
-                  Click on the bookmark icon on any list to save it here.
+                  Click on the star icon on any list to save it here.
                 </p>
               </div>
             ) : (
@@ -267,30 +216,31 @@ function DashboardContent() {
                 })}
               </div>
             )}
-          </div>
-        ) : tab === 'stats' ? (
-          <div className="max-w-[560px] w-full mx-auto">
+          </>
+        ) : currentTab === 'stats' ? (
+          <>
+            {/* Breadcrumb */}
             <div className="mb-6">
               <Breadcrumb
                 username={user.username || 'User'}
-                currentPage="Your Stats"
+                currentPage="Stats"
                 profilePictureUrl={user.profile_picture_url}
               />
             </div>
 
             {/* Summary Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-6" style={{ marginBottom: '12px' }}>
-              <div className="text-center border border-border rounded-md py-4">
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="text-center border border-border rounded-lg py-4">
                 <div className="text-2xl font-bold text-foreground">{formatCount(lists.length)}</div>
                 <div className="text-sm text-muted-foreground">lists</div>
               </div>
-              <div className="text-center border border-border rounded-md py-4">
+              <div className="text-center border border-border rounded-lg py-4">
                 <div className="text-2xl font-bold text-foreground">
                   {analyticsData ? formatCount(analyticsData.totalViews) : '0'}
                 </div>
                 <div className="text-sm text-muted-foreground">views</div>
               </div>
-              <div className="text-center border border-border rounded-md py-4">
+              <div className="text-center border border-border rounded-lg py-4">
                 <div className="text-2xl font-bold text-foreground">
                   {analyticsData ? formatCount(analyticsData.totalSaves) : '0'}
                 </div>
@@ -336,8 +286,9 @@ function DashboardContent() {
                 )
               })}
             </div>
-          </div>
+          </>
         ) : null}
+          </div>
         </div>
       </AppContainer>
     </div>

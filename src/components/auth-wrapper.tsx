@@ -28,8 +28,11 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
             profile_picture_url: data.user.metadata?.avatar_url || null,
             profile_is_public: true,
             bio: data.user.metadata?.bio || null,
-            subscription_status: 'free',
-            subscription_tier: 'free',
+            avatar_url: null,
+            stripe_account_id: null,
+            stripe_account_status: null,
+            stripe_connected_at: null,
+            stripe_customer_id: null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import type { Database } from '@/types/database'
+import type { Database } from '@/types/database.types'
 
 type ListSummary = Pick<Database['public']['Tables']['lists']['Row'], 'id' | 'public_id' | 'title' | 'emoji' | 'save_count'>
 type TopList = ListSummary & { view_count: number; click_count: number }

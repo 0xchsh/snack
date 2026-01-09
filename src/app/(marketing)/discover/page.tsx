@@ -262,7 +262,7 @@ export default function DiscoverPage() {
                             <DefaultAvatar size={16} />
                           )}
                         </div>
-                        <span className="text-sm text-neutral-400 truncate">
+                        <span className="text-sm text-muted-foreground truncate">
                           {displayName}
                         </span>
                       </div>
@@ -270,7 +270,7 @@ export default function DiscoverPage() {
                   </div>
 
                   {/* Right side - stats */}
-                  <div className="flex items-center gap-3 ml-4 flex-shrink-0 text-neutral-400">
+                  <div className="flex items-center gap-3 ml-4 flex-shrink-0 text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <Link2 className="w-4 h-4" />
                       <span className="text-sm">{linkCount}</span>

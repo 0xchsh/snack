@@ -62,7 +62,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         id,
         type,
         message,
-        description,
+        ...(description !== undefined && { description }),
         duration,
       }
 

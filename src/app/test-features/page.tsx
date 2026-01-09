@@ -100,7 +100,7 @@ export default function TestFeaturesPage() {
               <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={handleTestToasts}
-                  variant="default"
+                  variant="primary"
                   size="sm"
                 >
                   Test All Toasts
@@ -198,7 +198,7 @@ export default function TestFeaturesPage() {
                 {!user && (
                   <Button
                     onClick={() => window.location.href = '/auth/sign-in'}
-                    variant="default"
+                    variant="primary"
                     size="sm"
                   >
                     Go to Sign In

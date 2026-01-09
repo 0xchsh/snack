@@ -81,7 +81,7 @@ export function createErrorResponse(
           details: error.details,
         },
         timestamp: new Date().toISOString(),
-        path,
+        ...(path !== undefined && { path }),
       },
       { status: error.statusCode }
     )
@@ -142,7 +142,7 @@ export function createErrorResponse(
           details: process.env.NODE_ENV === 'development' ? { stack: error.stack } : undefined,
         },
         timestamp: new Date().toISOString(),
-        path,
+        ...(path !== undefined && { path }),
       },
       { status: 500 }
     )
@@ -158,7 +158,7 @@ export function createErrorResponse(
         details: process.env.NODE_ENV === 'development' ? { error: String(error) } : undefined,
       },
       timestamp: new Date().toISOString(),
-      path,
+      ...(path !== undefined && { path }),
     },
     { status: 500 }
   )

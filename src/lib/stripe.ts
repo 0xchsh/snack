@@ -15,7 +15,7 @@ export function getStripe(): Stripe {
   }
 
   return new Stripe(secretKey, {
-    apiVersion: '2024-11-20.acacia', // Use latest API version
+    apiVersion: '2025-10-29.clover', // Use latest API version
     typescript: true,
     appInfo: {
       name: 'Snack',
@@ -145,7 +145,7 @@ export async function createCheckoutSession(params: {
         destination: params.creatorStripeAccountId,
       },
       statement_descriptor: 'SNACK',
-      statement_descriptor_suffix: statementDescriptorSuffix,
+      ...(statementDescriptorSuffix && { statement_descriptor_suffix: statementDescriptorSuffix }),
       metadata: {
         list_id: params.listId,
         buyer_id: params.buyerId,

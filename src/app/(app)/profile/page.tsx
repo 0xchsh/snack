@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LogOut, Edit, Loader2, Trash2 } from 'lucide-react'
+import { LogOut, Edit, Loader2, Trash2, Copy, ExternalLink } from 'lucide-react'
 
 import { Button } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
@@ -319,6 +319,46 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
         </div>
       </div>
 
+      {/* Profile URL Section */}
+      <div className="bg-background border border-border rounded-xl p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold mb-1">Your Profile URL</h3>
+            <p className="text-sm text-muted-foreground font-mono">
+              snack.xyz/@{currentUser.username}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={async () => {
+                await navigator.clipboard.writeText(`https://snack.xyz/@${currentUser.username}`)
+                setMessage({ type: 'success', text: 'Profile URL copied!' })
+                setTimeout(() => setMessage(null), 2000)
+              }}
+            >
+              <Copy className="w-4 h-4" />
+              Copy
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              asChild
+            >
+              <Link href={`/${currentUser.username}`} target="_blank">
+                <ExternalLink className="w-4 h-4" />
+                View
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Personal Information */}
       <div className="bg-background border border-border rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
@@ -411,6 +451,28 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
               <div className="px-4 py-3 bg-muted rounded-lg text-foreground">
                 {currentUser.email}
               </div>
+            )}
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium mb-2">Bio</label>
+            {isEditing ? (
+              <textarea
+                value={formData.bio}
+                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary resize-none"
+                placeholder="Tell people about yourself"
+                maxLength={160}
+                rows={3}
+                disabled={isSaving}
+              />
+            ) : (
+              <div className="px-4 py-3 bg-muted rounded-lg text-foreground min-h-[94px]">
+                {currentUser.bio || <span className="text-muted-foreground">No bio yet</span>}
+              </div>
+            )}
+            {isEditing && (
+              <p className="text-xs text-muted-foreground mt-1">{formData.bio?.length || 0}/160 characters</p>
             )}
           </div>
         </div>

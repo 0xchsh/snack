@@ -1,4 +1,4 @@
-import type { Database } from './database'
+import type { Database } from './database.types'
 
 export type User = Database['public']['Tables']['users']['Row']
 export type UserInsert = Database['public']['Tables']['users']['Insert']
@@ -25,18 +25,7 @@ export type CreatorPayout = Database['public']['Tables']['creator_payouts']['Row
 export type CreatorPayoutInsert = Database['public']['Tables']['creator_payouts']['Insert']
 export type CreatorPayoutUpdate = Database['public']['Tables']['creator_payouts']['Update']
 
-// Legacy subscription types (not currently used)
-export type Subscription = Database['public']['Tables']['subscriptions']['Row']
-export type SubscriptionInsert = Database['public']['Tables']['subscriptions']['Insert']
-export type SubscriptionUpdate = Database['public']['Tables']['subscriptions']['Update']
-
-export type PaymentMethod = Database['public']['Tables']['payment_methods']['Row']
-export type PaymentMethodInsert = Database['public']['Tables']['payment_methods']['Insert']
-export type PaymentMethodUpdate = Database['public']['Tables']['payment_methods']['Update']
-
-export type Invoice = Database['public']['Tables']['invoices']['Row']
-export type InvoiceInsert = Database['public']['Tables']['invoices']['Insert']
-export type InvoiceUpdate = Database['public']['Tables']['invoices']['Update']
+// Legacy subscription types removed - tables no longer exist in database
 
 // Extended types with relations
 export type ListWithLinks = List & {

@@ -102,7 +102,7 @@ export function ListPricingSettings({
           </p>
         </div>
         <Button
-          variant={isPaid ? 'default' : 'outline'}
+          variant={isPaid ? 'primary' : 'outline'}
           size="sm"
           onClick={handleTogglePaid}
           className="flex items-center gap-2"

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Star, BarChart3 } from 'lucide-react'
+import { Star, BarChart3, List } from 'lucide-react'
 import { useEffect, Suspense, useState } from 'react'
 
 import { Button } from '@/components/ui'
@@ -9,7 +9,6 @@ import { TopBar, BrandMark, UserMenu } from '@/components/primitives'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LoadingState } from '@/components/loading-state'
 import { useAuth } from '@/hooks/useAuth'
-import { ListsProvider } from '@/hooks/useLists'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 /**
@@ -76,9 +75,26 @@ function AppLayoutContent({
       <TopBar variant="app">
         <TopBar.Left>
           <BrandMark variant="app" href="/dashboard" />
+          <Link
+            href="/discover"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Discover
+          </Link>
         </TopBar.Left>
 
         <TopBar.Right>
+          <Button
+            asChild
+            variant={!activeTab ? 'secondary' : 'muted'}
+            size="icon"
+            className={!activeTab ? 'text-foreground' : undefined}
+            aria-label="Your lists"
+          >
+            <Link href="/dashboard">
+              <List className="w-4 h-4" />
+            </Link>
+          </Button>
           <Button
             asChild
             variant={activeTab === 'saved' ? 'secondary' : 'muted'}
@@ -123,14 +139,12 @@ export default function AppLayout({
   children: React.ReactNode
 }) {
   return (
-    <ListsProvider>
-      <Suspense fallback={
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <LoadingState message="Loading..." />
-        </div>
-      }>
-        <AppLayoutContent>{children}</AppLayoutContent>
-      </Suspense>
-    </ListsProvider>
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <LoadingState message="Loading..." />
+      </div>
+    }>
+      <AppLayoutContent>{children}</AppLayoutContent>
+    </Suspense>
   )
 }
