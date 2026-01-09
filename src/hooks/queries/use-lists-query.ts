@@ -10,6 +10,7 @@ import { ListWithLinks, LinkCreatePayload, CreateListForm } from '@/types'
 export const listKeys = {
   all: ['lists'] as const,
   list: (id: string) => ['lists', id] as const,
+  publicList: (username: string, listId: string) => ['lists', 'public', username, listId] as const,
 }
 
 // ============================================================================
@@ -48,6 +49,66 @@ export function useListQuery(listId: string | undefined) {
       return result.data
     },
     enabled: !!listId,
+  })
+}
+
+/**
+ * Fetch a public list by username and listId with placeholderData from cache
+ * This provides instant navigation when coming from the dashboard
+ */
+export function usePublicListQuery(
+  username: string | undefined,
+  listId: string | undefined
+) {
+  const queryClient = useQueryClient()
+
+  return useQuery({
+    queryKey: listKeys.publicList(username || '', listId || ''),
+    queryFn: async (): Promise<ListWithLinks> => {
+      const encodedUsername = encodeURIComponent(username || '')
+      const encodedListId = encodeURIComponent(listId || '')
+
+      // Try the username/listId endpoint first
+      const response = await fetch(`/api/users/${encodedUsername}/lists/${encodedListId}`)
+
+      if (response.ok) {
+        const result = await response.json()
+        return result.data
+      }
+
+      // Fall back to generic list endpoint for legacy IDs
+      if (response.status === 404) {
+        const fallbackResponse = await fetch(`/api/lists/${encodedListId}`)
+        if (fallbackResponse.ok) {
+          const fallbackResult = await fallbackResponse.json()
+          return fallbackResult.data
+        }
+      }
+
+      if (response.status === 403) {
+        throw new Error('This list is private')
+      }
+
+      throw new Error('List not found')
+    },
+    enabled: !!username && !!listId,
+    // Use cached data from dashboard while fetching fresh data
+    placeholderData: () => {
+      // Try to find in the all lists cache (from dashboard)
+      const allLists = queryClient.getQueryData<ListWithLinks[]>(listKeys.all)
+      const cachedList = allLists?.find(
+        (list) => list.id === listId || list.public_id === listId
+      )
+      if (cachedList) return cachedList
+
+      // Try individual list cache (from prefetch)
+      const individualList = queryClient.getQueryData<ListWithLinks>(
+        listKeys.list(listId || '')
+      )
+      return individualList
+    },
+    // Keep showing placeholder while refetching
+    staleTime: 30 * 1000, // Consider fresh for 30 seconds
   })
 }
 

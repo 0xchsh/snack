@@ -11,8 +11,8 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { ListWithLinks, CreateListForm, LinkCreatePayload } from '@/types'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
-import { LoadingState } from '@/components/loading-state'
 import {
+  usePublicListQuery,
   useUpdateListMutation,
   useDeleteListMutation,
   useAddLinkMutation,
@@ -22,19 +22,46 @@ import {
 } from '@/hooks/queries'
 import { useQueryClient } from '@tanstack/react-query'
 
+// Skeleton component for list page
+function ListPageSkeleton() {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto py-12 max-w-[560px] px-4 md:px-0">
+        {/* Header skeleton */}
+        <div className="flex items-center gap-3 mb-6 animate-pulse">
+          <div className="w-10 h-10 bg-muted rounded-lg" />
+          <div className="h-6 bg-muted rounded w-48" />
+        </div>
+        {/* Links skeleton */}
+        <div className="space-y-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex items-center gap-3 p-3 border border-border rounded-lg animate-pulse">
+              <div className="w-10 h-10 bg-muted rounded" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-muted rounded w-3/4" />
+                <div className="h-3 bg-muted rounded w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Lazy load heavy components for better performance
 const ListEditor = dynamic(() => import('@/components/list-editor').then(mod => ({ default: mod.ListEditor })), {
-  loading: () => <LoadingState message="Loading editor..." />,
+  loading: () => <ListPageSkeleton />,
   ssr: false
 })
 
 const PublicListView = dynamic(() => import('@/components/public-list-view').then(mod => ({ default: mod.PublicListView })), {
-  loading: () => <LoadingState message="Loading list..." />,
+  loading: () => <ListPageSkeleton />,
   ssr: false
 })
 
 const CreateList = dynamic(() => import('@/components/create-list').then(mod => ({ default: mod.CreateList })), {
-  loading: () => <LoadingState message="Loading form..." />,
+  loading: () => <ListPageSkeleton />,
   ssr: false
 })
 
@@ -42,16 +69,35 @@ export default function UserListPage() {
   const params = useParams()
   const username = params?.username as string
   const listId = params?.listId as string
-  const [currentList, setCurrentList] = useState<ListWithLinks | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [showCreateList, setShowCreateList] = useState(false)
   const [showCopySuccess, setShowCopySuccess] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [validationError, setValidationError] = useState<string | null>(null)
   const { user } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const queryClient = useQueryClient()
+
+  // Validate username format
+  useEffect(() => {
+    if (username) {
+      const validation = validateUsername(username)
+      if (!validation.valid) {
+        setValidationError('Invalid username format')
+      }
+    }
+  }, [username])
+
+  // TanStack Query - fetches with placeholderData from cache for instant navigation
+  const {
+    data: currentList,
+    isLoading,
+    error: queryError,
+    isPlaceholderData,
+  } = usePublicListQuery(
+    validationError ? undefined : username,
+    validationError ? undefined : listId
+  )
 
   // TanStack Query mutations
   const updateListMutation = useUpdateListMutation()
@@ -67,78 +113,16 @@ export default function UserListPage() {
   // Get query string once to avoid recreating on every render
   const queryString = searchParams?.toString() ?? ''
 
-  // Fetch list data from API using username and listId
+  // Handle redirect for canonical username
   useEffect(() => {
-    if (!username || !listId) return
-
-    // Validate username format first
-    const validation = validateUsername(username)
-    if (!validation.valid) {
-      setError('Invalid username format')
-      setLoading(false)
-      return
+    if (currentList?.user?.username && currentList.user.username !== username) {
+      router.replace(`/${currentList.user.username}/${listId}${queryString ? `?${queryString}` : ''}`)
     }
+  }, [currentList, username, listId, queryString, router])
 
-    const fetchList = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-
-        const encodedUsername = encodeURIComponent(username)
-        const encodedListId = encodeURIComponent(listId)
-
-        // Use new API endpoint that resolves by username and listId
-        const response = await fetch(`/api/users/${encodedUsername}/lists/${encodedListId}`)
-
-        if (response.ok) {
-          const data = await response.json()
-          setCurrentList(data.data)
-          return
-        }
-
-        if (response.status === 404) {
-          // Fall back to the generic list endpoint which can resolve by id or public_id
-          const fallbackResponse = await fetch(`/api/lists/${encodedListId}`, { cache: 'no-store' })
-
-          if (fallbackResponse.ok) {
-            const fallbackData = await fallbackResponse.json()
-            const fallbackList = fallbackData.data
-
-            setCurrentList(fallbackList)
-            setError(null)
-
-            // Redirect to the canonical username route if this slug belongs to someone else
-            if (fallbackList?.user?.username && fallbackList.user.username !== username) {
-              router.replace(`/${fallbackList.user.username}/${listId}${queryString ? `?${queryString}` : ''}`)
-            }
-            return
-          }
-
-          setError('List not found')
-          return
-        }
-
-        if (response.status === 403) {
-          setError('This list is private')
-          return
-        }
-
-        const data = await response.json().catch(() => ({}))
-        setError(data.error || 'Failed to load list')
-      } catch (err) {
-        console.error('Error fetching list:', err)
-        setError('Failed to load list')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchList()
-  }, [username, listId, router, queryString])
-  
   // Determine if user can edit this list
   const canEdit = isAuthenticated && currentUserId === currentList?.user_id
-  
+
   // Determine if list should be visible
   const canView = currentList?.is_public || canEdit
 
@@ -151,12 +135,12 @@ export default function UserListPage() {
     if (!currentList) return
 
     try {
-      const updatedList = await updateListMutation.mutateAsync({
+      await updateListMutation.mutateAsync({
         listId: currentList.id,
         updates,
       })
-      // Update local state with the response
-      setCurrentList(updatedList)
+      // Invalidate to refetch with updated data
+      queryClient.invalidateQueries({ queryKey: listKeys.publicList(username, listId) })
     } catch (error) {
       console.error('Error updating list:', error)
     }
@@ -166,12 +150,12 @@ export default function UserListPage() {
     if (!currentList) return
 
     try {
-      const updatedList = await addLinkMutation.mutateAsync({
+      await addLinkMutation.mutateAsync({
         listId: currentList.id,
         link: linkData,
       })
-      // Update local state with the response (has real IDs, OG data)
-      setCurrentList(updatedList)
+      // Invalidate to refetch with new link
+      queryClient.invalidateQueries({ queryKey: listKeys.publicList(username, listId) })
     } catch (error) {
       console.error('Error adding link:', error)
     }
@@ -180,52 +164,20 @@ export default function UserListPage() {
   const handleRemoveLink = async (linkId: string) => {
     if (!currentList) return
 
-    // Optimistic update for local state
-    setCurrentList(prev =>
-      prev
-        ? {
-            ...prev,
-            links: prev.links?.filter(link => link.id !== linkId) || [],
-          }
-        : null
-    )
-
     try {
       await deleteLinkMutation.mutateAsync({
         listId: currentList.id,
         linkId,
       })
+      // Invalidate to refetch
+      queryClient.invalidateQueries({ queryKey: listKeys.publicList(username, listId) })
     } catch (error) {
       console.error('Error removing link:', error)
-      // Rollback handled by mutation, but also refresh local state
-      const response = await fetch(`/api/users/${username}/lists/${listId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setCurrentList(data.data)
-      }
     }
   }
 
   const handleReorderLinks = async (linkIds: string[]) => {
     if (!currentList) return
-
-    // Optimistic update for local state
-    const linkMap = new Map(currentList.links?.map(link => [link.id, link]) || [])
-    const reorderedLinks = linkIds
-      .map(id => linkMap.get(id))
-      .filter(Boolean) as typeof currentList.links
-
-    setCurrentList(prev =>
-      prev
-        ? {
-            ...prev,
-            links: reorderedLinks.map((link, index) => ({
-              ...link,
-              position: index,
-            })),
-          }
-        : null
-    )
 
     try {
       await reorderLinksMutation.mutateAsync({
@@ -234,12 +186,6 @@ export default function UserListPage() {
       })
     } catch (error) {
       console.error('Error reordering links:', error)
-      // Rollback by refetching
-      const response = await fetch(`/api/users/${username}/lists/${listId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setCurrentList(data.data)
-      }
     }
   }
 
@@ -256,13 +202,12 @@ export default function UserListPage() {
     }
   }
 
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Loading list..." />
-      </div>
-    )
+  // Derive error message
+  const error = validationError || (queryError instanceof Error ? queryError.message : null)
+
+  // Show skeleton while loading (but not if we have placeholder data!)
+  if (isLoading && !currentList) {
+    return <ListPageSkeleton />
   }
 
   // Show error state

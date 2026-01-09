@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, Star, Link2, List, Plus } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { Button } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
@@ -12,10 +13,34 @@ import {
   useCreateEmptyListMutation,
   useSavedListsQuery,
   useAnalyticsStatsQuery,
+  listKeys,
 } from '@/hooks/queries'
 import { AppContainer } from '@/components/primitives'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { LoadingState } from '@/components/loading-state'
+
+// Skeleton component for list items
+function ListItemSkeleton() {
+  return (
+    <div className="flex items-center justify-between px-3 py-3 bg-background border border-border rounded-md animate-pulse">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="w-4 h-4 bg-muted rounded" />
+        <div className="h-4 bg-muted rounded w-32" />
+      </div>
+      <div className="h-4 bg-muted rounded w-12 ml-3" />
+    </div>
+  )
+}
+
+function ListsSkeleton({ count = 3 }: { count?: number }) {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: count }).map((_, i) => (
+        <ListItemSkeleton key={i} />
+      ))}
+    </div>
+  )
+}
 
 function formatCount(count: number): string {
   if (count >= 1000000) {
@@ -31,6 +56,7 @@ function DashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const tab = searchParams?.get('tab') || 'your-lists'
+  const queryClient = useQueryClient()
 
   const { user, loading } = useAuth()
   const [mounted, setMounted] = useState(false)
@@ -40,6 +66,20 @@ function DashboardContent() {
   const { data: savedLists = [], isLoading: savedListsLoading } = useSavedListsQuery()
   const { data: analyticsData } = useAnalyticsStatsQuery()
   const createEmptyListMutation = useCreateEmptyListMutation()
+
+  // Prefetch list data on hover for instant navigation
+  const prefetchList = useCallback((listId: string) => {
+    queryClient.prefetchQuery({
+      queryKey: listKeys.list(listId),
+      queryFn: async () => {
+        const response = await fetch(`/api/lists/${listId}`)
+        if (!response.ok) throw new Error('Failed to fetch list')
+        const result = await response.json()
+        return result.data
+      },
+      staleTime: 60 * 1000, // Consider fresh for 1 minute
+    })
+  }, [queryClient])
 
   useEffect(() => {
     setMounted(true)
@@ -113,7 +153,9 @@ function DashboardContent() {
 
             {/* Lists */}
             <div className="space-y-3">
-              {lists.length === 0 ? (
+              {listsLoading ? (
+                <ListsSkeleton count={3} />
+              ) : lists.length === 0 ? (
                 <div className="text-center py-16">
                   <div className="w-16 h-16 bg-secondary flex items-center justify-center text-2xl mx-auto mb-4">
                     🥨
@@ -136,7 +178,8 @@ function DashboardContent() {
                   <div key={list.id}>
                     <Link
                       href={`/${user.username}/${list.public_id || list.id}`}
-                      className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-colors rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      onMouseEnter={() => prefetchList(list.id)}
+                      className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 active:bg-accent/70 active:scale-[0.995] transition-all duration-150 rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <span className="text-base flex-shrink-0">{list.emoji || '📋'}</span>
@@ -172,9 +215,7 @@ function DashboardContent() {
 
             {/* Lists */}
             {savedListsLoading ? (
-              <div className="flex items-center justify-center py-16">
-                <LoadingState message="Loading saved lists..." />
-              </div>
+              <ListsSkeleton count={3} />
             ) : savedLists.length === 0 ? (
               <div className="text-center py-16">
                 <div className="w-16 h-16 bg-secondary flex items-center justify-center text-2xl mx-auto mb-4" style={{ borderRadius: '12px' }}>
@@ -193,7 +234,8 @@ function DashboardContent() {
                     <div key={list.id}>
                       <Link
                         href={`/${listOwner}/${list.public_id || list.id}`}
-                        className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-colors rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        onMouseEnter={() => prefetchList(list.id)}
+                        className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 active:bg-accent/70 active:scale-[0.995] transition-all duration-150 rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <span className="text-base flex-shrink-0">{list.emoji || '📋'}</span>
@@ -258,9 +300,10 @@ function DashboardContent() {
                   <Link
                     key={list.id}
                     href={`/${user.username}/${listId}`}
+                    onMouseEnter={() => prefetchList(list.id)}
                     className="block"
                   >
-                    <div className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 transition-colors rounded-md cursor-pointer">
+                    <div className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-accent/50 active:bg-accent/70 active:scale-[0.995] transition-all duration-150 rounded-md cursor-pointer">
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="text-base">{list.emoji || '📋'}</span>
                         <span className="text-base text-foreground truncate">

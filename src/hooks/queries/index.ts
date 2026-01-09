@@ -3,6 +3,7 @@ export {
   listKeys,
   useListsQuery,
   useListQuery,
+  usePublicListQuery,
   useCreateEmptyListMutation,
   useCreateListMutation,
   useUpdateListMutation,
