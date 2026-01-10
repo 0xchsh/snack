@@ -6,7 +6,6 @@ import { useEffect, Suspense, useState } from 'react'
 
 import { Button } from '@/components/ui'
 import { TopBar, BrandMark, UserMenu } from '@/components/primitives'
-import { ThemeToggle } from '@/components/theme-toggle'
 import { LoadingState } from '@/components/loading-state'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -120,9 +119,7 @@ function AppLayoutContent({
           <UserMenu
             user={user}
             onLogout={handleLogout}
-            username={user.username}
           />
-          <ThemeToggle />
         </TopBar.Right>
       </TopBar>
 

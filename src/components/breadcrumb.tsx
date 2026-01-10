@@ -31,7 +31,7 @@ export function Breadcrumb({ username, currentPage, profilePictureUrl }: Breadcr
         {username}
       </Link>
       <span className="text-muted-foreground">/</span>
-      <span className="text-foreground">{currentPage}</span>
+      <span className="text-foreground font-medium">{currentPage}</span>
     </div>
   )
 }

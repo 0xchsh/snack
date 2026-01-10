@@ -3,23 +3,35 @@ const RESERVED_WORDS = new Set([
   // Static app routes
   'auth', 'api', 'profile', 'dashboard', 'demo', 'u', 'list',
   'public-demo', 'dashboard-simple',
-  
+
   // System routes
   'admin', 'administrator', 'root', 'www', 'mail', 'ftp',
   'assets', 'static', '_next', 'favicon.ico', 'robots.txt', 'sitemap.xml',
-  
-  // Common reserved words
+
+  // Marketing routes (current and future)
   'about', 'help', 'support', 'contact', 'terms', 'privacy',
+  'pricing', 'blog', 'features', 'faq', 'discover', 'explore',
+  'careers', 'jobs', 'press', 'brand', 'changelog', 'updates',
+  'docs', 'documentation', 'developers', 'dev',
+
+  // Auth-related routes
   'settings', 'account', 'login', 'logout', 'signup', 'signin',
   'register', 'forgot', 'reset', 'verify', 'confirm',
   'home', 'index', 'main', 'app', 'application',
-  
+
   // HTTP methods and common tech terms
   'get', 'post', 'put', 'delete', 'patch', 'head', 'options',
   'null', 'undefined', 'true', 'false', 'admin', 'test', 'staging',
-  
+
   // Potential brand conflicts
-  'snack', 'snacks', 'lists', 'list', 'links', 'link'
+  'snack', 'snacks', 'lists', 'list', 'links', 'link',
+
+  // Purchase/commerce routes
+  'purchase', 'checkout', 'buy', 'pay', 'billing', 'invoice',
+
+  // Misc reserved
+  'feed', 'trending', 'popular', 'new', 'search', 'notifications',
+  'messages', 'inbox', 'activity', 'analytics', 'stats'
 ])
 
 /**

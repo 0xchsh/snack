@@ -59,6 +59,18 @@ export async function GET(request: NextRequest) {
               console.error('Error creating user record:', insertError)
             } else {
               console.log('User record created successfully')
+
+              // Send welcome email to new user (fire and forget)
+              if (userData.user.email) {
+                fetch(`${origin}/api/email/welcome`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    email: userData.user.email,
+                    username: username,
+                  }),
+                }).catch((err) => console.error('Failed to send welcome email:', err))
+              }
             }
           } else {
             console.log('User record already exists:', existingUser.username)

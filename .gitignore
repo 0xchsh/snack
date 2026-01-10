@@ -23,6 +23,10 @@ dist/
 .env.test.local
 .env.production.local
 
+# Taskmaster
+.taskmaster/
+.claude/
+
 # Vercel
 .vercel
 
