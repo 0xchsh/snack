@@ -1,28 +1,25 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { User } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
-import { TopBar, BrandMark } from '@/components/primitives'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 
-/**
- * Marketing Layout
- *
- * Used for public-facing pages: home, auth pages
- * Features larger branding and auth CTAs
- */
 function MarketingLayoutContent({
   children,
 }: {
   children: React.ReactNode
 }) {
   const { user } = useAuth()
+  const pathname = usePathname()
+  const isHomepage = pathname === '/'
 
   return (
-    <>
+    <div className={isHomepage ? 'light' : ''} style={isHomepage ? { colorScheme: 'light' } : undefined}>
       {/* Skip to content link for accessibility */}
       <a
         href="#main-content"
@@ -31,38 +28,51 @@ function MarketingLayoutContent({
         Skip to content
       </a>
 
-      <TopBar variant="marketing">
-        <TopBar.Left>
-          <BrandMark variant="marketing" href="/" />
-        </TopBar.Left>
+      <header style={isHomepage ? { backgroundColor: '#ffffff' } : undefined} className={isHomepage ? '' : 'bg-background'}>
+        <div className="mx-auto w-full px-4 py-6 max-w-5xl">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2">
+              <Image
+                src="/images/logo.svg"
+                alt="Snack"
+                width={40}
+                height={40}
+                className={isHomepage ? '' : 'dark:invert'}
+                style={isHomepage ? { filter: 'none' } : undefined}
+              />
+            </Link>
 
-        <TopBar.Right>
-          {user ? (
-            <>
-              <Button asChild variant="muted">
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
-              {user.username && (
-                <Button asChild variant="muted" size="icon">
-                  <Link href={`/${user.username}`}>
-                    <User className="w-5 h-5" />
-                  </Link>
+            {/* Right side */}
+            <div className="flex items-center gap-3">
+              {user ? (
+                <>
+                  <Button asChild variant="muted" style={isHomepage ? { color: '#525252' } : undefined}>
+                    <Link href="/dashboard">Dashboard</Link>
+                  </Button>
+                  {user.username && (
+                    <Button asChild variant="muted" size="icon" style={isHomepage ? { color: '#525252' } : undefined}>
+                      <Link href={`/${user.username}`}>
+                        <User className="w-5 h-5" />
+                      </Link>
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <Button asChild style={isHomepage ? { backgroundColor: '#171717', color: '#ffffff' } : undefined}>
+                  <Link href="/auth/sign-in">Get Started</Link>
                 </Button>
               )}
-            </>
-          ) : (
-            <Button asChild>
-              <Link href="/auth/sign-in">Get Started</Link>
-            </Button>
-          )}
-          <ThemeToggle />
-        </TopBar.Right>
-      </TopBar>
+              {!isHomepage && <ThemeToggle />}
+            </div>
+          </div>
+        </div>
+      </header>
 
       <main id="main-content">
         {children}
       </main>
-    </>
+    </div>
   )
 }
 
