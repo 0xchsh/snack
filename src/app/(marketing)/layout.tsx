@@ -47,11 +47,11 @@ function MarketingLayoutContent({
             <div className="flex items-center gap-3">
               {user ? (
                 <>
-                  <Button asChild variant="muted" style={isHomepage ? { color: '#525252' } : undefined}>
+                  <Button asChild variant={isHomepage ? undefined : 'muted'} className={isHomepage ? 'bg-transparent text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100' : undefined}>
                     <Link href="/dashboard">Dashboard</Link>
                   </Button>
                   {user.username && (
-                    <Button asChild variant="muted" size="icon" style={isHomepage ? { color: '#525252' } : undefined}>
+                    <Button asChild variant={isHomepage ? undefined : 'muted'} size="icon" className={isHomepage ? 'bg-transparent text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100' : undefined}>
                       <Link href={`/${user.username}`}>
                         <User className="w-5 h-5" />
                       </Link>
@@ -59,7 +59,7 @@ function MarketingLayoutContent({
                   )}
                 </>
               ) : (
-                <Button asChild style={isHomepage ? { backgroundColor: '#171717', color: '#ffffff' } : undefined}>
+                <Button asChild className={isHomepage ? 'bg-neutral-900 text-white hover:bg-neutral-800' : undefined}>
                   <Link href="/auth/sign-in">Get Started</Link>
                 </Button>
               )}

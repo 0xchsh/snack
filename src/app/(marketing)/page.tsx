@@ -4,7 +4,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTheme } from 'next-themes'
 
 import { Button } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
@@ -13,11 +12,6 @@ import { AnimatedListDemo, FeaturesSection, FAQSection, UseCasesSection, Usernam
 export default function HomePage() {
   const { user, loading } = useAuth()
   const router = useRouter()
-  const { setTheme } = useTheme()
-
-  useEffect(() => {
-    setTheme('light')
-  }, [setTheme])
 
   useEffect(() => {
     if (!loading && user) {
