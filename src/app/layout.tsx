@@ -14,6 +14,25 @@ export const metadata: Metadata = {
     shortcut: '/images/favicon.png',
     apple: '/images/favicon.png',
   },
+  openGraph: {
+    title: 'Snack - Curated Link Collections',
+    description: 'Your favorite links all in one place.',
+    images: [
+      {
+        url: '/images/og-image.png',
+        width: 3840,
+        height: 2160,
+        alt: 'Snack - Your favorite links all in one place',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Snack - Curated Link Collections',
+    description: 'Your favorite links all in one place.',
+    images: ['/images/og-image.png'],
+  },
 }
 
 export default function RootLayout({
