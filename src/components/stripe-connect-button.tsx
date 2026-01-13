@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Loader2, CheckCircle, AlertCircle, CreditCard } from 'lucide-react'
+import { ArrowPathIcon, CheckCircleIcon, ExclamationTriangleIcon, CreditCardIcon } from '@heroicons/react/24/solid'
 import { Button } from './ui/button'
 
 interface StripeConnectButtonProps {
@@ -87,7 +87,7 @@ export function StripeConnectButton({
   if (checking) {
     return (
       <Button variant={variant} size={size} className={className} disabled>
-        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+        <ArrowPathIcon className="w-4 h-4 mr-2 animate-spin" />
         Checking status...
       </Button>
     )
@@ -96,7 +96,7 @@ export function StripeConnectButton({
   if (status.onboarding_complete) {
     return (
       <Button variant="outline" size={size} className={className} disabled>
-        <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+        <CheckCircleIcon className="w-4 h-4 mr-2 text-green-600" />
         Stripe Connected
       </Button>
     )
@@ -113,12 +113,12 @@ export function StripeConnectButton({
       >
         {loading ? (
           <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <ArrowPathIcon className="w-4 h-4 mr-2 animate-spin" />
             Loading...
           </>
         ) : (
           <>
-            <AlertCircle className="w-4 h-4 mr-2 text-orange-600" />
+            <ExclamationTriangleIcon className="w-4 h-4 mr-2 text-orange-600" />
             Complete Stripe Setup
           </>
         )}
@@ -136,12 +136,12 @@ export function StripeConnectButton({
     >
       {loading ? (
         <>
-          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          <ArrowPathIcon className="w-4 h-4 mr-2 animate-spin" />
           Loading...
         </>
       ) : (
         <>
-          <CreditCard className="w-4 h-4 mr-2" />
+          <CreditCardIcon className="w-4 h-4 mr-2" />
           Connect Stripe
         </>
       )}

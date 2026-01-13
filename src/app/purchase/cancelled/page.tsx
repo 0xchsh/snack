@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { XCircle, ArrowLeft, RefreshCw } from 'lucide-react'
+import { XCircleIcon, ArrowLeftIcon, ArrowPathIcon } from '@heroicons/react/24/solid'
 import { Button } from '@/components/ui/button'
 import { Header } from '@/components/header'
 import { useAuth } from '@/hooks/useAuth'
@@ -43,7 +43,7 @@ export default function PurchaseCancelledPage() {
           {/* Cancelled Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-20 h-20 bg-orange-100 dark:bg-orange-900/20 rounded-full flex items-center justify-center">
-              <XCircle className="w-12 h-12 text-orange-600 dark:text-orange-500" />
+              <XCircleIcon className="w-12 h-12 text-orange-600 dark:text-orange-500" />
             </div>
           </div>
 
@@ -70,7 +70,7 @@ export default function PurchaseCancelledPage() {
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button onClick={() => router.back()} className="flex items-center gap-2" size="lg">
-              <RefreshCw className="w-4 h-4" />
+              <ArrowPathIcon className="w-4 h-4" />
               Try Again
             </Button>
             <Button
@@ -78,7 +78,7 @@ export default function PurchaseCancelledPage() {
               variant="outline"
               size="lg"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <ArrowLeftIcon className="w-4 h-4 mr-2" />
               Go Back
             </Button>
           </div>

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react'
+import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon, InformationCircleIcon, XMarkIcon } from '@heroicons/react/24/solid'
 
 type ToastType = 'success' | 'error' | 'warning' | 'info'
 
@@ -30,10 +30,10 @@ interface ToastContextType {
 const ToastContext = createContext<ToastContextType | undefined>(undefined)
 
 const toastIcons: Record<ToastType, ReactNode> = {
-  success: <CheckCircle className="w-5 h-5" />,
-  error: <XCircle className="w-5 h-5" />,
-  warning: <AlertCircle className="w-5 h-5" />,
-  info: <Info className="w-5 h-5" />,
+  success: <CheckCircleIcon className="w-5 h-5" />,
+  error: <XCircleIcon className="w-5 h-5" />,
+  warning: <ExclamationTriangleIcon className="w-5 h-5" />,
+  info: <InformationCircleIcon className="w-5 h-5" />,
 }
 
 const toastStyles: Record<ToastType, string> = {
@@ -145,7 +145,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 className="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity"
                 aria-label="Close notification"
               >
-                <X className="w-4 h-4" />
+                <XMarkIcon className="w-4 h-4" />
               </button>
             </motion.div>
           ))}

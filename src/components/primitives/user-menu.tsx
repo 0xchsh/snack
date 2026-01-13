@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { CircleUser, Settings, Sun, Moon, LogOut } from 'lucide-react'
+import { UserCircleIcon, Cog6ToothIcon, SunIcon, MoonIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/solid'
 import Link from 'next/link'
 
 import { Button } from '@/components/ui'
@@ -51,21 +51,21 @@ export function UserMenu({ user, onLogout, className }: UserMenuProps) {
           aria-label="Account menu"
           className={className}
         >
-          <CircleUser className="w-5 h-5" strokeWidth={1.5} />
+          <UserCircleIcon className="w-5 h-5" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[200px]">
         <DropdownMenuItem asChild>
           <Link href="/profile" className="cursor-pointer">
-            <Settings className="w-4 h-4 text-muted-foreground" />
+            <Cog6ToothIcon className="w-4 h-4 text-muted-foreground" />
             <span>Settings</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={toggleTheme} disabled={!mounted}>
           {mounted && theme === 'light' ? (
-            <Moon className="w-4 h-4 text-muted-foreground" />
+            <MoonIcon className="w-4 h-4 text-muted-foreground" />
           ) : (
-            <Sun className="w-4 h-4 text-muted-foreground" />
+            <SunIcon className="w-4 h-4 text-muted-foreground" />
           )}
           <span>{mounted ? (theme === 'light' ? 'Dark mode' : 'Light mode') : 'Toggle theme'}</span>
         </DropdownMenuItem>
@@ -74,7 +74,7 @@ export function UserMenu({ user, onLogout, className }: UserMenuProps) {
           onClick={onLogout}
           className="text-destructive focus:text-destructive hover:text-destructive"
         >
-          <LogOut className="w-4 h-4" />
+          <ArrowRightStartOnRectangleIcon className="w-4 h-4" />
           <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

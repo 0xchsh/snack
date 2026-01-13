@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Check, Copy, Trash2 } from 'lucide-react'
+import { CheckIcon, DocumentDuplicateIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { Button } from '@/components/ui'
 import { TopBar, BrandMark, AppContainer } from '@/components/primitives'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -260,7 +260,7 @@ export default function UserListPage() {
             transition={{ duration: 0.2 }}
             className="fixed top-4 left-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
           >
-            <Copy className="w-4 h-4" />
+            <DocumentDuplicateIcon className="w-4 h-4" />
             <span className="font-medium">Link copied to clipboard!</span>
           </motion.div>
         )}
@@ -279,7 +279,7 @@ export default function UserListPage() {
             aria-label="Delete list"
             className="bg-red-500/10 text-red-600 hover:bg-red-500/20 hover:text-red-700 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20 dark:hover:text-red-300"
           >
-            <Trash2 className="w-5 h-5" />
+            <TrashIcon className="w-5 h-5" />
           </Button>
           <Button
             onClick={() => {
@@ -290,7 +290,7 @@ export default function UserListPage() {
             aria-label="Preview public view"
             className="bg-green-500/10 text-green-600 hover:bg-green-500/20 hover:text-green-700 dark:bg-green-500/10 dark:text-green-400 dark:hover:bg-green-500/20 dark:hover:text-green-300"
           >
-            <Check className="w-5 h-5" />
+            <CheckIcon className="w-5 h-5" />
           </Button>
           <Button
             onClick={async () => {
@@ -303,7 +303,7 @@ export default function UserListPage() {
             size="icon"
             aria-label="Copy link"
           >
-            <Copy className="w-5 h-5" />
+            <DocumentDuplicateIcon className="w-5 h-5" />
           </Button>
           <ThemeToggle />
         </TopBar.Right>

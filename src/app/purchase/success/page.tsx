@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CheckCircle, Loader2, ArrowRight } from 'lucide-react'
+import { CheckCircleIcon, ArrowPathIcon, ArrowRightIcon } from '@heroicons/react/24/solid'
 import { Button } from '@/components/ui/button'
 import { Header } from '@/components/header'
 import { useAuth } from '@/hooks/useAuth'
@@ -46,7 +46,7 @@ function PurchaseSuccessContent() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+          <ArrowPathIcon className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
           <p className="text-muted-foreground">Confirming your purchase...</p>
         </div>
       </div>
@@ -86,7 +86,7 @@ function PurchaseSuccessContent() {
           {/* Success Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-20 h-20 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
-              <CheckCircle className="w-12 h-12 text-green-600 dark:text-green-500" />
+              <CheckCircleIcon className="w-12 h-12 text-green-600 dark:text-green-500" />
             </div>
           </div>
 
@@ -101,15 +101,15 @@ function PurchaseSuccessContent() {
             <h2 className="font-semibold mb-4">What's next?</h2>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 mt-0.5 text-green-600" />
+                <CheckCircleIcon className="w-4 h-4 mt-0.5 text-green-600" />
                 <span>You can access all links in this list anytime</span>
               </li>
               <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 mt-0.5 text-green-600" />
+                <CheckCircleIcon className="w-4 h-4 mt-0.5 text-green-600" />
                 <span>Your purchase is saved to your account</span>
               </li>
               <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 mt-0.5 text-green-600" />
+                <CheckCircleIcon className="w-4 h-4 mt-0.5 text-green-600" />
                 <span>A receipt has been sent to your email</span>
               </li>
             </ul>
@@ -123,7 +123,7 @@ function PurchaseSuccessContent() {
               size="lg"
             >
               Go to Dashboard
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRightIcon className="w-4 h-4" />
             </Button>
             <Button onClick={() => router.back()} variant="outline" size="lg">
               View List
@@ -148,7 +148,7 @@ export default function PurchaseSuccessPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-background flex items-center justify-center">
-          <Loader2 className="w-12 h-12 animate-spin text-primary" />
+          <ArrowPathIcon className="w-12 h-12 animate-spin text-primary" />
         </div>
       }
     >

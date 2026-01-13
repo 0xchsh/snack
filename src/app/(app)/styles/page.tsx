@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ArrowLeft, BarChart3, Heart, Copy, ExternalLink, Moon, MoreVertical, Settings, Sun, User } from 'lucide-react'
+import { ArrowLeftIcon, ChartBarIcon, HeartIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, MoonIcon, EllipsisVerticalIcon, Cog6ToothIcon, SunIcon, UserIcon } from '@heroicons/react/24/solid'
 
 import { Button, Card, CardDescription, CardFooter, CardHeader, CardTitle, Input, Label, Textarea } from '@/components/ui'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -60,7 +60,7 @@ export default function StylesPage() {
         <div className="container mx-auto px-nav-x py-nav-y">
           <div className="flex items-center justify-between">
             <Link href="/dashboard" className="flex items-center gap-3 text-foreground hover:text-muted-foreground transition-colors">
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeftIcon className="w-5 h-5" />
               <h1 className="text-xl font-semibold">Design System</h1>
             </Link>
             <ThemeToggle />
@@ -201,29 +201,29 @@ export default function StylesPage() {
                 <div className="flex flex-wrap gap-3">
                   <Button variant="muted" className="gap-2 font-medium">
                     View
-                    <ExternalLink className="w-4 h-4" />
+                    <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                   </Button>
                   <Button variant="muted" className="gap-2 font-medium">
                     Copy
-                    <Copy className="w-4 h-4" />
+                    <DocumentDuplicateIcon className="w-4 h-4" />
                   </Button>
                   <Button asChild variant="muted" className="gap-2 font-medium">
                     <Link href="#">
                       Saved
-                      <Heart className="w-4 h-4" />
+                      <HeartIcon className="w-4 h-4" />
                     </Link>
                   </Button>
                   <Button asChild variant="muted" className="gap-2 font-medium">
                     <Link href="#">
                       Stats
-                      <BarChart3 className="w-4 h-4" />
+                      <ChartBarIcon className="w-4 h-4" />
                     </Link>
                   </Button>
                 </div>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto mt-4">
 {`<Button variant="muted" className="gap-2 font-medium">
   View
-  <ExternalLink className="w-4 h-4" />
+  <ArrowSquareOut weight="fill" className="w-4 h-4" />
 </Button>`}
                 </pre>
               </div>
@@ -235,21 +235,21 @@ export default function StylesPage() {
               <div className="bg-secondary p-6 rounded-lg border border-border">
                 <div className="flex flex-wrap gap-3">
                   <Button variant="muted" size="icon">
-                    <User className="w-5 h-5" />
+                    <UserIcon className="w-5 h-5" />
                   </Button>
                   <Button variant="muted" size="icon">
-                    <Settings className="w-5 h-5" />
+                    <Cog6ToothIcon className="w-5 h-5" />
                   </Button>
                   <Button variant="muted" size="icon">
-                    <MoreVertical className="w-5 h-5" />
+                    <EllipsisVerticalIcon className="w-5 h-5" />
                   </Button>
                   <Button variant="muted" size="icon">
-                    <Sun className="w-5 h-5" />
+                    <SunIcon className="w-5 h-5" />
                   </Button>
                 </div>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto mt-4">
 {`<Button variant="muted" size="icon">
-  <User className="w-5 h-5" />
+  <User weight="fill" className="w-5 h-5" />
 </Button>`}
                 </pre>
               </div>
@@ -568,44 +568,44 @@ className="w-full px-4 py-2 text-left text-sm
 
         {/* Icons */}
         <section className="mb-16">
-          <h2 className="text-2xl font-bold mb-6 text-foreground">Icons (Lucide React)</h2>
+          <h2 className="text-2xl font-bold mb-6 text-foreground">Icons (Heroicons)</h2>
           <div className="bg-secondary p-6 rounded-lg border border-border">
             <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-6">
               <div className="flex flex-col items-center gap-2">
-                <User className="w-6 h-6 text-foreground" />
+                <UserIcon className="w-6 h-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">User</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <Settings className="w-6 h-6 text-foreground" />
+                <Cog6ToothIcon className="w-6 h-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">Settings</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <Heart className="w-6 h-6 text-foreground" />
+                <HeartIcon className="w-6 h-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">Heart</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <BarChart3 className="w-6 h-6 text-foreground" />
+                <ChartBarIcon className="w-6 h-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">BarChart3</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <Copy className="w-6 h-6 text-foreground" />
+                <DocumentDuplicateIcon className="w-6 h-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">Copy</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <ExternalLink className="w-6 h-6 text-foreground" />
+                <ArrowTopRightOnSquareIcon className="w-6 h-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">External</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <Sun className="w-6 h-6 text-foreground" />
+                <SunIcon className="w-6 h-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">Sun</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <Moon className="w-6 h-6 text-foreground" />
+                <MoonIcon className="w-6 h-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">Moon</p>
               </div>
             </div>
             <p className="text-sm text-muted-foreground mt-6">
-              View all icons at <a href="https://lucide.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">lucide.dev</a>
+              View all icons at <a href="https://heroicons.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">heroicons.com</a>
             </p>
           </div>
         </section>

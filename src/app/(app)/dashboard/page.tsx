@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Suspense, useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Eye, Star, Link2, List, Plus } from 'lucide-react'
+import { EyeIcon, StarIcon, LinkIcon, ListBulletIcon, PlusIcon } from '@heroicons/react/24/solid'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { Button } from '@/components/ui'
@@ -136,7 +136,7 @@ function DashboardContent() {
             {/* Header with count and create button */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <List className="w-4 h-4" />
+                <ListBulletIcon className="w-4 h-4" />
                 <span className="text-base">{lists.length} lists</span>
               </div>
               <Button
@@ -147,7 +147,7 @@ function DashboardContent() {
                 className="gap-2"
               >
                 <span>Create list</span>
-                <Plus className="w-4 h-4" />
+                <PlusIcon className="w-4 h-4" />
               </Button>
             </div>
 
@@ -209,7 +209,7 @@ function DashboardContent() {
 
             {/* Header with count */}
             <div className="flex items-center gap-2 text-muted-foreground mb-3">
-              <Star className="w-4 h-4" />
+              <StarIcon className="w-4 h-4" />
               <span className="text-base">{savedLists.length} saved lists</span>
             </div>
 
@@ -249,7 +249,7 @@ function DashboardContent() {
                           </div>
                         </div>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground flex-shrink-0 ml-3">
-                          <Star className="h-4 w-4" />
+                          <StarIcon className="h-4 w-4" />
                           <span>{list.save_count || 0}</span>
                         </div>
                       </Link>
@@ -312,15 +312,15 @@ function DashboardContent() {
                       </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground flex-shrink-0">
                         <div className="flex items-center gap-1">
-                          <Link2 className="h-4 w-4" aria-hidden="true" />
+                          <LinkIcon className="h-4 w-4" aria-hidden="true" />
                           <span>{formatCount(list.links?.length || 0)}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Eye className="h-4 w-4" aria-hidden="true" />
+                          <EyeIcon className="h-4 w-4" aria-hidden="true" />
                           <span>{formatCount(stats.views)}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4" aria-hidden="true" />
+                          <StarIcon className="h-4 w-4" aria-hidden="true" />
                           <span>{formatCount(list.save_count || 0)}</span>
                         </div>
                       </div>

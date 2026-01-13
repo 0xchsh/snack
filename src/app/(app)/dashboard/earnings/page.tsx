@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { DollarSign, ShoppingCart, CreditCard, Loader2, AlertCircle } from 'lucide-react'
+import { CurrencyDollarIcon, ShoppingCartIcon, CreditCardIcon, ArrowPathIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid'
 import { useAuth } from '@/hooks/useAuth'
 import { StripeConnectButton } from '@/components/stripe-connect-button'
 import { formatCurrency } from '@/lib/pricing'
@@ -87,7 +87,7 @@ export default function EarningsDashboardPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+          <ArrowPathIcon className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
           <p className="text-muted-foreground">Loading earnings...</p>
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function EarningsDashboardPage() {
         {!stripeConnected && (
           <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-6 mb-8">
             <div className="flex items-start gap-4">
-              <AlertCircle className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" />
+              <ExclamationTriangleIcon className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <h3 className="font-semibold text-orange-900 dark:text-orange-100 mb-2">
                   Connect Stripe to receive payments
@@ -134,7 +134,7 @@ export default function EarningsDashboardPage() {
           <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-muted-foreground">Total Earnings</h3>
-              <DollarSign className="w-5 h-5 text-muted-foreground" />
+              <CurrencyDollarIcon className="w-5 h-5 text-muted-foreground" />
             </div>
             <p className="text-3xl font-bold">
               {formatCurrency(earningsData?.total_earnings || 0, earningsData?.currency || 'usd')}
@@ -144,7 +144,7 @@ export default function EarningsDashboardPage() {
           <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-muted-foreground">Total Sales</h3>
-              <ShoppingCart className="w-5 h-5 text-muted-foreground" />
+              <ShoppingCartIcon className="w-5 h-5 text-muted-foreground" />
             </div>
             <p className="text-3xl font-bold">{earningsData?.total_purchases || 0}</p>
           </div>
@@ -176,7 +176,7 @@ export default function EarningsDashboardPage() {
             </div>
           ) : (
             <div className="p-12 text-center text-muted-foreground">
-              <CreditCard className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <CreditCardIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">No sales yet</p>
               <p className="text-sm">
                 {stripeConnected

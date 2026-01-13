@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Star, Link2, List, Loader2 } from 'lucide-react'
+import { StarIcon, LinkIcon, ListBulletIcon, ArrowPathIcon } from '@heroicons/react/24/solid'
 import { useInView } from 'react-intersection-observer'
 import { LoadingState } from '@/components/loading-state'
 import { DefaultAvatar } from '@/components/default-avatar'
@@ -176,7 +176,7 @@ export default function DiscoverPage() {
           <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             {/* Left side - Total lists */}
             <div className="flex items-center gap-1.5 text-muted-foreground">
-              <List className="w-4 h-4" />
+              <ListBulletIcon className="w-4 h-4" />
               <span className="text-sm sm:text-base">{totalCount} {totalCount === 1 ? 'list' : 'lists'}</span>
             </div>
 
@@ -272,11 +272,11 @@ export default function DiscoverPage() {
                   {/* Right side - stats */}
                   <div className="flex items-center gap-3 ml-4 flex-shrink-0 text-muted-foreground">
                     <div className="flex items-center gap-1.5">
-                      <Link2 className="w-4 h-4" />
+                      <LinkIcon className="w-4 h-4" />
                       <span className="text-sm">{linkCount}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Star className="w-4 h-4" />
+                      <StarIcon className="w-4 h-4" />
                       <span className="text-sm">{list.save_count || 0}</span>
                     </div>
                   </div>
@@ -291,7 +291,7 @@ export default function DiscoverPage() {
           <div ref={loadMoreRef} className="py-8 flex justify-center">
             {loadingMore && (
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <ArrowPathIcon className="w-5 h-5 animate-spin" />
                 <span className="text-sm">Loading more lists...</span>
               </div>
             )}

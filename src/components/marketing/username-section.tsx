@@ -60,8 +60,8 @@ export function UsernameSection() {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-semibold text-neutral-900 mb-3">
-            Claim your username.
+          <h2 className="text-2xl sm:text-3xl font-semibold text-neutral-900 mb-3">
+            Claim your username
           </h2>
           <p className="text-lg text-neutral-500">
             One link for all your lists. Short, simple, yours.

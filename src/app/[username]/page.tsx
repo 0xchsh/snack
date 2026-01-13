@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
-import { List, Link2, Star, Copy } from 'lucide-react'
+import { ListBulletIcon, LinkIcon, StarIcon, DocumentDuplicateIcon } from '@heroicons/react/24/solid'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -153,7 +153,7 @@ export default function UsernamePage() {
             transition={{ duration: 0.2 }}
             className="fixed top-4 left-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
           >
-            <Copy className="w-4 h-4" />
+            <DocumentDuplicateIcon className="w-4 h-4" />
             <span className="font-medium">Profile link copied!</span>
           </motion.div>
         )}
@@ -179,7 +179,7 @@ export default function UsernamePage() {
                 size="icon"
                 aria-label="Copy profile link"
               >
-                <Copy className="w-5 h-5" />
+                <DocumentDuplicateIcon className="w-5 h-5" />
               </Button>
               <ThemeToggle />
             </div>
@@ -225,16 +225,16 @@ export default function UsernamePage() {
           {/* Stats */}
           <div className="flex flex-row items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 text-muted-foreground">
-              <List className="w-4 h-4" />
+              <ListBulletIcon className="w-4 h-4" />
               <span className="text-sm sm:text-base">{profile.stats.total_public_lists} lists</span>
             </div>
             <div className="flex items-center gap-3 sm:gap-3 text-muted-foreground">
               <div className="flex items-center gap-1.5">
-                <Link2 className="w-4 h-4" />
+                <LinkIcon className="w-4 h-4" />
                 <span className="text-sm sm:text-base">{profile.stats.total_links}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Star className="w-4 h-4" />
+                <StarIcon className="w-4 h-4" />
                 <span className="text-sm sm:text-base">{profile.stats.total_saves_received}</span>
               </div>
             </div>

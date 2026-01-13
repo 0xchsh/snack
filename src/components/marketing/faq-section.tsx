@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDownIcon } from '@heroicons/react/24/solid'
 
 const FAQ_ITEMS = [
   {
@@ -51,7 +51,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          <ChevronDown className="w-5 h-5 text-neutral-400" />
+          <ChevronDownIcon className="w-5 h-5 text-neutral-400" />
         </motion.div>
       </button>
 
@@ -80,8 +80,8 @@ export function FAQSection() {
       <div className="max-w-2xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-semibold text-neutral-900 mb-3">
-            Frequently<br />asked questions
+          <h2 className="text-2xl sm:text-3xl font-semibold text-neutral-900 mb-3">
+            Frequently asked questions
           </h2>
           <p className="text-neutral-500">
             Quick answers to common questions about<br className="sm:hidden" /> Snack, privacy, and setup.

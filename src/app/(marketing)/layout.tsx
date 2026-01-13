@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { User } from 'lucide-react'
+import { UserIcon } from '@heroicons/react/24/solid'
 import { usePathname } from 'next/navigation'
 
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -53,7 +53,7 @@ function MarketingLayoutContent({
                   {user.username && (
                     <Button asChild variant={isHomepage ? undefined : 'muted'} size="icon" className={isHomepage ? 'bg-transparent text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100' : undefined}>
                       <Link href={`/${user.username}`}>
-                        <User className="w-5 h-5" />
+                        <UserIcon className="w-5 h-5" />
                       </Link>
                     </Button>
                   )}

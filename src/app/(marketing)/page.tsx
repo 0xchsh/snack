@@ -78,11 +78,11 @@ export default function HomePage() {
       {/* Features */}
       <FeaturesSection />
 
-      {/* Use Cases */}
-      <UseCasesSection />
-
       {/* Username Section */}
       <UsernameSection />
+
+      {/* Use Cases */}
+      <UseCasesSection />
 
       {/* FAQ */}
       <FAQSection />

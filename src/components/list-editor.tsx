@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { GripVertical, Trash2, RefreshCw, MoreHorizontal, Clipboard, FileText, Eye, Link2 } from 'lucide-react'
+import { Bars3Icon, TrashIcon, ArrowPathIcon, EllipsisHorizontalIcon, ClipboardIcon, DocumentTextIcon, EyeIcon, LinkIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ListWithLinks, Link, LinkCreatePayload } from '@/types'
@@ -776,7 +776,7 @@ export function ListEditor({
             transition={{ duration: 0.2 }}
             className="fixed top-4 left-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
           >
-            <Clipboard className="w-4 h-4" />
+            <ClipboardIcon className="w-4 h-4" />
             <span className="font-medium">Link copied to clipboard!</span>
           </motion.div>
         )}
@@ -826,7 +826,7 @@ export function ListEditor({
       {/* Link count and Paste button/input */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-muted-foreground flex-shrink-0">
-          <Link2 className="w-4 h-4" />
+          <LinkIcon className="w-4 h-4" />
           <span className="text-base">{optimisticList.links?.length || 0} links</span>
         </div>
 
@@ -1031,7 +1031,7 @@ function LinkItem({
         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="bg-muted rounded-md px-2 py-2 flex items-center gap-4">
             <div className="flex items-center justify-center text-muted-foreground cursor-grab" title="Drag to reorder">
-              <GripVertical className="w-4 h-4" />
+              <Bars3Icon className="w-4 h-4" />
             </div>
             <button
               type="button"
@@ -1046,7 +1046,7 @@ function LinkItem({
               title="Refresh link preview"
               disabled={isRefreshing}
             >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <ArrowPathIcon className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
             <button
               type="button"
@@ -1060,7 +1060,7 @@ function LinkItem({
               className="text-muted-foreground hover:text-destructive transition-colors"
               title="Delete link"
             >
-              <Trash2 className="w-4 h-4" />
+              <TrashIcon className="w-4 h-4" />
             </button>
           </div>
         </div>

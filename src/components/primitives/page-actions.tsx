@@ -1,9 +1,8 @@
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
-import { LucideIcon } from 'lucide-react'
 
 interface ActionButton {
-  icon?: LucideIcon | React.ReactNode
+  icon?: React.ComponentType<{ className?: string }> | React.ReactNode
   label?: string
   onClick?: () => void
   href?: string
@@ -26,7 +25,7 @@ export function PageActions({ actions, className }: PageActionsProps) {
   return (
     <div className={cn('flex items-center gap-nav', className)}>
       {actions.map((action, index) => {
-        const Icon = action.icon as LucideIcon | undefined
+        const Icon = action.icon as React.ComponentType<{ className?: string }> | undefined
         const isIconOnly = !action.label
         const size = isIconOnly ? 'icon' : 'default'
 

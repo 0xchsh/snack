@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Sun, Moon } from 'lucide-react'
+import { SunIcon, MoonIcon } from '@heroicons/react/24/solid'
 import { Button } from '@/components/ui'
 
 import { useTheme } from './theme-provider'
@@ -44,9 +44,9 @@ export function ThemeToggle() {
       aria-pressed={theme === 'dark'}
     >
       {theme === 'light' ? (
-        <Sun className="w-5 h-5" strokeWidth={2} />
+        <SunIcon className="w-5 h-5" />
       ) : (
-        <Moon className="w-5 h-5" strokeWidth={2} />
+        <MoonIcon className="w-5 h-5" />
       )}
     </Button>
   )

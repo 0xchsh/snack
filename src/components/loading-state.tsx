@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react'
+import { ArrowPathIcon } from '@heroicons/react/24/solid'
 
 import { cn } from '@/lib/utils'
 
@@ -25,7 +25,7 @@ export function LoadingState({
 }: LoadingStateProps) {
   return (
     <div className={cn('flex flex-col items-center justify-center text-center space-y-4', className)}>
-      <Loader2
+      <ArrowPathIcon
         className={cn('animate-spin text-primary', sizeClasses[size], spinnerClassName)}
         aria-hidden="true"
       />

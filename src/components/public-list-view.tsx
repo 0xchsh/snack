@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, memo } from 'react'
-import { Copy, Clock, Link as LinkIcon, Eye, Star, Edit } from 'lucide-react'
+import { DocumentDuplicateIcon, ClockIcon, LinkIcon, EyeIcon, StarIcon, PencilIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -312,7 +312,7 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
             transition={{ duration: 0.2 }}
             className="fixed top-4 left-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
           >
-            <Copy className="w-4 h-4" />
+            <DocumentDuplicateIcon className="w-4 h-4" />
             <span className="font-medium">Link copied to clipboard!</span>
           </motion.div>
         )}
@@ -328,7 +328,7 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
             transition={{ duration: 0.2 }}
             className="fixed top-4 left-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
           >
-            <Star className="w-4 h-4" />
+            <StarIcon className="w-4 h-4" />
             <span className="font-medium">Saved successfully!</span>
           </motion.div>
         )}
@@ -341,7 +341,7 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
           buttons={[
             {
               type: 'custom',
-              icon: <Edit className="w-5 h-5" />,
+              icon: <PencilIcon className="w-5 h-5" />,
               onClick: () => {
                 const username = user?.username || list.user?.username
                 router.push(`/${username}/${list.public_id || list.id}?view=edit`)
@@ -350,7 +350,7 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
             },
             {
               type: 'custom',
-              icon: <Copy className="w-5 h-5" />,
+              icon: <DocumentDuplicateIcon className="w-5 h-5" />,
               onClick: async () => {
                 const url = `${window.location.origin}/${list.user?.username}/${list.public_id || list.id}`
                 await navigator.clipboard.writeText(url)
@@ -369,16 +369,16 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
             {
               type: 'custom',
               icon: isSaved ? (
-                <Star className="w-5 h-5 fill-yellow-500 text-yellow-500" />
+                <StarIcon className="w-5 h-5 fill-yellow-500 text-yellow-500" />
               ) : (
-                <Star className="w-5 h-5" />
+                <StarIcon className="w-5 h-5" />
               ),
               onClick: handleSave,
               className: "w-icon-button h-icon-button p-0 flex items-center justify-center"
             },
             {
               type: 'custom',
-              icon: <Copy className="w-5 h-5" />,
+              icon: <DocumentDuplicateIcon className="w-5 h-5" />,
               onClick: handleCopy,
               className: "w-icon-button h-icon-button p-0 flex items-center justify-center"
             },
@@ -448,7 +448,7 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
             {/* Right: Links, Time, Saves */}
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               <div className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-muted-foreground" />
+                <ClockIcon className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm sm:text-base text-muted-foreground">{getRelativeTime(list.created_at)}</span>
               </div>
               <div className="flex items-center gap-1.5">
@@ -456,7 +456,7 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
                 <span className="text-sm sm:text-base text-muted-foreground">{list.links?.length || 0}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Star className="w-4 h-4 text-muted-foreground" />
+                <StarIcon className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm sm:text-base text-muted-foreground">{formatCount(list.save_count || 0)}</span>
               </div>
             </div>

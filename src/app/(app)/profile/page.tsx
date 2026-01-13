@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LogOut, Edit, Loader2, Trash2, Copy, ExternalLink } from 'lucide-react'
+import { ArrowRightStartOnRectangleIcon, PencilIcon, ArrowPathIcon, TrashIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid'
 
 import { Button } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
@@ -277,7 +277,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
             </div>
             {uploadingPicture && (
               <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-white" aria-hidden="true" />
+                <ArrowPathIcon className="h-6 w-6 animate-spin text-white" aria-hidden="true" />
               </div>
             )}
           </div>
@@ -340,7 +340,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
                 setTimeout(() => setMessage(null), 2000)
               }}
             >
-              <Copy className="w-4 h-4" />
+              <DocumentDuplicateIcon className="w-4 h-4" />
               Copy
             </Button>
             <Button
@@ -351,7 +351,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
               asChild
             >
               <Link href={`/${currentUser.username}`} target="_blank">
-                <ExternalLink className="w-4 h-4" />
+                <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                 View
               </Link>
             </Button>
@@ -374,7 +374,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
             size="sm"
             className="gap-2"
           >
-            <Edit className="w-4 h-4" />
+            <PencilIcon className="w-4 h-4" />
             {isEditing ? 'Cancel' : 'Edit'}
           </Button>
         </div>
@@ -517,12 +517,12 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
           >
             {isLoggingOut ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <ArrowPathIcon className="w-4 h-4 animate-spin" />
                 Signing out...
               </>
             ) : (
               <>
-                <LogOut className="w-4 h-4" />
+                <ArrowRightStartOnRectangleIcon className="w-4 h-4" />
                 Log Out
               </>
             )}

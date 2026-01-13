@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useRef, useState, useMemo } from 'react'
-import { X } from 'lucide-react'
+import { XMarkIcon } from '@heroicons/react/24/solid'
 
 import { Button, Input, Label } from '@/components/ui'
 import { CreateListForm } from '@/types'
@@ -70,7 +70,7 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
               size="icon"
               className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
             >
-              <X className="w-6 h-6" />
+              <XMarkIcon className="w-6 h-6" />
             </Button>
           </div>
 

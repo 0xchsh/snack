@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Clock, Link2, Star, User } from 'lucide-react'
+import { ClockIcon, LinkIcon, StarIcon, UserIcon } from '@heroicons/react/24/solid'
 
 const DEMO_LINKS = [
   {
@@ -92,7 +92,7 @@ export function AnimatedListDemo() {
           {/* Author */}
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-neutral-200 flex items-center justify-center overflow-hidden">
-              <User className="w-3.5 h-3.5 text-neutral-500" />
+              <UserIcon className="w-3.5 h-3.5 text-neutral-500" />
             </div>
             <span className="text-sm text-neutral-500">{DEMO_AUTHOR}</span>
           </div>
@@ -100,15 +100,15 @@ export function AnimatedListDemo() {
           {/* Stats */}
           <div className="flex items-center gap-3 text-sm text-neutral-400">
             <div className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" />
+              <ClockIcon className="w-3.5 h-3.5" />
               <span>2m</span>
             </div>
             <div className="flex items-center gap-1">
-              <Link2 className="w-3.5 h-3.5" />
+              <LinkIcon className="w-3.5 h-3.5" />
               <span>{linkCount}</span>
             </div>
             <div className="flex items-center gap-1">
-              <Star className="w-3.5 h-3.5" />
+              <StarIcon className="w-3.5 h-3.5" />
               <span>0</span>
             </div>
           </div>

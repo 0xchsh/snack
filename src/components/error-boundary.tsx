@@ -1,7 +1,7 @@
 'use client'
 
 import React, { Component, ErrorInfo, ReactNode } from 'react'
-import { AlertCircle, RefreshCw } from 'lucide-react'
+import { ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/solid'
 import { Button } from '@/components/ui'
 
 interface Props {
@@ -85,7 +85,7 @@ export class ErrorBoundary extends Component<Props, State> {
               {/* Error Icon */}
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
-                  <AlertCircle className="w-6 h-6 text-destructive" />
+                  <ExclamationTriangleIcon className="w-6 h-6 text-destructive" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">
@@ -124,7 +124,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   size="sm"
                   className="flex-1 gap-2"
                 >
-                  <RefreshCw className="w-4 h-4" />
+                  <ArrowPathIcon className="w-4 h-4" />
                   Reload Page
                 </Button>
                 <Button

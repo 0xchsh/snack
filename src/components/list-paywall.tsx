@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Lock, Loader2 } from 'lucide-react'
+import { LockClosedIcon, ArrowPathIcon } from '@heroicons/react/24/solid'
 import { useRouter } from 'next/navigation'
 import { formatCurrency } from '@/lib/pricing'
 import type { Currency } from '@/types'
@@ -77,7 +77,7 @@ export function ListPaywall({
         {/* Lock Icon */}
         <div className="flex justify-center mb-6">
           <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
-            <Lock className="w-8 h-8 text-muted-foreground" />
+            <LockClosedIcon className="w-8 h-8 text-muted-foreground" />
           </div>
         </div>
 
@@ -111,7 +111,7 @@ export function ListPaywall({
         >
           {isLoading ? (
             <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              <ArrowPathIcon className="w-5 h-5 mr-2 animate-spin" />
               Loading checkout...
             </>
           ) : (

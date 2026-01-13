@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState, ReactNode } from 'react'
-import { BarChart3, Star, Copy, ExternalLink, MoreVertical, Settings, User } from 'lucide-react'
+import { ChartBarIcon, StarIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, EllipsisVerticalIcon, Cog6ToothIcon, UserIcon } from '@heroicons/react/24/solid'
 
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
@@ -59,7 +59,7 @@ function MenuButton({ menuItems }: { menuItems: Array<{ label: string; onClick: 
         variant="muted"
         size="icon"
       >
-        <MoreVertical className={NAV_CONSTANTS.ICON_SIZE} />
+        <EllipsisVerticalIcon className={NAV_CONSTANTS.ICON_SIZE} />
       </Button>
 
       {isOpen && (
@@ -109,7 +109,7 @@ export function Header({
             className={cn('gap-2 font-medium', button.className)}
           >
             {button.label || 'View'}
-            <ExternalLink className="w-4 h-4" />
+            <ArrowTopRightOnSquareIcon className="w-4 h-4" />
           </Button>
         )
 
@@ -123,7 +123,7 @@ export function Header({
             className={cn('gap-2 font-medium', button.className)}
           >
             {button.label || 'Copy'}
-            <Copy className="w-4 h-4" />
+            <DocumentDuplicateIcon className="w-4 h-4" />
           </Button>
         )
 
@@ -141,7 +141,7 @@ export function Header({
           >
             <Link href={button.href || '/dashboard?tab=saved'}>
               {button.label || 'Saved'}
-              <Star className="w-4 h-4" />
+              <StarIcon className="w-4 h-4" />
             </Link>
           </Button>
         )
@@ -160,7 +160,7 @@ export function Header({
           >
             <Link href={button.href || '/dashboard?tab=stats'}>
               {button.label || 'Stats'}
-              <BarChart3 className="w-4 h-4" />
+              <ChartBarIcon className="w-4 h-4" />
             </Link>
           </Button>
         )
@@ -175,7 +175,7 @@ export function Header({
             className={button.className}
           >
             <Link href={button.href || '/profile'}>
-              <Settings className={NAV_CONSTANTS.ICON_SIZE} />
+              <Cog6ToothIcon className={NAV_CONSTANTS.ICON_SIZE} />
             </Link>
           </Button>
         )
@@ -190,7 +190,7 @@ export function Header({
             className={button.className}
           >
             <Link href={button.href || `/${username}`}>
-              <User className={NAV_CONSTANTS.ICON_SIZE} />
+              <UserIcon className={NAV_CONSTANTS.ICON_SIZE} />
             </Link>
           </Button>
         )

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Star, BarChart3, List } from 'lucide-react'
+import { StarIcon, ChartBarIcon, ListBulletIcon } from '@heroicons/react/24/solid'
 import { useEffect, Suspense, useState } from 'react'
 
 import { Button } from '@/components/ui'
@@ -91,7 +91,7 @@ function AppLayoutContent({
             aria-label="Your lists"
           >
             <Link href="/dashboard">
-              <List className="w-4 h-4" />
+              <ListBulletIcon className="w-4 h-4" />
             </Link>
           </Button>
           <Button
@@ -102,7 +102,7 @@ function AppLayoutContent({
             aria-label="Saved lists"
           >
             <Link href="/dashboard?tab=saved">
-              <Star className="w-4 h-4" />
+              <StarIcon className="w-4 h-4" />
             </Link>
           </Button>
           <Button
@@ -113,7 +113,7 @@ function AppLayoutContent({
             aria-label="Stats"
           >
             <Link href="/dashboard?tab=stats">
-              <BarChart3 className="w-4 h-4" />
+              <ChartBarIcon className="w-4 h-4" />
             </Link>
           </Button>
           <UserMenu
