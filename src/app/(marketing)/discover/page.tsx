@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { StarIcon, LinkIcon, ListBulletIcon, ArrowPathIcon } from '@heroicons/react/24/solid'
+import { StarIcon, LinkIcon, ListBulletIcon } from '@heroicons/react/24/solid'
+import { Spinner } from '@/components/ui'
 import { useInView } from 'react-intersection-observer'
 import { LoadingState } from '@/components/loading-state'
 import { DefaultAvatar } from '@/components/default-avatar'
@@ -291,7 +292,7 @@ export default function DiscoverPage() {
           <div ref={loadMoreRef} className="py-8 flex justify-center">
             {loadingMore && (
               <div className="flex items-center gap-2 text-muted-foreground">
-                <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                <Spinner size="sm" />
                 <span className="text-sm">Loading more lists...</span>
               </div>
             )}

@@ -3,9 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowPathIcon } from '@heroicons/react/24/solid'
-
-import { Button, Input, Label } from '@/components/ui'
+import { Button, Input, Label, Spinner } from '@/components/ui'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -54,7 +52,7 @@ export default function SignInPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <ArrowPathIcon className="h-8 w-8 animate-spin text-primary mx-auto" aria-hidden="true" />
+          <Spinner size="lg" className="mx-auto" />
           <p className="text-muted-foreground">Loading…</p>
         </div>
       </div>
@@ -66,7 +64,7 @@ export default function SignInPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <ArrowPathIcon className="h-8 w-8 animate-spin text-primary mx-auto" aria-hidden="true" />
+          <Spinner size="lg" className="mx-auto" />
           <p className="text-muted-foreground">Redirecting to dashboard…</p>
         </div>
       </div>

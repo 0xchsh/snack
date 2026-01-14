@@ -1,6 +1,5 @@
-import { ArrowPathIcon } from '@heroicons/react/24/solid'
-
 import { cn } from '@/lib/utils'
+import { Spinner } from '@/components/ui/spinner'
 
 type LoadingStateSize = 'sm' | 'md' | 'lg'
 
@@ -11,10 +10,10 @@ interface LoadingStateProps {
   spinnerClassName?: string
 }
 
-const sizeClasses: Record<LoadingStateSize, string> = {
-  sm: 'h-5 w-5',
-  md: 'h-8 w-8',
-  lg: 'h-12 w-12',
+const sizeMap: Record<LoadingStateSize, 'sm' | 'md' | 'lg'> = {
+  sm: 'sm',
+  md: 'md',
+  lg: 'lg',
 }
 
 export function LoadingState({
@@ -25,10 +24,7 @@ export function LoadingState({
 }: LoadingStateProps) {
   return (
     <div className={cn('flex flex-col items-center justify-center text-center space-y-4', className)}>
-      <ArrowPathIcon
-        className={cn('animate-spin text-primary', sizeClasses[size], spinnerClassName)}
-        aria-hidden="true"
-      />
+      <Spinner size={sizeMap[size]} className={spinnerClassName} />
       {message ? (
         <p className="text-muted-foreground">
           {message}

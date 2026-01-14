@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CurrencyDollarIcon, ShoppingCartIcon, CreditCardIcon, ArrowPathIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid'
+import { CurrencyDollarIcon, ShoppingCartIcon, CreditCardIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid'
+import { Spinner } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 import { StripeConnectButton } from '@/components/stripe-connect-button'
 import { formatCurrency } from '@/lib/pricing'
@@ -87,7 +88,7 @@ export default function EarningsDashboardPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <ArrowPathIcon className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+          <Spinner size="lg" className="mx-auto mb-4" />
           <p className="text-muted-foreground">Loading earnings...</p>
         </div>
       </div>

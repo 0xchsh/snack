@@ -4,9 +4,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRightStartOnRectangleIcon, PencilIcon, ArrowPathIcon, TrashIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid'
+import { ArrowRightStartOnRectangleIcon, PencilIcon, TrashIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid'
 
-import { Button } from '@/components/ui'
+import { Button, Spinner } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 import { LoadingState } from '@/components/loading-state'
 import { AppContainer } from '@/components/primitives'
@@ -277,7 +277,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
             </div>
             {uploadingPicture && (
               <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
-                <ArrowPathIcon className="h-6 w-6 animate-spin text-white" aria-hidden="true" />
+                <Spinner size="md" className="text-white" />
               </div>
             )}
           </div>
@@ -529,7 +529,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
           >
             {isLoggingOut ? (
               <>
-                <ArrowPathIcon className="w-4 h-4 animate-spin" aria-hidden="true" />
+                <Spinner size="xs" />
                 Signing out…
               </>
             ) : (

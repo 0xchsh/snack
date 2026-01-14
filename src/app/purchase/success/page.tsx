@@ -2,8 +2,8 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CheckCircleIcon, ArrowPathIcon, ArrowRightIcon } from '@heroicons/react/24/solid'
-import { Button } from '@/components/ui/button'
+import { CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/24/solid'
+import { Button, Spinner } from '@/components/ui'
 import { Header } from '@/components/header'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -46,7 +46,7 @@ function PurchaseSuccessContent() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <ArrowPathIcon className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+          <Spinner size="lg" className="mx-auto mb-4" />
           <p className="text-muted-foreground">Confirming your purchase...</p>
         </div>
       </div>
@@ -148,7 +148,7 @@ export default function PurchaseSuccessPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-background flex items-center justify-center">
-          <ArrowPathIcon className="w-12 h-12 animate-spin text-primary" />
+          <Spinner size="lg" />
         </div>
       }
     >

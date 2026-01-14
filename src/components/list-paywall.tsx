@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { LockClosedIcon, ArrowPathIcon } from '@heroicons/react/24/solid'
+import { LockClosedIcon } from '@heroicons/react/24/solid'
 import { useRouter } from 'next/navigation'
 import { formatCurrency } from '@/lib/pricing'
 import type { Currency } from '@/types'
-import { Button } from './ui/button'
+import { Button, Spinner } from './ui'
 import { useToast } from './toast/toast-provider'
 
 interface ListPaywallProps {
@@ -113,7 +113,7 @@ export function ListPaywall({
         >
           {isLoading ? (
             <>
-              <ArrowPathIcon className="w-5 h-5 mr-2 animate-spin" aria-hidden="true" />
+              <Spinner size="sm" className="mr-2" />
               Loading checkout…
             </>
           ) : (

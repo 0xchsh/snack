@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowPathIcon, CheckCircleIcon, ExclamationTriangleIcon, CreditCardIcon } from '@heroicons/react/24/solid'
-import { Button } from './ui/button'
+import { CheckCircleIcon, ExclamationTriangleIcon, CreditCardIcon } from '@heroicons/react/24/solid'
+import { Button, Spinner } from './ui'
 
 interface StripeConnectButtonProps {
   variant?: 'primary' | 'outline' | 'secondary'
@@ -87,7 +87,7 @@ export function StripeConnectButton({
   if (checking) {
     return (
       <Button variant={variant} size={size} className={className} disabled>
-        <ArrowPathIcon className="w-4 h-4 mr-2 animate-spin" />
+        <Spinner size="xs" className="mr-2" />
         Checking status...
       </Button>
     )
@@ -113,7 +113,7 @@ export function StripeConnectButton({
       >
         {loading ? (
           <>
-            <ArrowPathIcon className="w-4 h-4 mr-2 animate-spin" />
+            <Spinner size="xs" className="mr-2" />
             Loading...
           </>
         ) : (
@@ -136,7 +136,7 @@ export function StripeConnectButton({
     >
       {loading ? (
         <>
-          <ArrowPathIcon className="w-4 h-4 mr-2 animate-spin" />
+          <Spinner size="xs" className="mr-2" />
           Loading...
         </>
       ) : (

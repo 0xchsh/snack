@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-import { Button } from '@/components/ui'
+import { Button, Spinner } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 import { AnimatedListDemo, FeaturesSection, FAQSection, UseCasesSection, UsernameSection } from '@/components/marketing'
 
@@ -22,7 +22,7 @@ export default function HomePage() {
   if (loading || user) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-5 h-5 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
+        <Spinner size="sm" />
       </div>
     )
   }
