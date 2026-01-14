@@ -23,7 +23,7 @@ export default function PurchaseCancelledPage() {
                   label: 'Dashboard',
                   onClick: () => router.push('/dashboard'),
                   className:
-                    'px-4 py-2 text-base font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors',
+                    'px-4 py-2 text-base font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary-hover transition-colors',
                 },
               ]
             : [
@@ -32,7 +32,7 @@ export default function PurchaseCancelledPage() {
                   label: 'Sign In',
                   onClick: () => router.push('/auth/sign-in'),
                   className:
-                    'px-4 py-2 text-base font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors',
+                    'px-4 py-2 text-base font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary-hover transition-colors',
                 },
               ]
         }

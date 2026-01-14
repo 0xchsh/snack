@@ -49,18 +49,26 @@ const config: Config = {
         foreground: "var(--foreground)",
         primary: {
           DEFAULT: "var(--primary)",
+          hover: "var(--primary-hover)",
+          active: "var(--primary-active)",
           foreground: "var(--primary-foreground)",
         },
         secondary: {
           DEFAULT: "var(--secondary)",
+          hover: "var(--secondary-hover)",
+          active: "var(--secondary-active)",
           foreground: "var(--secondary-foreground)",
         },
         destructive: {
           DEFAULT: "var(--destructive)",
+          hover: "var(--destructive-hover)",
+          active: "var(--destructive-active)",
           foreground: "var(--destructive-foreground)",
         },
         muted: {
           DEFAULT: "var(--muted)",
+          hover: "var(--muted-hover)",
+          active: "var(--muted-active)",
           foreground: "var(--muted-foreground)",
         },
         accent: {

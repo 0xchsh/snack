@@ -59,7 +59,7 @@ function MarketingLayoutContent({
                   )}
                 </>
               ) : (
-                <Button asChild variant="secondary">
+                <Button asChild variant={isHomepage ? undefined : 'secondary'} className={isHomepage ? 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200' : undefined}>
                   <Link href="/auth/sign-in">Get Started</Link>
                 </Button>
               )}

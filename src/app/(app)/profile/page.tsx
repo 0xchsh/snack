@@ -41,7 +41,7 @@ export default function ProfilePage() {
           <p className="text-muted-foreground">You need to be signed in to view your profile.</p>
           <Link
             href="/auth/sign-in"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors font-semibold"
           >
             Sign In
           </Link>

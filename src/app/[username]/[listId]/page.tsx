@@ -355,7 +355,7 @@ export default function UserListPage() {
               <button
                 onClick={handleDelete}
                 disabled={deleteListMutation.isPending}
-                className="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-md transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive-hover rounded-md transition-colors disabled:opacity-50"
               >
                 {deleteListMutation.isPending ? 'Deleting...' : 'Delete'}
               </button>

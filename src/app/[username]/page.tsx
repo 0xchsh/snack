@@ -100,7 +100,7 @@ export default function UsernamePage() {
           <p className="text-muted-foreground">{error}</p>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-semibold"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary-hover transition-colors font-semibold"
           >
             <span>←</span>
             Go Home

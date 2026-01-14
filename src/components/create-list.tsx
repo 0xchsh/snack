@@ -83,7 +83,7 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
                 type="button"
                 onClick={() => setShowEmojiPicker(true)}
                 variant="secondary"
-                className="w-20 h-20 rounded-2xl text-4xl mx-auto mb-3 hover:bg-secondary/80"
+                className="w-20 h-20 rounded-2xl text-4xl mx-auto mb-3 hover:bg-secondary-hover"
                 aria-label="Choose list emoji"
               >
                 <span aria-hidden="true">{currentEmoji}</span>

@@ -10,17 +10,17 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 active:scale-[0.98]',
+          'bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active active:scale-[0.98]',
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70 active:scale-[0.98]',
+          'bg-secondary text-secondary-foreground hover:bg-secondary-hover active:bg-secondary-active active:scale-[0.98]',
         muted:
-          'bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted active:bg-muted/80 active:scale-[0.98]',
+          'bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted-hover active:bg-muted-active active:scale-[0.98]',
         ghost:
-          'text-muted-foreground hover:text-foreground hover:bg-secondary/80 active:bg-secondary/70 active:scale-[0.98]',
+          'text-muted-foreground hover:text-foreground hover:bg-secondary-hover active:bg-secondary-active active:scale-[0.98]',
         outline:
-          'border border-border bg-transparent text-foreground hover:bg-secondary/80 active:bg-secondary/70 active:scale-[0.98]',
+          'border border-border bg-transparent text-foreground hover:bg-secondary-hover active:bg-secondary-active active:scale-[0.98]',
         destructive:
-          'bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80 active:scale-[0.98]',
+          'bg-destructive text-destructive-foreground hover:bg-destructive-hover active:bg-destructive-active active:scale-[0.98]',
       },
       size: {
         default: 'h-icon-button px-4 rounded-lg text-sm',
