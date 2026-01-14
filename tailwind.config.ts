@@ -34,6 +34,10 @@ const config: Config = {
         'logo-marketing': '2.5rem', // 40px
         'icon-button': '2.625rem', // 42px
       },
+      maxWidth: {
+        'container-app': '64rem', // 1024px - max-width for app content
+        'container-marketing': '80rem', // 1280px - max-width for marketing
+      },
       gap: {
         'nav': '0.75rem', // 12px - gap between nav items
       },

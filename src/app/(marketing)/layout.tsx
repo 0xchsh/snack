@@ -29,7 +29,7 @@ function MarketingLayoutContent({
       </a>
 
       <header style={isHomepage ? { backgroundColor: '#ffffff' } : undefined} className={isHomepage ? '' : 'bg-background'}>
-        <div className="mx-auto w-full px-4 py-6 max-w-5xl">
+        <div className="mx-auto w-full px-4 py-6 sm:px-6 max-w-container-app">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2">
