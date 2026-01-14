@@ -36,7 +36,7 @@ export default function HomePage() {
             Never forget your favorite links
           </h1>
           <p className="text-lg text-neutral-500 mb-8">
-            Organize and share them as simple, beautiful lists.
+            Organize and share them as simple, beautiful&nbsp;lists.
           </p>
 
           <div className="flex items-center justify-center gap-3 mb-12">
