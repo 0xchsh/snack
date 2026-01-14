@@ -63,7 +63,7 @@ async function fixLongPublicIds() {
   console.log(`Found ${listsWithLongIds.length} list(s) with long public IDs:\n`)
 
   for (const list of listsWithLongIds) {
-    const oldUrl = `https://app.snack.xyz/[username]/${list.public_id}`
+    const oldUrl = `https://snack.xyz/[username]/${list.public_id}`
     console.log(`📋 ${list.title || 'Untitled'}`)
     console.log(`   Current: ${oldUrl}`)
     console.log(`   Length: ${list.public_id.length} characters`)
@@ -103,7 +103,7 @@ async function fixLongPublicIds() {
       console.error(`❌ Failed to update "${list.title}":`, updateError.message)
       errorCount++
     } else {
-      const newUrl = `https://app.snack.xyz/[username]/${newPublicId}`
+      const newUrl = `https://snack.xyz/[username]/${newPublicId}`
       console.log(`✅ ${list.title || 'Untitled'}`)
       console.log(`   Old: .../${list.public_id.substring(0, 20)}...`)
       console.log(`   New: ${newUrl}`)

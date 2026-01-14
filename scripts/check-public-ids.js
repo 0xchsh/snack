@@ -30,7 +30,7 @@ async function checkPublicIds() {
     const username = list.users?.username || 'unknown'
     const publicId = list.public_id || 'NULL'
     const publicIdLength = publicId === 'NULL' ? 0 : publicId.length
-    const url = `https://app.snack.xyz/${username}/${publicId}`
+    const url = `https://snack.xyz/${username}/${publicId}`
 
     console.log(`Title: ${list.title || 'Untitled'}`)
     console.log(`  ID: ${list.id}`)
