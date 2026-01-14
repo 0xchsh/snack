@@ -170,7 +170,7 @@ function DashboardContent() {
                     size="lg"
                     className="px-6 py-3"
                   >
-                    {createEmptyListMutation.isPending ? 'Creating...' : 'Create Your First List'}
+                    {createEmptyListMutation.isPending ? 'Creating…' : 'Create Your First List'}
                   </Button>
                 </div>
               ) : (

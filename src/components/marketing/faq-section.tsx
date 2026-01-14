@@ -42,7 +42,8 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
     <div className="bg-neutral-50 rounded-xl">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-5 py-4 flex items-center justify-between text-left"
+        className="w-full px-5 py-4 flex items-center justify-between text-left rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+        aria-expanded={isOpen}
       >
         <span className="font-medium text-neutral-900">
           {question}
@@ -51,7 +52,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          <ChevronDownIcon className="w-5 h-5 text-neutral-400" />
+          <ChevronDownIcon className="w-5 h-5 text-neutral-400" aria-hidden="true" />
         </motion.div>
       </button>
 

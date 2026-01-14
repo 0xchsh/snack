@@ -18,7 +18,7 @@ const sizeClasses: Record<LoadingStateSize, string> = {
 }
 
 export function LoadingState({
-  message = 'Loading...',
+  message = 'Loading…',
   size = 'md',
   className,
   spinnerClassName,

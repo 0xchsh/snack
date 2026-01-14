@@ -58,8 +58,10 @@ function MenuButton({ menuItems }: { menuItems: Array<{ label: string; onClick: 
         onClick={() => setIsOpen(!isOpen)}
         variant="muted"
         size="icon"
+        aria-label="More options"
+        aria-expanded={isOpen}
       >
-        <EllipsisVerticalIcon className={NAV_CONSTANTS.ICON_SIZE} />
+        <EllipsisVerticalIcon className={NAV_CONSTANTS.ICON_SIZE} aria-hidden="true" />
       </Button>
 
       {isOpen && (
@@ -109,7 +111,7 @@ export function Header({
             className={cn('gap-2 font-medium', button.className)}
           >
             {button.label || 'View'}
-            <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+            <ArrowTopRightOnSquareIcon className="w-4 h-4" aria-hidden="true" />
           </Button>
         )
 
@@ -123,7 +125,7 @@ export function Header({
             className={cn('gap-2 font-medium', button.className)}
           >
             {button.label || 'Copy'}
-            <DocumentDuplicateIcon className="w-4 h-4" />
+            <DocumentDuplicateIcon className="w-4 h-4" aria-hidden="true" />
           </Button>
         )
 
@@ -141,7 +143,7 @@ export function Header({
           >
             <Link href={button.href || '/dashboard?tab=saved'}>
               {button.label || 'Saved'}
-              <StarIcon className="w-4 h-4" />
+              <StarIcon className="w-4 h-4" aria-hidden="true" />
             </Link>
           </Button>
         )
@@ -160,7 +162,7 @@ export function Header({
           >
             <Link href={button.href || '/dashboard?tab=stats'}>
               {button.label || 'Stats'}
-              <ChartBarIcon className="w-4 h-4" />
+              <ChartBarIcon className="w-4 h-4" aria-hidden="true" />
             </Link>
           </Button>
         )
@@ -173,9 +175,10 @@ export function Header({
             variant="muted"
             size="icon"
             className={button.className}
+            aria-label="Settings"
           >
             <Link href={button.href || '/profile'}>
-              <Cog6ToothIcon className={NAV_CONSTANTS.ICON_SIZE} />
+              <Cog6ToothIcon className={NAV_CONSTANTS.ICON_SIZE} aria-hidden="true" />
             </Link>
           </Button>
         )
@@ -188,9 +191,10 @@ export function Header({
             variant="muted"
             size="icon"
             className={button.className}
+            aria-label="View profile"
           >
             <Link href={button.href || `/${username}`}>
-              <UserIcon className={NAV_CONSTANTS.ICON_SIZE} />
+              <UserIcon className={NAV_CONSTANTS.ICON_SIZE} aria-hidden="true" />
             </Link>
           </Button>
         )

@@ -775,8 +775,10 @@ export function ListEditor({
             exit={{ opacity: 0, scale: 0.95, x: '-50%' }}
             transition={{ duration: 0.2 }}
             className="fixed top-4 left-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
+            role="status"
+            aria-live="polite"
           >
-            <ClipboardIcon className="w-4 h-4" />
+            <ClipboardIcon className="w-4 h-4" aria-hidden="true" />
             <span className="font-medium">Link copied to clipboard!</span>
           </motion.div>
         )}
@@ -790,8 +792,9 @@ export function ListEditor({
           onClick={() => setShowEmojiPicker(true)}
           variant="outline"
           className="flex-shrink-0 !w-[62px] !h-[62px] p-0 rounded-md text-3xl bg-background hover:border-muted-foreground"
+          aria-label="Change list emoji"
         >
-          <span>{currentEmoji}</span>
+          <span aria-hidden="true">{currentEmoji}</span>
         </Button>
 
         {isEditingTitle ? (
@@ -826,7 +829,7 @@ export function ListEditor({
       {/* Link count and Paste button/input */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-muted-foreground flex-shrink-0">
-          <LinkIcon className="w-4 h-4" />
+          <LinkIcon className="w-4 h-4" aria-hidden="true" />
           <span className="text-base">{optimisticList.links?.length || 0} links</span>
         </div>
 
@@ -849,8 +852,9 @@ export function ListEditor({
             ref={mobilePasteInputRef}
             type="url"
             inputMode="url"
-            autoComplete="url"
-            placeholder="Paste links here"
+            autoComplete="off"
+            placeholder="Paste links here…"
+            aria-label="Paste links"
             onPaste={handleMobilePaste}
             className="flex-1 px-4 py-2 bg-background text-foreground border border-border rounded-md text-base placeholder:text-muted-foreground focus:outline-none focus:border-muted-foreground transition-colors min-w-0"
           />
@@ -1030,8 +1034,13 @@ function LinkItem({
         {/* Actions overlay */}
         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="bg-muted rounded-md px-2 py-2 flex items-center gap-4">
-            <div className="flex items-center justify-center text-muted-foreground cursor-grab" title="Drag to reorder">
-              <Bars3Icon className="w-4 h-4" />
+            <div
+              className="flex items-center justify-center text-muted-foreground cursor-grab"
+              role="button"
+              aria-label="Drag to reorder"
+              tabIndex={0}
+            >
+              <Bars3Icon className="w-4 h-4" aria-hidden="true" />
             </div>
             <button
               type="button"
@@ -1042,11 +1051,11 @@ function LinkItem({
               onMouseDown={(e) => {
                 e.stopPropagation()
               }}
-              className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-              title="Refresh link preview"
+              className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              aria-label="Refresh link preview"
               disabled={isRefreshing}
             >
-              <ArrowPathIcon className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <ArrowPathIcon className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} aria-hidden="true" />
             </button>
             <button
               type="button"
@@ -1057,10 +1066,10 @@ function LinkItem({
               onMouseDown={(e) => {
                 e.stopPropagation()
               }}
-              className="text-muted-foreground hover:text-destructive transition-colors"
-              title="Delete link"
+              className="text-muted-foreground hover:text-destructive transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              aria-label="Delete link"
             >
-              <TrashIcon className="w-4 h-4" />
+              <TrashIcon className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>

@@ -27,7 +27,7 @@ export default function ProfilePage() {
   if (!mounted || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Loading profile..." />
+        <LoadingState message="Loading profile…" />
       </div>
     )
   }
@@ -292,7 +292,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
                 disabled={uploadingPicture}
                 onClick={() => fileInputRef.current?.click()}
               >
-                {uploadingPicture ? 'Uploading...' : 'Upload New Photo'}
+                {uploadingPicture ? 'Uploading…' : 'Upload New Photo'}
               </Button>
               <input
                 ref={fileInputRef}
@@ -381,15 +381,17 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium mb-2">First Name</label>
+            <label htmlFor="first_name" className="block text-sm font-medium mb-2">First Name</label>
             {isEditing ? (
               <input
+                id="first_name"
                 type="text"
                 value={formData.first_name}
                 onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                 className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary"
-                placeholder="Enter your first name"
+                placeholder="Enter your first name…"
                 disabled={isSaving}
+                autoComplete="given-name"
               />
             ) : (
               <div className="px-4 py-3 bg-muted rounded-lg text-foreground min-h-[46px]">
@@ -399,15 +401,17 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Last Name</label>
+            <label htmlFor="last_name" className="block text-sm font-medium mb-2">Last Name</label>
             {isEditing ? (
               <input
+                id="last_name"
                 type="text"
                 value={formData.last_name}
                 onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                 className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary"
-                placeholder="Enter your last name"
+                placeholder="Enter your last name…"
                 disabled={isSaving}
+                autoComplete="family-name"
               />
             ) : (
               <div className="px-4 py-3 bg-muted rounded-lg text-foreground min-h-[46px]">
@@ -417,16 +421,19 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Username</label>
+            <label htmlFor="username" className="block text-sm font-medium mb-2">Username</label>
             {isEditing ? (
               <input
+                id="username"
                 type="text"
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary"
-                placeholder="Enter your username"
+                placeholder="Enter your username…"
                 disabled={isSaving}
                 required
+                autoComplete="username"
+                spellCheck={false}
               />
             ) : (
               <div className="px-4 py-3 bg-muted rounded-lg text-foreground">
@@ -436,16 +443,19 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
+            <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
             {isEditing ? (
               <input
+                id="email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary"
-                placeholder="Enter your email"
+                placeholder="Enter your email…"
                 disabled={isSaving}
                 required
+                autoComplete="email"
+                spellCheck={false}
               />
             ) : (
               <div className="px-4 py-3 bg-muted rounded-lg text-foreground">
@@ -455,16 +465,18 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-2">Bio</label>
+            <label htmlFor="bio" className="block text-sm font-medium mb-2">Bio</label>
             {isEditing ? (
               <textarea
+                id="bio"
                 value={formData.bio}
                 onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                 className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary resize-none"
-                placeholder="Tell people about yourself"
+                placeholder="Tell people about yourself…"
                 maxLength={160}
                 rows={3}
                 disabled={isSaving}
+                autoComplete="off"
               />
             ) : (
               <div className="px-4 py-3 bg-muted rounded-lg text-foreground min-h-[94px]">
@@ -485,7 +497,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
               disabled={isSaving}
               className="px-6"
             >
-              {isSaving ? 'Saving...' : 'Save Changes'}
+              {isSaving ? 'Saving…' : 'Save Changes'}
             </Button>
             <Button
               type="button"
@@ -517,12 +529,12 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
           >
             {isLoggingOut ? (
               <>
-                <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                Signing out...
+                <ArrowPathIcon className="w-4 h-4 animate-spin" aria-hidden="true" />
+                Signing out…
               </>
             ) : (
               <>
-                <ArrowRightStartOnRectangleIcon className="w-4 h-4" />
+                <ArrowRightStartOnRectangleIcon className="w-4 h-4" aria-hidden="true" />
                 Log Out
               </>
             )}

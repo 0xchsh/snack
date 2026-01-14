@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { formatCurrency } from '@/lib/pricing'
 import type { Currency } from '@/types'
 import { Button } from './ui/button'
+import { useToast } from './toast/toast-provider'
 
 interface ListPaywallProps {
   listId: string
@@ -26,6 +27,7 @@ export function ListPaywall({
 }: ListPaywallProps) {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const toast = useToast()
 
   const handlePurchase = async () => {
     setIsLoading(true)
@@ -49,7 +51,7 @@ export function ListPaywall({
           return
         }
 
-        alert(errorData.error || 'Failed to create checkout session. Please try again.')
+        toast.error(errorData.error || 'Failed to create checkout session. Please try again.')
         setIsLoading(false)
         return
       }
@@ -61,12 +63,12 @@ export function ListPaywall({
         window.location.href = data.data.url
       } else {
         console.error('No checkout URL in response:', data)
-        alert('Failed to create checkout session. Please try again.')
+        toast.error('Failed to create checkout session. Please try again.')
         setIsLoading(false)
       }
     } catch (error) {
       console.error('Error creating checkout:', error)
-      alert('An error occurred. Please try again.')
+      toast.error('An error occurred. Please try again.')
       setIsLoading(false)
     }
   }
@@ -111,8 +113,8 @@ export function ListPaywall({
         >
           {isLoading ? (
             <>
-              <ArrowPathIcon className="w-5 h-5 mr-2 animate-spin" />
-              Loading checkout...
+              <ArrowPathIcon className="w-5 h-5 mr-2 animate-spin" aria-hidden="true" />
+              Loading checkout…
             </>
           ) : (
             <>

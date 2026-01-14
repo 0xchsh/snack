@@ -24,7 +24,7 @@ export function FeaturesSection() {
               className="bg-neutral-50 rounded-xl p-5 hover:bg-neutral-100 transition-colors cursor-default"
             >
               <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-4">
-                <feature.icon className="w-5 h-5 text-neutral-600" />
+                <feature.icon className="w-5 h-5 text-neutral-600" aria-hidden="true" />
               </div>
               <p className="text-base font-medium text-neutral-900">
                 {feature.label}

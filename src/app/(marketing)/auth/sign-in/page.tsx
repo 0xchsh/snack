@@ -55,7 +55,7 @@ export default function SignInPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <ArrowPathIcon className="h-8 w-8 animate-spin text-primary mx-auto" aria-hidden="true" />
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Loading…</p>
         </div>
       </div>
     )
@@ -67,7 +67,7 @@ export default function SignInPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <ArrowPathIcon className="h-8 w-8 animate-spin text-primary mx-auto" aria-hidden="true" />
-          <p className="text-muted-foreground">Redirecting to dashboard...</p>
+          <p className="text-muted-foreground">Redirecting to dashboard…</p>
         </div>
       </div>
     )
@@ -101,7 +101,7 @@ export default function SignInPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="Enter your email"
+              placeholder="Enter your email…"
             />
           </div>
 
@@ -115,7 +115,7 @@ export default function SignInPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Enter your password"
+              placeholder="Enter your password…"
             />
           </div>
 
@@ -125,7 +125,7 @@ export default function SignInPage() {
             size="lg"
             className="w-full"
           >
-            {isLoading ? 'Signing In...' : 'Sign In'}
+            {isLoading ? 'Signing in…' : 'Sign In'}
           </Button>
         </form>
 
@@ -153,7 +153,7 @@ export default function SignInPage() {
               <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
           )}
-          {isLoading ? 'Signing In...' : 'Continue with Google'}
+          {isLoading ? 'Signing in…' : 'Continue with Google'}
         </Button>
 
         <p className="text-center text-muted-foreground">

@@ -69,8 +69,9 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
               variant="ghost"
               size="icon"
               className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
+              aria-label="Close dialog"
             >
-              <XMarkIcon className="w-6 h-6" />
+              <XMarkIcon className="w-6 h-6" aria-hidden="true" />
             </Button>
           </div>
 
@@ -83,8 +84,9 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
                 onClick={() => setShowEmojiPicker(true)}
                 variant="secondary"
                 className="w-20 h-20 rounded-2xl text-4xl mx-auto mb-3 hover:bg-secondary/80"
+                aria-label="Choose list emoji"
               >
-                <span>{currentEmoji}</span>
+                <span aria-hidden="true">{currentEmoji}</span>
               </Button>
               <p 
                 className="text-sm text-muted-foreground"
@@ -107,10 +109,11 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
                 onChange={(e) =>
                   setFormData(prev => ({ ...prev, title: e.target.value }))
                 }
-                placeholder="My awesome list"
+                placeholder="My awesome list…"
                 maxLength={100}
                 required
                 variant="secondary"
+                autoComplete="off"
               />
             </div>
 

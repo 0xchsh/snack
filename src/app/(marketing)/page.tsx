@@ -50,7 +50,7 @@ export default function HomePage() {
 
           {/* Demo in page container */}
           <div className="rounded-xl border border-neutral-200 bg-white shadow-xl shadow-neutral-200/50 overflow-hidden">
-            <div className="border-b border-neutral-100 px-4 py-2 flex items-center gap-2">
+            <div className="border-b border-neutral-100 px-4 py-2 flex items-center gap-2" aria-hidden="true">
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded-full bg-neutral-200" />
                 <div className="w-3 h-3 rounded-full bg-neutral-200" />

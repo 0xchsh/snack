@@ -73,9 +73,12 @@ export function EmojiPicker({
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-40"
+      <button
+        type="button"
+        className="fixed inset-0 z-40 cursor-default"
         onClick={onClose}
+        aria-label="Close emoji picker"
+        tabIndex={-1}
       />
 
       {/* Emoji Mart Picker */}

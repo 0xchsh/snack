@@ -30,10 +30,10 @@ interface ToastContextType {
 const ToastContext = createContext<ToastContextType | undefined>(undefined)
 
 const toastIcons: Record<ToastType, ReactNode> = {
-  success: <CheckCircleIcon className="w-5 h-5" />,
-  error: <XCircleIcon className="w-5 h-5" />,
-  warning: <ExclamationTriangleIcon className="w-5 h-5" />,
-  info: <InformationCircleIcon className="w-5 h-5" />,
+  success: <CheckCircleIcon className="w-5 h-5" aria-hidden="true" />,
+  error: <XCircleIcon className="w-5 h-5" aria-hidden="true" />,
+  warning: <ExclamationTriangleIcon className="w-5 h-5" aria-hidden="true" />,
+  info: <InformationCircleIcon className="w-5 h-5" aria-hidden="true" />,
 }
 
 const toastStyles: Record<ToastType, string> = {
@@ -117,7 +117,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
 
       {/* Toast Container */}
-      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 pointer-events-none max-w-md w-full px-4">
+      <div
+        className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 pointer-events-none max-w-md w-full px-4"
+        aria-live="polite"
+        aria-atomic="false"
+      >
         <AnimatePresence mode="popLayout">
           {toasts.map((toast) => (
             <motion.div
@@ -127,6 +131,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               exit={{ opacity: 0, scale: 0.95, y: -10 }}
               transition={{ duration: 0.2 }}
               className={`${toastStyles[toast.type]} px-4 py-3 rounded-lg shadow-lg flex items-start gap-3 pointer-events-auto`}
+              role={toast.type === 'error' ? 'alert' : 'status'}
             >
               {/* Icon */}
               <div className="flex-shrink-0 mt-0.5">{toastIcons[toast.type]}</div>
