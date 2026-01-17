@@ -279,7 +279,7 @@ export default function UserListPage() {
             aria-label="Delete list"
             className="bg-red-500/10 text-red-600 hover:bg-red-500/20 hover:text-red-700 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20 dark:hover:text-red-300"
           >
-            <TrashIcon className="w-5 h-5" />
+            <TrashIcon className="w-4 h-4" />
           </Button>
           <Button
             onClick={() => {
@@ -290,7 +290,7 @@ export default function UserListPage() {
             aria-label="Preview public view"
             className="bg-green-500/10 text-green-600 hover:bg-green-500/20 hover:text-green-700 dark:bg-green-500/10 dark:text-green-400 dark:hover:bg-green-500/20 dark:hover:text-green-300"
           >
-            <CheckIcon className="w-5 h-5" />
+            <CheckIcon className="w-4 h-4" />
           </Button>
           <Button
             onClick={async () => {
@@ -303,7 +303,7 @@ export default function UserListPage() {
             size="icon"
             aria-label="Copy link"
           >
-            <DocumentDuplicateIcon className="w-5 h-5" />
+            <DocumentDuplicateIcon className="w-4 h-4" />
           </Button>
           <ThemeToggle />
         </TopBar.Right>

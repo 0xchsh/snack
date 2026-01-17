@@ -24,22 +24,22 @@ const config: Config = {
       },
       width: {
         'logo-app': '2rem', // 32px - app logo size
-        'logo-marketing': '2.5rem', // 40px - marketing logo size
-        'icon-button': '2.625rem', // 42px - icon button size
+        'logo-marketing': '2rem', // 32px - marketing logo size
+        'icon-button': '2rem', // 32px - icon button size
         'container-app': '64rem', // 1024px - max-width for app content
         'container-marketing': '80rem', // 1280px - max-width for marketing
       },
       height: {
         'logo-app': '2rem', // 32px
-        'logo-marketing': '2.5rem', // 40px
-        'icon-button': '2.625rem', // 42px
+        'logo-marketing': '2rem', // 32px
+        'icon-button': '2rem', // 32px
       },
       maxWidth: {
         'container-app': '64rem', // 1024px - max-width for app content
         'container-marketing': '80rem', // 1280px - max-width for marketing
       },
       gap: {
-        'nav': '0.75rem', // 12px - gap between nav items
+        'nav': '0.5rem', // 8px - gap between nav items
       },
       fontFamily: {
         sans: ['Geist', 'ui-sans-serif', 'sans-serif', 'system-ui'],

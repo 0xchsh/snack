@@ -51,7 +51,7 @@ export function UserMenu({ user, onLogout, className }: UserMenuProps) {
           aria-label="Account menu"
           className={className}
         >
-          <UserCircleIcon className="w-5 h-5" />
+          <UserCircleIcon className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[200px]">

@@ -8,10 +8,9 @@ interface BrandMarkProps {
 }
 
 /**
- * BrandMark - Logo component with responsive sizing
+ * BrandMark - Logo component
  *
- * - App variant: 32px (w-logo-app h-logo-app)
- * - Marketing variant: 32px (w-logo-app h-logo-app)
+ * - Uses 32px size (w-logo-marketing h-logo-marketing) for consistency across all pages
  * - Automatically links to appropriate destination based on variant
  */
 export function BrandMark({
@@ -19,7 +18,7 @@ export function BrandMark({
   href,
   className
 }: BrandMarkProps) {
-  const sizeClass = 'w-logo-app h-logo-app'
+  const sizeClass = 'w-logo-marketing h-logo-marketing'
 
   const defaultHref = variant === 'marketing' ? '/' : '/dashboard'
   const destination = href ?? defaultHref

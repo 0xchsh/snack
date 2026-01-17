@@ -166,9 +166,9 @@ export default function UsernamePage() {
               <Image
                 src="/images/logo.svg"
                 alt="Snack"
-                width={32}
-                height={32}
-                className="w-8 h-8"
+                width={40}
+                height={40}
+                className="w-10 h-10"
               />
             </Link>
 

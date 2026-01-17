@@ -36,8 +36,8 @@ function MarketingLayoutContent({
               <Image
                 src="/images/logo.svg"
                 alt="Snack"
-                width={40}
-                height={40}
+                width={32}
+                height={32}
                 className={isHomepage ? '' : 'dark:invert'}
                 style={isHomepage ? { filter: 'none' } : undefined}
               />
@@ -53,7 +53,7 @@ function MarketingLayoutContent({
                   {user.username && (
                     <Button asChild variant={isHomepage ? undefined : 'muted'} size="icon" className={isHomepage ? 'bg-transparent text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100' : undefined}>
                       <Link href={`/${user.username}`}>
-                        <UserIcon className="w-5 h-5" />
+                        <UserIcon className="w-4 h-4" />
                       </Link>
                     </Button>
                   )}

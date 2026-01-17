@@ -57,18 +57,13 @@ export async function POST(request: NextRequest) {
     }
     
     const body: CreateListForm = await request.json()
-    
-    // Validate required fields
-    if (!body.title) {
-      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
-    }
-    
-    // Create the list
+
+    // Create the list with defaults for empty list creation
     const { data: list, error } = await supabase
       .from('lists')
       .insert({
         user_id: user.id,
-        title: body.title,
+        title: body.title || 'Untitled',
         emoji: body.emoji || '🎯',
         is_public: body.is_public !== undefined ? body.is_public : true
       })

@@ -166,7 +166,7 @@ export default function DiscoverPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 md:py-12 max-w-[800px] px-4 md:px-0">
+      <div className="mx-auto py-6 md:py-12 max-w-container-app px-4 sm:px-6">
         <div className="mb-8 text-center">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Discover Lists</h1>
           <p className="text-muted-foreground">Explore curated lists from the community</p>

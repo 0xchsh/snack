@@ -13,8 +13,8 @@ export const NAV_CONSTANTS = {
   LOGO_HEIGHT: 32,
 
   // Icon Buttons (Settings, Profile, etc.)
-  ICON_BUTTON_SIZE: 'w-[42px] h-[42px]',
-  ICON_SIZE: 'w-5 h-5',
+  ICON_BUTTON_SIZE: 'w-8 h-8',
+  ICON_SIZE: 'w-4 h-4',
 
   // Tab Buttons (Saved, Stats)
   TAB_ICON_SIZE: 'w-3.5 h-3.5',

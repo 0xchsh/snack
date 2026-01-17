@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRightStartOnRectangleIcon, PencilIcon, TrashIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid'
+import { ArrowRightStartOnRectangleIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid'
 
 import { Button, Spinner } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
@@ -74,7 +74,6 @@ export default function ProfilePage() {
 
 function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void> }) {
   const router = useRouter()
-  const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [uploadingPicture, setUploadingPicture] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -219,7 +218,6 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
       }
 
       setCurrentUser(result.data)
-      setIsEditing(false)
       setMessage({ type: 'success', text: result.warning || 'Profile updated successfully!' })
       
       // Refresh the page to update all user contexts
@@ -241,7 +239,6 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
       bio: currentUser.bio || '',
       profile_is_public: currentUser.profile_is_public ?? true,
     })
-    setIsEditing(false)
     setMessage(null)
   }
 
@@ -325,7 +322,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
           <div>
             <h3 className="font-semibold mb-1">Your Profile URL</h3>
             <p className="text-sm text-muted-foreground font-mono">
-              snack.xyz/@{currentUser.username}
+              snack.xyz/{currentUser.username}
             </p>
           </div>
           <div className="flex gap-2">
@@ -335,7 +332,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
               size="sm"
               className="gap-2"
               onClick={async () => {
-                await navigator.clipboard.writeText(`https://snack.xyz/@${currentUser.username}`)
+                await navigator.clipboard.writeText(`https://snack.xyz/${currentUser.username}`)
                 setMessage({ type: 'success', text: 'Profile URL copied!' })
                 setTimeout(() => setMessage(null), 2000)
               }}
@@ -360,157 +357,14 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
       </div>
 
       {/* Personal Information */}
-      <div className="bg-background border border-border rounded-xl p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="font-semibold mb-1">Personal Information</h3>
-            <p className="text-sm text-muted-foreground">Update your personal details here.</p>
-          </div>
-          <Button
-            type="button"
-            onClick={() => setIsEditing(!isEditing)}
-            disabled={isSaving}
-            variant="ghost"
-            size="sm"
-            className="gap-2"
-          >
-            <PencilIcon className="w-4 h-4" />
-            {isEditing ? 'Cancel' : 'Edit'}
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="first_name" className="block text-sm font-medium mb-2">First Name</label>
-            {isEditing ? (
-              <input
-                id="first_name"
-                type="text"
-                value={formData.first_name}
-                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary"
-                placeholder="Enter your first name…"
-                disabled={isSaving}
-                autoComplete="given-name"
-              />
-            ) : (
-              <div className="px-4 py-3 bg-muted rounded-lg text-foreground min-h-[46px]">
-                {currentUser.first_name || ''}
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="last_name" className="block text-sm font-medium mb-2">Last Name</label>
-            {isEditing ? (
-              <input
-                id="last_name"
-                type="text"
-                value={formData.last_name}
-                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary"
-                placeholder="Enter your last name…"
-                disabled={isSaving}
-                autoComplete="family-name"
-              />
-            ) : (
-              <div className="px-4 py-3 bg-muted rounded-lg text-foreground min-h-[46px]">
-                {currentUser.last_name || ''}
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium mb-2">Username</label>
-            {isEditing ? (
-              <input
-                id="username"
-                type="text"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary"
-                placeholder="Enter your username…"
-                disabled={isSaving}
-                required
-                autoComplete="username"
-                spellCheck={false}
-              />
-            ) : (
-              <div className="px-4 py-3 bg-muted rounded-lg text-foreground">
-                @{currentUser.username}
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
-            {isEditing ? (
-              <input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary"
-                placeholder="Enter your email…"
-                disabled={isSaving}
-                required
-                autoComplete="email"
-                spellCheck={false}
-              />
-            ) : (
-              <div className="px-4 py-3 bg-muted rounded-lg text-foreground">
-                {currentUser.email}
-              </div>
-            )}
-          </div>
-
-          <div className="md:col-span-2">
-            <label htmlFor="bio" className="block text-sm font-medium mb-2">Bio</label>
-            {isEditing ? (
-              <textarea
-                id="bio"
-                value={formData.bio}
-                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                className="w-full px-4 py-3 bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-primary resize-none"
-                placeholder="Tell people about yourself…"
-                maxLength={160}
-                rows={3}
-                disabled={isSaving}
-                autoComplete="off"
-              />
-            ) : (
-              <div className="px-4 py-3 bg-muted rounded-lg text-foreground min-h-[94px]">
-                {currentUser.bio || <span className="text-muted-foreground">No bio yet</span>}
-              </div>
-            )}
-            {isEditing && (
-              <p className="text-xs text-muted-foreground mt-1">{formData.bio?.length || 0}/160 characters</p>
-            )}
-          </div>
-        </div>
-
-        {isEditing && (
-          <div className="flex gap-3 mt-6 pt-6 border-t border-border">
-            <Button
-              type="button"
-              onClick={handleSaveProfile}
-              disabled={isSaving}
-              className="px-6"
-            >
-              {isSaving ? 'Saving…' : 'Save Changes'}
-            </Button>
-            <Button
-              type="button"
-              onClick={handleCancel}
-              disabled={isSaving}
-              variant="ghost"
-              className="px-6"
-            >
-              Cancel
-            </Button>
-          </div>
-        )}
-      </div>
+      <PersonalInfoForm
+        formData={formData}
+        setFormData={setFormData}
+        currentUser={currentUser}
+        isSaving={isSaving}
+        onSave={handleSaveProfile}
+        onDiscard={handleCancel}
+      />
 
       {/* Logout Section */}
       <div className="bg-background border border-border rounded-xl p-6">
@@ -545,3 +399,146 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
   )
 }
 
+interface PersonalInfoFormProps {
+  formData: {
+    first_name: string
+    last_name: string
+    username: string
+    email: string
+    bio: string
+    profile_is_public: boolean
+  }
+  setFormData: React.Dispatch<React.SetStateAction<PersonalInfoFormProps['formData']>>
+  currentUser: any
+  isSaving: boolean
+  onSave: () => void
+  onDiscard: () => void
+}
+
+function PersonalInfoForm({
+  formData,
+  setFormData,
+  currentUser,
+  isSaving,
+  onSave,
+  onDiscard,
+}: PersonalInfoFormProps) {
+  // Check if form has changes compared to current user data
+  const hasChanges =
+    formData.first_name !== (currentUser.first_name || '') ||
+    formData.last_name !== (currentUser.last_name || '') ||
+    formData.username !== (currentUser.username || '') ||
+    formData.email !== (currentUser.email || '') ||
+    formData.bio !== (currentUser.bio || '')
+
+  return (
+    <div className="bg-background border border-border rounded-xl p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h3 className="font-semibold mb-1">Personal Information</h3>
+          <p className="text-sm text-muted-foreground">Update your personal details here.</p>
+        </div>
+        <div className="flex gap-2">
+          {hasChanges && (
+            <Button
+              type="button"
+              onClick={onDiscard}
+              disabled={isSaving}
+              variant="ghost"
+              size="sm"
+            >
+              Discard
+            </Button>
+          )}
+          <Button
+            type="button"
+            onClick={onSave}
+            disabled={!hasChanges || isSaving}
+            variant="secondary"
+            size="sm"
+          >
+            {isSaving ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label htmlFor="first_name" className="block text-sm font-medium mb-2">First Name</label>
+          <input
+            id="first_name"
+            type="text"
+            value={formData.first_name}
+            onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+            className="w-full px-4 py-3 bg-muted text-foreground border border-transparent rounded-lg focus:outline-none focus:border-border focus:bg-background transition-colors"
+            placeholder="Enter your first name…"
+            disabled={isSaving}
+            autoComplete="given-name"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="last_name" className="block text-sm font-medium mb-2">Last Name</label>
+          <input
+            id="last_name"
+            type="text"
+            value={formData.last_name}
+            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+            className="w-full px-4 py-3 bg-muted text-foreground border border-transparent rounded-lg focus:outline-none focus:border-border focus:bg-background transition-colors"
+            placeholder="Enter your last name…"
+            disabled={isSaving}
+            autoComplete="family-name"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="username" className="block text-sm font-medium mb-2">Username</label>
+          <input
+            id="username"
+            type="text"
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            className="w-full px-4 py-3 bg-muted text-foreground border border-transparent rounded-lg focus:outline-none focus:border-border focus:bg-background transition-colors"
+            placeholder="Enter your username…"
+            disabled={isSaving}
+            required
+            autoComplete="username"
+            spellCheck={false}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
+          <input
+            id="email"
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            className="w-full px-4 py-3 bg-muted text-foreground border border-transparent rounded-lg focus:outline-none focus:border-border focus:bg-background transition-colors"
+            placeholder="Enter your email…"
+            disabled={isSaving}
+            required
+            autoComplete="email"
+            spellCheck={false}
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <label htmlFor="bio" className="block text-sm font-medium mb-2">Bio</label>
+          <textarea
+            id="bio"
+            value={formData.bio}
+            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+            className="w-full px-4 py-3 bg-muted text-foreground border border-transparent rounded-lg focus:outline-none focus:border-border focus:bg-background transition-colors resize-none"
+            placeholder="Tell people about yourself…"
+            maxLength={160}
+            rows={3}
+            disabled={isSaving}
+            autoComplete="off"
+          />
+          <p className="text-xs text-muted-foreground mt-1">{formData.bio?.length || 0}/160 characters</p>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui'
 import { TopBar, BrandMark, UserMenu } from '@/components/primitives'
 import { LoadingState } from '@/components/loading-state'
 import { useAuth } from '@/hooks/useAuth'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 /**
  * App Layout
@@ -23,9 +23,11 @@ function AppLayoutContent({
 }) {
   const { user, loading, signOut } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const [mounted, setMounted] = useState(false)
   const activeTab = searchParams?.get('tab')
+  const isOnDashboard = pathname === '/dashboard'
 
   // Ensure component is mounted on client before rendering tab-specific UI
   useEffect(() => {
@@ -74,20 +76,19 @@ function AppLayoutContent({
       <TopBar variant="app">
         <TopBar.Left>
           <BrandMark variant="app" href="/dashboard" />
-          <Link
-            href="/discover"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Discover
-          </Link>
+          <Button asChild variant="secondary" className="ml-2">
+            <Link href="/discover">
+              Discover
+            </Link>
+          </Button>
         </TopBar.Left>
 
         <TopBar.Right>
           <Button
             asChild
-            variant={!activeTab ? 'secondary' : 'muted'}
+            variant={isOnDashboard && !activeTab ? 'secondary' : 'muted'}
             size="icon"
-            className={!activeTab ? 'text-foreground' : undefined}
+            className={isOnDashboard && !activeTab ? 'text-foreground' : undefined}
             aria-label="Your lists"
           >
             <Link href="/dashboard">
@@ -96,9 +97,9 @@ function AppLayoutContent({
           </Button>
           <Button
             asChild
-            variant={activeTab === 'saved' ? 'secondary' : 'muted'}
+            variant={isOnDashboard && activeTab === 'saved' ? 'secondary' : 'muted'}
             size="icon"
-            className={activeTab === 'saved' ? 'text-foreground' : undefined}
+            className={isOnDashboard && activeTab === 'saved' ? 'text-foreground' : undefined}
             aria-label="Saved lists"
           >
             <Link href="/dashboard?tab=saved">
@@ -107,9 +108,9 @@ function AppLayoutContent({
           </Button>
           <Button
             asChild
-            variant={activeTab === 'stats' ? 'secondary' : 'muted'}
+            variant={isOnDashboard && activeTab === 'stats' ? 'secondary' : 'muted'}
             size="icon"
-            className={activeTab === 'stats' ? 'text-foreground' : undefined}
+            className={isOnDashboard && activeTab === 'stats' ? 'text-foreground' : undefined}
             aria-label="Stats"
           >
             <Link href="/dashboard?tab=stats">
