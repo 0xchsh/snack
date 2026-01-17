@@ -45,12 +45,15 @@ export default function StylesPage() {
     { name: 'nav-y', value: '24px (1.5rem)', class: 'py-nav-y' },
     { name: 'nav-x-mobile', value: '16px (1rem)', class: 'px-nav-x-mobile' },
     { name: 'nav-y-mobile', value: '12px (0.75rem)', class: 'py-nav-y-mobile' },
+    { name: 'nav (gap)', value: '8px (0.5rem)', class: 'gap-nav' },
   ]
 
   const sizingScale = [
     { name: 'logo-app', value: '32px (2rem)', class: 'w-logo-app h-logo-app' },
-    { name: 'logo-marketing', value: '40px (2.5rem)', class: 'w-logo-marketing h-logo-marketing' },
-    { name: 'icon-button', value: '42px (2.625rem)', class: 'w-icon-button h-icon-button' },
+    { name: 'logo-marketing', value: '32px (2rem)', class: 'w-logo-marketing h-logo-marketing' },
+    { name: 'icon-button', value: '32px (2rem)', class: 'w-icon-button h-icon-button' },
+    { name: 'container-app', value: '1024px (64rem)', class: 'max-w-container-app' },
+    { name: 'container-marketing', value: '1280px (80rem)', class: 'max-w-container-marketing' },
   ]
 
   return (
@@ -435,32 +438,28 @@ export default function StylesPage() {
 
             <div>
               <h3 className="text-lg font-semibold mb-3 text-foreground">Border Radius</h3>
+              <p className="text-sm text-muted-foreground mb-3">Custom radius tokens (--radius: 0.625rem / 10px)</p>
               <div className="bg-secondary p-6 rounded-lg border border-border">
                 <div className="flex flex-wrap gap-6">
                   <div className="text-center space-y-2">
-                    <div className="w-24 h-24 bg-primary/20 border border-primary rounded-sm" />
-                    <p className="text-xs font-mono text-muted-foreground">rounded-sm</p>
-                    <p className="text-xs text-muted-foreground">0.125rem</p>
+                    <div className="w-24 h-24 bg-primary/20 border border-primary rounded-xs" />
+                    <p className="text-xs font-mono text-muted-foreground">rounded-xs</p>
+                    <p className="text-xs text-muted-foreground">2px</p>
                   </div>
                   <div className="text-center space-y-2">
-                    <div className="w-24 h-24 bg-primary/20 border border-primary rounded" />
-                    <p className="text-xs font-mono text-muted-foreground">rounded</p>
-                    <p className="text-xs text-muted-foreground">0.25rem</p>
+                    <div className="w-24 h-24 bg-primary/20 border border-primary rounded-sm" />
+                    <p className="text-xs font-mono text-muted-foreground">rounded-sm</p>
+                    <p className="text-xs text-muted-foreground">6px (--radius - 4px)</p>
+                  </div>
+                  <div className="text-center space-y-2">
+                    <div className="w-24 h-24 bg-primary/20 border border-primary rounded-md" />
+                    <p className="text-xs font-mono text-muted-foreground">rounded-md</p>
+                    <p className="text-xs text-muted-foreground">8px (--radius - 2px)</p>
                   </div>
                   <div className="text-center space-y-2">
                     <div className="w-24 h-24 bg-primary/20 border border-primary rounded-lg" />
                     <p className="text-xs font-mono text-muted-foreground">rounded-lg</p>
-                    <p className="text-xs text-muted-foreground">0.5rem</p>
-                  </div>
-                  <div className="text-center space-y-2">
-                    <div className="w-24 h-24 bg-primary/20 border border-primary rounded-xl" />
-                    <p className="text-xs font-mono text-muted-foreground">rounded-xl</p>
-                    <p className="text-xs text-muted-foreground">0.75rem</p>
-                  </div>
-                  <div className="text-center space-y-2">
-                    <div className="w-24 h-24 bg-primary/20 border border-primary rounded-2xl" />
-                    <p className="text-xs font-mono text-muted-foreground">rounded-2xl</p>
-                    <p className="text-xs text-muted-foreground">1rem</p>
+                    <p className="text-xs text-muted-foreground">10px (--radius)</p>
                   </div>
                 </div>
               </div>
