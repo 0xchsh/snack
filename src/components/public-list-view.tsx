@@ -516,13 +516,23 @@ const PublicLinkItem = memo(function PublicLinkItem({
   hasAnimated,
   prefersReducedMotion
 }: PublicLinkItemProps) {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onClick()
+    }
+  }
+
   // Card layout - largest cards with OG images (exact match to edit view)
   return (
     <motion.div
+      role="button"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
       initial={hasAnimated || prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={hasAnimated || prefersReducedMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
-      className="flex flex-col gap-3 cursor-pointer group"
+      className="flex flex-col gap-3 cursor-pointer group rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       onClick={onClick}
     >
       {/* OG Image Preview */}

@@ -142,7 +142,7 @@ function DashboardContent() {
               <Button
                 onClick={handleCreateList}
                 disabled={createEmptyListMutation.isPending}
-                variant="secondary"
+                variant="outline"
                 size="default"
                 className="gap-2"
               >
