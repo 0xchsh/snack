@@ -27,6 +27,8 @@ dist/
 # Taskmaster
 .taskmaster/
 .claude/
+.cursor/
+.docs/
 
 # Vercel
 .vercel
