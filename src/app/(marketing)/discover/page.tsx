@@ -166,7 +166,7 @@ export default function DiscoverPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 md:py-12 max-w-[560px] w-full px-4 sm:px-6">
+      <div className="mx-auto py-6 md:py-12 max-w-[560px] w-full">
         <div className="mb-8 text-center">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Discover Lists</h1>
           <p className="text-muted-foreground">Explore curated lists from the community</p>
@@ -238,7 +238,7 @@ export default function DiscoverPage() {
                 <Link
                   key={list.id}
                   href={`/${username}/${listSlug}`}
-                  className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 bg-background border border-border hover:bg-muted active:bg-muted/80 active:scale-[0.995] transition-all duration-150 rounded-md group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 bg-neutral-50 dark:bg-neutral-900 hover:bg-accent active:bg-accent/80 active:scale-[0.995] transition-all duration-150 rounded-md group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   {/* Left side - emoji and title */}
                   <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -249,24 +249,9 @@ export default function DiscoverPage() {
                       <span className="text-base font-medium text-foreground truncate">
                         {list.title || 'Untitled List'}
                       </span>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <div className="w-4 h-4 bg-muted rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
-                          {profilePicUrl ? (
-                            <Image
-                              src={profilePicUrl}
-                              alt={`${displayName}'s profile`}
-                              width={16}
-                              height={16}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <DefaultAvatar size={16} />
-                          )}
-                        </div>
-                        <span className="text-sm text-muted-foreground truncate">
-                          {displayName}
-                        </span>
-                      </div>
+                      <span className="text-sm text-muted-foreground truncate mt-0.5">
+                        {username}
+                      </span>
                     </div>
                   </div>
 

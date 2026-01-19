@@ -166,7 +166,7 @@ function DashboardContent() {
                     <Link
                       href={`/${user.username}/${list.public_id || list.id}`}
                       onMouseEnter={() => prefetchList(list.id)}
-                      className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-muted active:bg-muted/80 active:scale-[0.995] transition-all duration-150 rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      className="flex items-center justify-between px-3 py-3 bg-neutral-50 dark:bg-neutral-900 hover:bg-accent active:bg-accent/80 active:scale-[0.995] transition-all duration-150 rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <span className="text-base flex-shrink-0">{list.emoji || '📋'}</span>
@@ -235,20 +235,20 @@ function DashboardContent() {
                       <Link
                         href={`/${listOwner}/${list.public_id || list.id}`}
                         onMouseEnter={() => prefetchList(list.id)}
-                        className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-muted active:bg-muted/80 active:scale-[0.995] transition-all duration-150 rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 bg-neutral-50 dark:bg-neutral-900 hover:bg-accent active:bg-accent/80 active:scale-[0.995] transition-all duration-150 rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <span className="text-base flex-shrink-0">{list.emoji || '📋'}</span>
+                        <div className="flex items-center gap-4 min-w-0 flex-1">
+                          <span className="text-2xl flex-shrink-0">{list.emoji || '📋'}</span>
                           <div className="min-w-0 flex-1">
                             <span className="text-base font-medium text-foreground group-hover:text-primary transition-colors block truncate">
                               {list.title || 'Untitled List'}
                             </span>
                             <span className="text-sm text-muted-foreground truncate block">
-                              by @{listOwner}
+                              {listOwner}
                             </span>
                           </div>
                         </div>
-                        <span className="text-sm text-muted-foreground flex-shrink-0 ml-3">
+                        <span className="text-sm text-muted-foreground flex-shrink-0 ml-4">
                           {list.links?.length || 0} links
                         </span>
                       </Link>
@@ -302,7 +302,7 @@ function DashboardContent() {
                     onMouseEnter={() => prefetchList(list.id)}
                     className="block"
                   >
-                    <div className="flex items-center justify-between px-3 py-3 bg-background border border-border hover:bg-muted active:bg-muted/80 active:scale-[0.995] transition-all duration-150 rounded-md cursor-pointer">
+                    <div className="flex items-center justify-between px-3 py-3 bg-neutral-50 dark:bg-neutral-900 hover:bg-accent active:bg-accent/80 active:scale-[0.995] transition-all duration-150 rounded-md cursor-pointer">
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="text-base">{list.emoji || '📋'}</span>
                         <span className="text-base font-medium text-foreground truncate">

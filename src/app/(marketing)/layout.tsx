@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { UserIcon } from '@heroicons/react/24/solid'
+import { StarIcon, ChartBarIcon, ListBulletIcon } from '@heroicons/react/24/solid'
 import { usePathname } from 'next/navigation'
 
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui'
+import { TopBar, BrandMark, UserMenu } from '@/components/primitives'
 import { useAuth } from '@/hooks/useAuth'
 
 function MarketingLayoutContent({
@@ -14,9 +15,74 @@ function MarketingLayoutContent({
 }: {
   children: React.ReactNode
 }) {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   const pathname = usePathname()
   const isHomepage = pathname === '/'
+
+  const handleLogout = async () => {
+    await signOut()
+  }
+
+  // When logged in and not on homepage, show app-style nav
+  if (user && !isHomepage) {
+    return (
+      <div>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md"
+        >
+          Skip to content
+        </a>
+
+        <TopBar variant="app">
+          <TopBar.Left>
+            <BrandMark variant="app" href="/dashboard" />
+          </TopBar.Left>
+
+          <TopBar.Right>
+            <Button
+              asChild
+              variant="muted"
+              size="icon"
+              aria-label="Your lists"
+            >
+              <Link href="/dashboard">
+                <ListBulletIcon className="w-4 h-4" />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="muted"
+              size="icon"
+              aria-label="Saved lists"
+            >
+              <Link href="/dashboard?tab=saved">
+                <StarIcon className="w-4 h-4" />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="muted"
+              size="icon"
+              aria-label="Stats"
+            >
+              <Link href="/dashboard?tab=stats">
+                <ChartBarIcon className="w-4 h-4" />
+              </Link>
+            </Button>
+            <UserMenu
+              user={user}
+              onLogout={handleLogout}
+            />
+          </TopBar.Right>
+        </TopBar>
+
+        <main id="main-content">
+          {children}
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className={isHomepage ? 'light' : ''} style={isHomepage ? { colorScheme: 'light' } : undefined}>
@@ -45,24 +111,9 @@ function MarketingLayoutContent({
 
             {/* Right side */}
             <div className="flex items-center gap-3">
-              {user ? (
-                <>
-                  <Button asChild variant={isHomepage ? undefined : 'muted'} className={isHomepage ? 'bg-transparent text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100' : undefined}>
-                    <Link href="/dashboard">Dashboard</Link>
-                  </Button>
-                  {user.username && (
-                    <Button asChild variant={isHomepage ? undefined : 'muted'} size="icon" className={isHomepage ? 'bg-transparent text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100' : undefined}>
-                      <Link href={`/${user.username}`}>
-                        <UserIcon className="w-4 h-4" />
-                      </Link>
-                    </Button>
-                  )}
-                </>
-              ) : (
-                <Button asChild variant={isHomepage ? undefined : 'secondary'} className={isHomepage ? 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200' : undefined}>
-                  <Link href="/auth/sign-in">Get Started</Link>
-                </Button>
-              )}
+              <Button asChild variant={isHomepage ? undefined : 'secondary'} className={isHomepage ? 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200' : undefined}>
+                <Link href="/auth/sign-in">Get Started</Link>
+              </Button>
               {!isHomepage && <ThemeToggle />}
             </div>
           </div>

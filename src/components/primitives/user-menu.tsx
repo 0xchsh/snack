@@ -51,14 +51,14 @@ export function UserMenu({ user, onLogout, className }: UserMenuProps) {
           aria-label="Account menu"
           className={className}
         >
-          <UserCircleIcon className="w-4 h-4" />
+          <Cog6ToothIcon className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[200px]">
         <DropdownMenuItem asChild>
           <Link href="/profile" className="cursor-pointer">
-            <Cog6ToothIcon className="w-4 h-4 text-muted-foreground" />
-            <span>Settings</span>
+            <UserCircleIcon className="w-4 h-4 text-muted-foreground" />
+            <span>Profile</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={toggleTheme} disabled={!mounted}>
