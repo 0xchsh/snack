@@ -166,7 +166,7 @@ export default function DiscoverPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 md:py-12 max-w-container-app px-4 sm:px-6">
+      <div className="mx-auto py-6 md:py-12 max-w-[560px] w-full px-4 sm:px-6">
         <div className="mb-8 text-center">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Discover Lists</h1>
           <p className="text-muted-foreground">Explore curated lists from the community</p>
@@ -238,7 +238,7 @@ export default function DiscoverPage() {
                 <Link
                   key={list.id}
                   href={`/${username}/${listSlug}`}
-                  className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 bg-background border border-border hover:bg-accent/50 active:bg-accent/70 active:scale-[0.995] transition-all duration-150 rounded-md group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 bg-background border border-border hover:bg-muted active:bg-muted/80 active:scale-[0.995] transition-all duration-150 rounded-md group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   {/* Left side - emoji and title */}
                   <div className="flex items-center gap-4 flex-1 min-w-0">

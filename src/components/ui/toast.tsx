@@ -47,7 +47,7 @@ export function Toast({ show, message, variant = 'success' }: ToastProps) {
           aria-live="polite"
         >
           <Icon className="w-4 h-4" aria-hidden="true" />
-          <span className="font-medium">{message}</span>
+          <span className="text-sm font-medium">{message}</span>
         </motion.div>
       )}
     </AnimatePresence>

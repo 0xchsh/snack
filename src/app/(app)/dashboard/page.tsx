@@ -3,10 +3,10 @@
 import Link from 'next/link'
 import { Suspense, useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { EyeIcon, StarIcon, LinkIcon, ListBulletIcon, PlusIcon } from '@heroicons/react/24/solid'
+import { EyeIcon, StarIcon, LinkIcon, ListBulletIcon, PlusIcon, GlobeAltIcon } from '@heroicons/react/24/solid'
 import { useQueryClient } from '@tanstack/react-query'
 
-import { Button } from '@/components/ui'
+import { Button, ListRowSkeleton } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 import {
   useListsQuery,
@@ -19,24 +19,11 @@ import { AppContainer } from '@/components/primitives'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { LoadingState } from '@/components/loading-state'
 
-// Skeleton component for list items
-function ListItemSkeleton() {
-  return (
-    <div className="flex items-center justify-between px-3 py-3 bg-background border border-border rounded-md animate-pulse">
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="w-4 h-4 bg-muted rounded" />
-        <div className="h-4 bg-muted rounded w-32" />
-      </div>
-      <div className="h-4 bg-muted rounded w-12 ml-3" />
-    </div>
-  )
-}
-
 function ListsSkeleton({ count = 3 }: { count?: number }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: count }).map((_, i) => (
-        <ListItemSkeleton key={i} />
+        <ListRowSkeleton key={i} />
       ))}
     </div>
   )
@@ -207,10 +194,23 @@ function DashboardContent() {
               />
             </div>
 
-            {/* Header with count */}
-            <div className="flex items-center gap-2 text-muted-foreground mb-3">
-              <StarIcon className="w-4 h-4" />
-              <span className="text-base">{savedLists.length} saved lists</span>
+            {/* Header with count and discover button */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <StarIcon className="w-4 h-4" />
+                <span className="text-base">{savedLists.length} saved lists</span>
+              </div>
+              <Button
+                asChild
+                variant="outline"
+                size="default"
+                className="gap-2"
+              >
+                <Link href="/discover">
+                  <span>Discover</span>
+                  <GlobeAltIcon className="w-4 h-4" />
+                </Link>
+              </Button>
             </div>
 
             {/* Lists */}
@@ -248,10 +248,9 @@ function DashboardContent() {
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground flex-shrink-0 ml-3">
-                          <StarIcon className="h-4 w-4" />
-                          <span>{list.save_count || 0}</span>
-                        </div>
+                        <span className="text-sm text-muted-foreground flex-shrink-0 ml-3">
+                          {list.links?.length || 0} links
+                        </span>
                       </Link>
                     </div>
                   )

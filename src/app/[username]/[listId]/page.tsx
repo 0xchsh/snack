@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { DocumentDuplicateIcon, PlusIcon, EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
+import { DocumentDuplicateIcon, PlusIcon, EllipsisHorizontalIcon, SunIcon, MoonIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { motion } from 'framer-motion'
-import { Button, Toast, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
+import { Button, Toast, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui'
 import { AddLinkModal } from '@/components/add-link-modal'
 import { TopBar, BrandMark, AppContainer } from '@/components/primitives'
-import { ThemeToggle } from '@/components/theme-toggle'
+import { useTheme } from '@/components/theme-provider'
 import { ListWithLinks, LinkCreatePayload } from '@/types'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
@@ -72,6 +72,7 @@ export default function UserListPage() {
   const { user } = useAuth()
   const router = useRouter()
   const queryClient = useQueryClient()
+  const { theme, setTheme } = useTheme()
 
   // Validate username format
   useEffect(() => {
@@ -274,14 +275,30 @@ export default function UserListPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
+                  onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                >
+                  {theme === 'light' ? (
+                    <>
+                      <MoonIcon className="w-4 h-4" />
+                      Dark mode
+                    </>
+                  ) : (
+                    <>
+                      <SunIcon className="w-4 h-4" />
+                      Light mode
+                    </>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
                   onClick={() => setShowDeleteModal(true)}
                   className="text-destructive focus:text-destructive"
                 >
+                  <TrashIcon className="w-4 h-4" />
                   Delete list
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <ThemeToggle />
           </TopBar.Right>
         </TopBar>
 

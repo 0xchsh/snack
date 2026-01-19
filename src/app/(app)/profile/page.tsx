@@ -4,9 +4,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRightStartOnRectangleIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid'
+import { ArrowRightStartOnRectangleIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid'
 
-import { Button, Spinner } from '@/components/ui'
+import { Button, Spinner, Toast } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 import { LoadingState } from '@/components/loading-state'
 import { AppContainer } from '@/components/primitives'
@@ -84,17 +84,22 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
     last_name: string
     username: string
     email: string
-    bio: string
     profile_is_public: boolean
   }>({
     first_name: user.first_name || '',
     last_name: user.last_name || '',
     username: user.username || '',
     email: user.email || '',
-    bio: user.bio || '',
     profile_is_public: user.profile_is_public ?? true,
   })
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Username editing state
+  const [usernameInput, setUsernameInput] = useState(user.username || '')
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle')
+  const [usernameError, setUsernameError] = useState<string | null>(null)
+  const [isSavingUsername, setIsSavingUsername] = useState(false)
+  const usernameCheckTimeout = useRef<NodeJS.Timeout | null>(null)
 
   const handleLogout = async () => {
     try {
@@ -121,7 +126,6 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
       last_name: user.last_name || '',
       username: user.username || '',
       email: user.email || '',
-      bio: user.bio || '',
       profile_is_public: user.profile_is_public ?? true,
     })
   }, [user])
@@ -236,24 +240,108 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
       last_name: currentUser.last_name || '',
       username: currentUser.username || '',
       email: currentUser.email || '',
-      bio: currentUser.bio || '',
       profile_is_public: currentUser.profile_is_public ?? true,
     })
     setMessage(null)
   }
 
+  // Handle username input change with debounced validation
+  const handleUsernameChange = (value: string) => {
+    const lowercaseValue = value.toLowerCase().replace(/[^a-z0-9_-]/g, '')
+    setUsernameInput(lowercaseValue)
+    setUsernameError(null)
+
+    // Clear existing timeout
+    if (usernameCheckTimeout.current) {
+      clearTimeout(usernameCheckTimeout.current)
+    }
+
+    // If same as current username, mark as idle
+    if (lowercaseValue === currentUser.username) {
+      setUsernameStatus('idle')
+      return
+    }
+
+    // If empty or too short, mark as invalid
+    if (lowercaseValue.length < 3) {
+      setUsernameStatus('invalid')
+      setUsernameError('Username must be at least 3 characters')
+      return
+    }
+
+    // Set checking state and debounce the API call
+    setUsernameStatus('checking')
+    usernameCheckTimeout.current = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/username/check?username=${encodeURIComponent(lowercaseValue)}`)
+        const data = await response.json()
+
+        if (data.available) {
+          setUsernameStatus('available')
+          setUsernameError(null)
+        } else {
+          setUsernameStatus(data.error?.includes('taken') ? 'taken' : 'invalid')
+          setUsernameError(data.error || 'Username is not available')
+        }
+      } catch (error) {
+        setUsernameStatus('invalid')
+        setUsernameError('Failed to check username')
+      }
+    }, 400)
+  }
+
+  // Save username
+  const handleSaveUsername = async () => {
+    if (usernameStatus !== 'available' || usernameInput === currentUser.username) {
+      return
+    }
+
+    setIsSavingUsername(true)
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          username: usernameInput,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update username')
+      }
+
+      setCurrentUser(result.data)
+      setFormData(prev => ({ ...prev, username: usernameInput }))
+      setUsernameStatus('idle')
+      setMessage({ type: 'success', text: 'Username updated successfully!' })
+      setTimeout(() => setMessage(null), 3000)
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Failed to update username' })
+    } finally {
+      setIsSavingUsername(false)
+    }
+  }
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (usernameCheckTimeout.current) {
+        clearTimeout(usernameCheckTimeout.current)
+      }
+    }
+  }, [])
+
   return (
     <div className="space-y-3">
-      {/* Status Message */}
-      {message && (
-        <div className={`p-4 rounded-lg ${
-          message.type === 'success'
-            ? 'bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
-            : 'bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
-        }`}>
-          {message.text}
-        </div>
-      )}
+      {/* Toast Notification */}
+      <Toast
+        show={!!message}
+        message={message?.text || ''}
+        variant={message?.type === 'success' ? 'success' : 'error'}
+      />
 
       {/* Profile Picture Section */}
       <div className="bg-background border border-border rounded-xl p-6">
@@ -316,43 +404,83 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
         </div>
       </div>
 
-      {/* Profile URL Section */}
+      {/* Change Username Section */}
       <div className="bg-background border border-border rounded-xl p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold mb-1">Your Profile URL</h3>
-            <p className="text-sm text-muted-foreground font-mono">
-              snack.xyz/{currentUser.username}
-            </p>
+        <div className="mb-4">
+          <h3 className="font-semibold mb-1">Change Username</h3>
+          <p className="text-sm text-muted-foreground">Choose a new username for your profile.</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="flex-1 relative">
+            <div className="flex items-center h-icon-button border border-border rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:border-transparent">
+              <span className="px-3 text-sm text-muted-foreground bg-transparent border-r border-border">
+                snack.xyz/
+              </span>
+              <input
+                type="text"
+                value={usernameInput}
+                onChange={(e) => handleUsernameChange(e.target.value)}
+                className="flex-1 px-3 text-sm bg-transparent text-foreground focus:outline-none placeholder:text-muted-foreground"
+                placeholder="username"
+                spellCheck={false}
+                autoComplete="off"
+              />
+              <div className="px-3 flex items-center">
+                {usernameStatus === 'checking' && (
+                  <Spinner size="sm" className="text-muted-foreground" />
+                )}
+                {usernameStatus === 'available' && (
+                  <CheckCircleIcon className="w-5 h-5 text-green-500" />
+                )}
+                {(usernameStatus === 'taken' || usernameStatus === 'invalid') && (
+                  <XCircleIcon className="w-5 h-5 text-red-500" />
+                )}
+              </div>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              onClick={async () => {
-                await navigator.clipboard.writeText(`https://snack.xyz/${currentUser.username}`)
-                setMessage({ type: 'success', text: 'Profile URL copied!' })
-                setTimeout(() => setMessage(null), 2000)
-              }}
-            >
-              <DocumentDuplicateIcon className="w-4 h-4" />
-              Copy
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              asChild
-            >
-              <Link href={`/${currentUser.username}`} target="_blank">
-                <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                View
-              </Link>
-            </Button>
-          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleSaveUsername}
+            disabled={usernameStatus !== 'available' || isSavingUsername}
+          >
+            {isSavingUsername ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
+
+        {usernameError && (
+          <p className="text-sm text-red-500 mt-2">{usernameError}</p>
+        )}
+
+        <div className="flex gap-2 mt-4">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="gap-2 text-muted-foreground"
+            onClick={async () => {
+              await navigator.clipboard.writeText(`https://snack.xyz/${currentUser.username}`)
+              setMessage({ type: 'success', text: 'Profile URL copied!' })
+              setTimeout(() => setMessage(null), 2000)
+            }}
+          >
+            <DocumentDuplicateIcon className="w-4 h-4" />
+            Copy URL
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="gap-2 text-muted-foreground"
+            asChild
+          >
+            <Link href={`/${currentUser.username}`} target="_blank">
+              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+              View Profile
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -405,7 +533,6 @@ interface PersonalInfoFormProps {
     last_name: string
     username: string
     email: string
-    bio: string
     profile_is_public: boolean
   }
   setFormData: React.Dispatch<React.SetStateAction<PersonalInfoFormProps['formData']>>
@@ -427,50 +554,24 @@ function PersonalInfoForm({
   const hasChanges =
     formData.first_name !== (currentUser.first_name || '') ||
     formData.last_name !== (currentUser.last_name || '') ||
-    formData.username !== (currentUser.username || '') ||
-    formData.email !== (currentUser.email || '') ||
-    formData.bio !== (currentUser.bio || '')
+    formData.email !== (currentUser.email || '')
 
   return (
     <div className="bg-background border border-border rounded-xl p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="font-semibold mb-1">Personal Information</h3>
-          <p className="text-sm text-muted-foreground">Update your personal details here.</p>
-        </div>
-        <div className="flex gap-2">
-          {hasChanges && (
-            <Button
-              type="button"
-              onClick={onDiscard}
-              disabled={isSaving}
-              variant="ghost"
-              size="sm"
-            >
-              Discard
-            </Button>
-          )}
-          <Button
-            type="button"
-            onClick={onSave}
-            disabled={!hasChanges || isSaving}
-            variant="secondary"
-            size="sm"
-          >
-            {isSaving ? 'Saving…' : 'Save'}
-          </Button>
-        </div>
+      <div className="mb-6">
+        <h3 className="font-semibold mb-1">Personal Information</h3>
+        <p className="text-sm text-muted-foreground">Update your personal details here.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label htmlFor="first_name" className="block text-sm font-medium mb-2">First Name</label>
+          <label htmlFor="first_name" className="block text-sm font-medium mb-2 text-muted-foreground">First Name</label>
           <input
             id="first_name"
             type="text"
             value={formData.first_name}
             onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-            className="w-full px-4 py-3 bg-muted text-foreground border border-transparent rounded-lg focus:outline-none focus:border-border focus:bg-background transition-colors"
+            className="w-full h-icon-button px-3 bg-transparent text-foreground text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background transition-colors placeholder:text-muted-foreground"
             placeholder="Enter your first name…"
             disabled={isSaving}
             autoComplete="given-name"
@@ -478,43 +579,27 @@ function PersonalInfoForm({
         </div>
 
         <div>
-          <label htmlFor="last_name" className="block text-sm font-medium mb-2">Last Name</label>
+          <label htmlFor="last_name" className="block text-sm font-medium mb-2 text-muted-foreground">Last Name</label>
           <input
             id="last_name"
             type="text"
             value={formData.last_name}
             onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-            className="w-full px-4 py-3 bg-muted text-foreground border border-transparent rounded-lg focus:outline-none focus:border-border focus:bg-background transition-colors"
+            className="w-full h-icon-button px-3 bg-transparent text-foreground text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background transition-colors placeholder:text-muted-foreground"
             placeholder="Enter your last name…"
             disabled={isSaving}
             autoComplete="family-name"
           />
         </div>
 
-        <div>
-          <label htmlFor="username" className="block text-sm font-medium mb-2">Username</label>
-          <input
-            id="username"
-            type="text"
-            value={formData.username}
-            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-            className="w-full px-4 py-3 bg-muted text-foreground border border-transparent rounded-lg focus:outline-none focus:border-border focus:bg-background transition-colors"
-            placeholder="Enter your username…"
-            disabled={isSaving}
-            required
-            autoComplete="username"
-            spellCheck={false}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
+        <div className="md:col-span-2">
+          <label htmlFor="email" className="block text-sm font-medium mb-2 text-muted-foreground">Email</label>
           <input
             id="email"
             type="email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-4 py-3 bg-muted text-foreground border border-transparent rounded-lg focus:outline-none focus:border-border focus:bg-background transition-colors"
+            className="w-full h-icon-button px-3 bg-transparent text-foreground text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background transition-colors placeholder:text-muted-foreground"
             placeholder="Enter your email…"
             disabled={isSaving}
             required
@@ -522,22 +607,27 @@ function PersonalInfoForm({
             spellCheck={false}
           />
         </div>
+      </div>
 
-        <div className="md:col-span-2">
-          <label htmlFor="bio" className="block text-sm font-medium mb-2">Bio</label>
-          <textarea
-            id="bio"
-            value={formData.bio}
-            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-            className="w-full px-4 py-3 bg-muted text-foreground border border-transparent rounded-lg focus:outline-none focus:border-border focus:bg-background transition-colors resize-none"
-            placeholder="Tell people about yourself…"
-            maxLength={160}
-            rows={3}
+      <div className="flex justify-end gap-2 mt-6">
+        {hasChanges && (
+          <Button
+            type="button"
+            onClick={onDiscard}
             disabled={isSaving}
-            autoComplete="off"
-          />
-          <p className="text-xs text-muted-foreground mt-1">{formData.bio?.length || 0}/160 characters</p>
-        </div>
+            variant="ghost"
+          >
+            Discard
+          </Button>
+        )}
+        <Button
+          type="button"
+          onClick={onSave}
+          disabled={!hasChanges || isSaving}
+          variant="outline"
+        >
+          {isSaving ? 'Saving…' : 'Save'}
+        </Button>
       </div>
     </div>
   )

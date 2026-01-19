@@ -4,13 +4,12 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { AnimatePresence, motion } from 'framer-motion'
 import { ListBulletIcon, LinkIcon, StarIcon, DocumentDuplicateIcon } from '@heroicons/react/24/solid'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LoadingState } from '@/components/loading-state'
-import { Button } from '@/components/ui'
+import { Button, Toast } from '@/components/ui'
 import { DefaultAvatar } from '@/components/default-avatar'
 
 interface PublicProfile {
@@ -144,20 +143,7 @@ export default function UsernamePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Copy Success Toast */}
-      <AnimatePresence>
-        {showCopySuccess && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, x: '-50%' }}
-            animate={{ opacity: 1, scale: 1, x: '-50%' }}
-            exit={{ opacity: 0, scale: 0.95, x: '-50%' }}
-            transition={{ duration: 0.2 }}
-            className="fixed top-4 left-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
-          >
-            <DocumentDuplicateIcon className="w-4 h-4" />
-            <span className="font-medium">Profile link copied!</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Toast show={showCopySuccess} message="Profile link copied!" variant="copied" />
       {/* Header */}
       <div className="bg-background">
         <div className="mx-auto w-full max-w-container-app px-6 py-6">
@@ -166,9 +152,9 @@ export default function UsernamePage() {
               <Image
                 src="/images/logo.svg"
                 alt="Snack"
-                width={40}
-                height={40}
-                className="w-10 h-10"
+                width={32}
+                height={32}
+                className="w-8 h-8"
               />
             </Link>
 

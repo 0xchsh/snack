@@ -8,7 +8,7 @@ import { EmojiPicker } from './emoji-picker'
 import { validateAndNormalizeUrl, getHostname } from '@/lib/url-utils'
 import { Favicon } from './favicon'
 import { fetchOGDataClient } from '@/lib/og-client'
-import { Button, Toast } from '@/components/ui'
+import { Button, Toast, LinkCardSkeleton } from '@/components/ui'
 
 interface ListEditorProps {
   list: ListWithLinks
@@ -18,17 +18,9 @@ interface ListEditorProps {
   onReorderLinks?: (links: string[]) => void
 }
 
-// Ghost loading component for card view
+// Ghost loading component for card view - uses LinkCardSkeleton for exact dimension matching
 function GhostLinkItem() {
-  return (
-    <div className="flex flex-col gap-3 animate-pulse">
-      <div className="aspect-video bg-accent rounded-md"></div>
-      <div className="flex items-center gap-2">
-        <div className="w-4 h-4 rounded-sm bg-accent flex-shrink-0"></div>
-        <div className="h-4 bg-accent rounded w-3/4"></div>
-      </div>
-    </div>
-  )
+  return <LinkCardSkeleton />
 }
 
 export function ListEditor({

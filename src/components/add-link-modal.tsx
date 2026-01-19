@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { XMarkIcon, ClipboardIcon, LinkIcon } from '@heroicons/react/24/solid'
+import { XMarkIcon } from '@heroicons/react/24/solid'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui'
 import { validateAndNormalizeUrl } from '@/lib/url-utils'
@@ -44,18 +44,6 @@ export function AddLinkModal({ isOpen, onClose, onAddLink }: AddLinkModalProps) 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, onClose])
-
-  const handlePaste = async () => {
-    try {
-      const text = await navigator.clipboard.readText()
-      if (text) {
-        setUrl(text)
-        setError('')
-      }
-    } catch {
-      // Clipboard access denied, silently ignore
-    }
-  }
 
   const handleSubmit = async () => {
     if (!url.trim()) {
@@ -133,30 +121,18 @@ export function AddLinkModal({ isOpen, onClose, onAddLink }: AddLinkModalProps) 
                 }}
                 onKeyDown={handleKeyDown}
                 placeholder="Enter link"
-                className="flex-1 px-4 py-2.5 bg-background text-foreground border border-border rounded-md text-base placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-colors"
+                className="flex-1 h-icon-button px-3 bg-background text-foreground border border-border rounded-lg text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-colors"
                 disabled={isAdding}
               />
               <Button
                 type="button"
-                onClick={handlePaste}
-                variant="outline"
-                size="default"
-                className="flex-shrink-0 gap-2"
-                disabled={isAdding}
-              >
-                <ClipboardIcon className="w-4 h-4" />
-                <span>Paste</span>
-              </Button>
-              <Button
-                type="button"
                 onClick={handleSubmit}
                 variant="primary"
-                size="icon"
+                size="default"
                 className="flex-shrink-0"
                 disabled={isAdding || !url.trim()}
-                aria-label="Add link"
               >
-                <LinkIcon className="w-4 h-4" />
+                Add
               </Button>
             </div>
 

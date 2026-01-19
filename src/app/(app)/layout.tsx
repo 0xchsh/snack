@@ -76,11 +76,6 @@ function AppLayoutContent({
       <TopBar variant="app">
         <TopBar.Left>
           <BrandMark variant="app" href="/dashboard" />
-          <Button asChild variant="outline" className="ml-2">
-            <Link href="/discover">
-              Discover
-            </Link>
-          </Button>
         </TopBar.Left>
 
         <TopBar.Right>
