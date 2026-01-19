@@ -27,9 +27,7 @@ await esbuild.build({
   sourcemap: !isProduction,
   platform: 'browser',
   define: {
-    'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
-    'process.env': JSON.stringify({ NODE_ENV: isProduction ? 'production' : 'development' }),
-    'process': JSON.stringify({ env: { NODE_ENV: isProduction ? 'production' : 'development' } }),
+    'process.env.NODE_ENV': isProduction ? '"production"' : '"development"',
     'global': 'globalThis',
   },
   loader: {
@@ -55,9 +53,7 @@ await esbuild.build({
   sourcemap: !isProduction,
   platform: 'browser',
   define: {
-    'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
-    'process.env': JSON.stringify({ NODE_ENV: isProduction ? 'production' : 'development' }),
-    'process': JSON.stringify({ env: { NODE_ENV: isProduction ? 'production' : 'development' } }),
+    'process.env.NODE_ENV': isProduction ? '"production"' : '"development"',
     'global': 'globalThis',
   },
   loader: {
@@ -81,9 +77,7 @@ await esbuild.build({
   sourcemap: !isProduction,
   platform: 'browser',
   define: {
-    'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
-    'process.env': JSON.stringify({ NODE_ENV: isProduction ? 'production' : 'development' }),
-    'process': JSON.stringify({ env: { NODE_ENV: isProduction ? 'production' : 'development' } }),
+    'process.env.NODE_ENV': isProduction ? '"production"' : '"development"',
     'global': 'globalThis',
   },
   loader: {
