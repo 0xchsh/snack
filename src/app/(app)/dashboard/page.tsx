@@ -89,10 +89,10 @@ function DashboardContent() {
     try {
       const newList = await createEmptyListMutation.mutateAsync()
       if (user?.username) {
-        // New lists should open in edit mode so user can add content
-        router.push(`/${user.username}/${newList.public_id || newList.id}?view=edit`)
+        // New lists open directly - owners see the edit view automatically
+        router.push(`/${user.username}/${newList.public_id || newList.id}`)
       } else {
-        router.push(`/list/${newList.public_id || newList.id}?view=edit`)
+        router.push(`/list/${newList.public_id || newList.id}`)
       }
     } catch (error) {
       console.error('Error creating list:', error)

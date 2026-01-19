@@ -1,15 +1,14 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Bars3Icon, TrashIcon, ArrowPathIcon, EllipsisHorizontalIcon, ClipboardIcon, DocumentTextIcon, EyeIcon, LinkIcon } from '@heroicons/react/24/solid'
+import { Bars3Icon, TrashIcon, ArrowPathIcon, LinkIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
-import { AnimatePresence, motion } from 'framer-motion'
 import { ListWithLinks, Link, LinkCreatePayload } from '@/types'
 import { EmojiPicker } from './emoji-picker'
 import { validateAndNormalizeUrl, getHostname } from '@/lib/url-utils'
 import { Favicon } from './favicon'
 import { fetchOGDataClient } from '@/lib/og-client'
-import { Button } from '@/components/ui'
+import { Button, Toast } from '@/components/ui'
 
 interface ListEditorProps {
   list: ListWithLinks
@@ -39,7 +38,6 @@ export function ListEditor({
   onRemoveLink,
   onReorderLinks
 }: ListEditorProps) {
-  const [isEditingTitle, setIsEditingTitle] = useState(!list.title) // Start editing if title is empty
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [title, setTitle] = useState(list.title || '') // Ensure title is never undefined
   const [linkInput, setLinkInput] = useState('')
@@ -59,7 +57,6 @@ export function ListEditor({
   const dragStartPosition = useRef({ x: 0, y: 0 })
   const dragOffset = useRef({ x: 0, y: 0 })
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
-  const titleTextareaRef = useRef<HTMLTextAreaElement>(null)
   const moreMenuRef = useRef<HTMLDivElement>(null)
   const mobilePasteInputRef = useRef<HTMLInputElement>(null)
 
@@ -72,24 +69,6 @@ export function ListEditor({
     checkMobile()
   }, [])
 
-  // Auto-resize textarea based on content
-  const adjustTextareaHeight = useCallback(() => {
-    if (titleTextareaRef.current) {
-      // Reset height to auto to get the natural height
-      titleTextareaRef.current.style.height = 'auto'
-      
-      // Only set explicit height if content wraps to multiple lines
-      const scrollHeight = titleTextareaRef.current.scrollHeight
-      const clientHeight = titleTextareaRef.current.clientHeight
-      
-      // If content overflows (wraps), set explicit height
-      if (scrollHeight > clientHeight) {
-        titleTextareaRef.current.style.height = `${scrollHeight}px`
-      }
-      // Otherwise, leave height as 'auto' to match h1 natural height
-    }
-  }, [])
-
   const handleTitleSave = () => {
     const trimmedTitle = title.trim()
     if (!trimmedTitle) {
@@ -99,7 +78,6 @@ export function ListEditor({
     } else if (trimmedTitle !== list.title) {
       onUpdateList?.({ title: trimmedTitle })
     }
-    setIsEditingTitle(false)
   }
 
   const handleAddLink = async () => {
@@ -164,23 +142,17 @@ export function ListEditor({
     }
   }, [list.emoji])
 
-  // Adjust textarea height when editing starts
-  useEffect(() => {
-    if (isEditingTitle) {
-      // Small delay to ensure the textarea is rendered
-      setTimeout(() => {
-        adjustTextareaHeight()
-      }, 0)
-    }
-  }, [isEditingTitle, adjustTextareaHeight])
 
   // Custom drag handlers with visual feedback
   const handleMouseDown = useCallback((e: React.MouseEvent, linkId: string, index: number) => {
     e.preventDefault()
     e.stopPropagation()
-    
-    const element = e.currentTarget as HTMLElement
-    const rect = element.getBoundingClientRect()
+
+    // Find the card wrapper element by data-link-id attribute
+    const cardElement = document.querySelector(`[data-link-id="${linkId}"]`) as HTMLElement
+    if (!cardElement) return
+
+    const rect = cardElement.getBoundingClientRect()
     
     // Calculate center offset for better drag feel
     dragOffset.current = {
@@ -250,21 +222,12 @@ export function ListEditor({
   }, [isDragging, draggedItemId])
 
   const handleMouseUp = useCallback((e: MouseEvent) => {
-    console.log('Mouse up:', {
-      isDragging,
-      draggedItemId,
-      dragOverIndex,
-      hasLinks: !!list.links,
-      linksCount: list.links?.length || 0
-    })
-
     if (!isDragging || !optimisticList.links || !draggedItemId) {
       cleanup()
       return
     }
 
     const draggedIndex = optimisticList.links.findIndex(link => link.id === draggedItemId)
-    console.log('Drag indices:', { draggedIndex, dragOverIndex })
 
     if (draggedIndex !== -1 && dragOverIndex !== null && draggedIndex !== dragOverIndex) {
       // Reorder the links
@@ -276,21 +239,11 @@ export function ListEditor({
       }
       newLinks.splice(dragOverIndex, 0, draggedItem)
 
-      console.log('Reordering:', {
-        from: draggedIndex,
-        to: dragOverIndex,
-        draggedItem: draggedItem.id,
-        newOrder: newLinks.map(l => l.id)
-      })
+      // Update local state immediately for visual feedback
+      setOptimisticList(prev => ({ ...prev, links: newLinks }))
 
-      // Update the order
+      // Update the order on the server
       onReorderLinks?.(newLinks.map(link => link.id))
-    } else {
-      console.log('No reordering needed:', {
-        draggedIndex,
-        dragOverIndex,
-        samePosition: draggedIndex === dragOverIndex
-      })
     }
 
     cleanup()
@@ -765,182 +718,172 @@ export function ListEditor({
   // Removed view mode change handler - fixed to menu view only
 
   return (
-    <div className="space-y-6 pb-18">
+    <div className="pb-18">
       {/* Copy Success Toast */}
-      <AnimatePresence>
-        {showCopySuccess && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, x: '-50%' }}
-            animate={{ opacity: 1, scale: 1, x: '-50%' }}
-            exit={{ opacity: 0, scale: 0.95, x: '-50%' }}
-            transition={{ duration: 0.2 }}
-            className="fixed top-4 left-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
-            role="status"
-            aria-live="polite"
+      <Toast show={showCopySuccess} message="Link copied to clipboard!" variant="copied" />
+
+      <div className="flex flex-col gap-4 md:gap-6">
+        {/* Emoji */}
+        <div className="w-12 h-12">
+          <button
+            ref={emojiButtonRef}
+            type="button"
+            onClick={() => setShowEmojiPicker(true)}
+            className="text-5xl cursor-pointer"
+            aria-label="Change list emoji"
           >
-            <ClipboardIcon className="w-4 h-4" aria-hidden="true" />
-            <span className="font-medium">Link copied to clipboard!</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <span aria-hidden="true">{currentEmoji}</span>
+          </button>
+        </div>
 
-      {/* Emoji + Title */}
-      <div className="flex items-center gap-4">
-        <Button
-          ref={emojiButtonRef}
-          type="button"
-          onClick={() => setShowEmojiPicker(true)}
-          variant="outline"
-          className="flex-shrink-0 !w-[62px] !h-[62px] p-0 rounded-md text-3xl bg-background hover:border-muted-foreground"
-          aria-label="Change list emoji"
-        >
-          <span aria-hidden="true">{currentEmoji}</span>
-        </Button>
-
-        {isEditingTitle ? (
-          <input
-            ref={titleTextareaRef as any}
+        {/* Title */}
+        <div className="flex flex-col gap-2">
+          <textarea
             value={title}
-            onChange={(e) => setTitle(e.target.value.slice(0, 60))}
+            onChange={(e) => {
+              const newValue = e.target.value.slice(0, 60)
+              setTitle(newValue)
+              // Auto-resize
+              e.target.style.height = 'auto'
+              e.target.style.height = `${e.target.scrollHeight}px`
+            }}
             onBlur={handleTitleSave}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault()
-                handleTitleSave()
+                e.currentTarget.blur()
               }
             }}
             placeholder="Untitled List"
-            className="flex-1 min-w-0 w-full !h-[62px] text-3xl font-medium text-foreground bg-background border border-border rounded-md px-4 outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder:text-muted-foreground truncate"
+            className="text-3xl font-medium text-foreground bg-transparent border-0 outline-none placeholder:text-muted-foreground focus:bg-accent/50 rounded-md px-2 -mx-2 py-1 -my-1 transition-colors cursor-text leading-tight resize-none overflow-hidden w-full"
             maxLength={60}
-            autoFocus
+            rows={1}
+            ref={(el) => {
+              if (el) {
+                el.style.height = 'auto'
+                el.style.height = `${el.scrollHeight}px`
+              }
+            }}
           />
-        ) : (
-          <Button
-            type="button"
-            onClick={() => setIsEditingTitle(true)}
-            variant="outline"
-            className="flex-1 min-w-0 !h-[62px] justify-start text-left text-3xl font-medium text-foreground bg-background border-border px-4 hover:border-muted-foreground truncate"
-          >
-            {list.title || <span className="text-muted-foreground">Untitled List</span>}
-          </Button>
+        </div>
+
+        {/* Stats row */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-muted-foreground flex-shrink-0">
+            <LinkIcon className="w-4 h-4" aria-hidden="true" />
+            <span className="text-base">{optimisticList.links?.length || 0} links</span>
+          </div>
+
+          {/* Desktop: Paste button */}
+          {!isMobile && (
+            <Button
+              type="button"
+              onClick={pasteFromClipboard}
+              variant="outline"
+              className="flex items-center gap-2 px-4 py-2 text-base text-muted-foreground hover:text-foreground hover:border-muted-foreground flex-shrink-0"
+            >
+              <span>Paste links</span>
+              <span className="text-sm">⌘V</span>
+            </Button>
+          )}
+
+          {/* Mobile: Visible paste input */}
+          {isMobile && (
+            <input
+              ref={mobilePasteInputRef}
+              type="url"
+              inputMode="url"
+              autoComplete="off"
+              placeholder="Paste links here…"
+              aria-label="Paste links"
+              onPaste={handleMobilePaste}
+              className="flex-1 px-4 py-2 bg-background text-foreground border border-border rounded-md text-base placeholder:text-muted-foreground focus:outline-none focus:border-muted-foreground transition-colors min-w-0"
+            />
+          )}
+        </div>
+
+        {/* Error message */}
+        {linkError && (
+          <div className="text-sm text-destructive">
+            {linkError}
+          </div>
+        )}
+
+        {/* Links List - Card View Only */}
+        <div className="flex flex-col gap-6">
+          {/* Ghost loading placeholders */}
+          {loadingLinks.map((url, index) => (
+            <GhostLinkItem key={`ghost-${url}-${index}`} />
+          ))}
+
+          {/* Draggable list */}
+          <div className="relative draggable-list-container flex flex-col gap-6">
+            {(optimisticList.links || []).map((link, index) => {
+              // Show skeleton loader if link is being refreshed
+              if (refreshingLinkIds[link.id]) {
+                return <GhostLinkItem key={`refreshing-${link.id}`} />
+              }
+
+              return (
+                <div
+                  key={link.id}
+                  data-link-id={link.id}
+                  className={`
+                    transition-all duration-300 ease-out select-none
+                    ${draggedItemId === link.id ? 'opacity-30' : 'opacity-100'}
+                    ${dragOverIndex === index && draggedItemId !== link.id ?
+                      'transform translate-y-2 ring-1 ring-foreground rounded-md' : ''}
+                  `}
+                >
+                  <LinkItem
+                    link={link}
+                    onRemove={() => handleDeleteLink(link.id)}
+                    onRefresh={() => handleRefreshLink(link)}
+                    isRefreshing={false}
+                    onDragStart={(e) => handleMouseDown(e, link.id, index)}
+                    onOpenLink={() => window.open(link.url, '_blank', 'noopener,noreferrer')}
+                  />
+                </div>
+              )
+            })}
+
+            {/* Floating Drag Preview */}
+            {isDragging && draggedItemId && (() => {
+              const draggedLink = optimisticList.links?.find(l => l.id === draggedItemId)
+              if (!draggedLink) return null
+
+              return (
+                <div
+                  className="fixed z-50 pointer-events-none"
+                  style={{
+                    left: `${draggedItemPosition.x}px`,
+                    top: `${draggedItemPosition.y}px`,
+                    width: `${draggedItemPosition.width || 0}px`,
+                    transform: 'rotate(1deg) scale(1.02)',
+                    filter: 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.2))',
+                    opacity: 0.95
+                  }}
+                >
+                  <LinkItem
+                    link={draggedLink}
+                    onRemove={() => {}}
+                    onRefresh={() => {}}
+                    isRefreshing={false}
+                  />
+                </div>
+              )
+            })()}
+          </div>
+        </div>
+
+        {(!optimisticList.links || optimisticList.links.length === 0) && loadingLinks.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            <p>
+              Paste your first link to get started
+            </p>
+          </div>
         )}
       </div>
-
-      {/* Link count and Paste button/input */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-muted-foreground flex-shrink-0">
-          <LinkIcon className="w-4 h-4" aria-hidden="true" />
-          <span className="text-base">{optimisticList.links?.length || 0} links</span>
-        </div>
-
-        {/* Desktop: Paste button */}
-        {!isMobile && (
-          <Button
-            type="button"
-            onClick={pasteFromClipboard}
-            variant="outline"
-            className="flex items-center gap-2 px-4 py-2 text-base text-muted-foreground hover:text-foreground hover:border-muted-foreground flex-shrink-0"
-          >
-            <span>Paste links</span>
-            <span className="text-sm">⌘V</span>
-          </Button>
-        )}
-
-        {/* Mobile: Visible paste input */}
-        {isMobile && (
-          <input
-            ref={mobilePasteInputRef}
-            type="url"
-            inputMode="url"
-            autoComplete="off"
-            placeholder="Paste links here…"
-            aria-label="Paste links"
-            onPaste={handleMobilePaste}
-            className="flex-1 px-4 py-2 bg-background text-foreground border border-border rounded-md text-base placeholder:text-muted-foreground focus:outline-none focus:border-muted-foreground transition-colors min-w-0"
-          />
-        )}
-      </div>
-
-      {/* Error message */}
-      {linkError && (
-        <div className="text-sm text-destructive">
-          {linkError}
-        </div>
-      )}
-
-      {/* Links List - Card View Only */}
-      <div className="flex flex-col gap-8">
-        {/* Ghost loading placeholders */}
-        {loadingLinks.map((url, index) => (
-          <GhostLinkItem key={`ghost-${url}-${index}`} />
-        ))}
-
-        {/* Draggable list */}
-        <div className="relative draggable-list-container flex flex-col gap-8">
-          {(optimisticList.links || []).map((link, index) => {
-            // Show skeleton loader if link is being refreshed
-            if (refreshingLinkIds[link.id]) {
-              return <GhostLinkItem key={`refreshing-${link.id}`} />
-            }
-
-            return (
-              <div
-                key={link.id}
-                data-link-id={link.id}
-                onMouseDown={(e) => handleMouseDown(e, link.id, index)}
-                className={`
-                  transition-all duration-300 ease-out select-none
-                  ${draggedItemId === link.id ? 'opacity-30' : 'opacity-100'}
-                  ${dragOverIndex === index && draggedItemId !== link.id ?
-                    'transform translate-y-2 ring-1 ring-foreground rounded-md' : ''}
-                `}
-              >
-                <LinkItem
-                  link={link}
-                  onRemove={() => handleDeleteLink(link.id)}
-                  onRefresh={() => handleRefreshLink(link)}
-                  isRefreshing={false}
-                />
-              </div>
-            )
-          })}
-
-          {/* Floating Drag Preview */}
-          {isDragging && draggedItemId && (() => {
-            const draggedLink = optimisticList.links?.find(l => l.id === draggedItemId)
-            if (!draggedLink) return null
-
-            return (
-              <div
-                className="fixed z-50 pointer-events-none"
-                style={{
-                  left: `${draggedItemPosition.x}px`,
-                  top: `${draggedItemPosition.y}px`,
-                  width: `${draggedItemPosition.width || 0}px`,
-                  transform: 'rotate(1deg) scale(1.02)',
-                  filter: 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.2))',
-                  opacity: 0.95
-                }}
-              >
-                <LinkItem
-                  link={draggedLink}
-                  onRemove={() => {}}
-                  onRefresh={() => {}}
-                  isRefreshing={false}
-                />
-              </div>
-            )
-          })()}
-        </div>
-      </div>
-      
-      {(!optimisticList.links || optimisticList.links.length === 0) && loadingLinks.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          <p>
-            Paste your first link to get started
-          </p>
-        </div>
-      )}
 
       <EmojiPicker
         isOpen={showEmojiPicker}
@@ -964,22 +907,27 @@ interface LinkItemProps {
   onRemove: () => void
   onRefresh: () => void
   isRefreshing: boolean
+  onDragStart?: (e: React.MouseEvent) => void
+  onOpenLink?: () => void
 }
 
 function LinkItem({
   link,
   onRemove,
   onRefresh,
-  isRefreshing
+  isRefreshing,
+  onDragStart,
+  onOpenLink
 }: LinkItemProps) {
   // Card layout - full-width cards with OG images
   return (
     <div
-      className="rounded-md group cursor-grab flex flex-col gap-3 transition-transform active:scale-[0.98]"
+      className="rounded-md group cursor-pointer flex flex-col gap-3 transition-transform"
       style={{
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
       }}
+      onClick={onOpenLink}
     >
       {/* OG Image Preview */}
       <div className="aspect-video bg-accent relative rounded-md overflow-hidden">
@@ -1032,13 +980,19 @@ function LinkItem({
         )}
 
         {/* Actions overlay */}
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
           <div className="bg-muted rounded-md px-2 py-2 flex items-center gap-4">
             <div
-              className="flex items-center justify-center text-muted-foreground cursor-grab"
+              className="flex items-center justify-center text-muted-foreground cursor-grab hover:text-foreground transition-colors"
               role="button"
               aria-label="Drag to reorder"
               tabIndex={0}
+              onMouseDown={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                onDragStart?.(e)
+              }}
+              onClick={(e) => e.stopPropagation()}
             >
               <Bars3Icon className="w-4 h-4" aria-hidden="true" />
             </div>

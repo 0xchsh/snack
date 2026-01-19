@@ -1,14 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { AnimatePresence, motion } from 'framer-motion'
-import { CheckIcon, DocumentDuplicateIcon, TrashIcon } from '@heroicons/react/24/solid'
-import { Button } from '@/components/ui'
+import { DocumentDuplicateIcon, PlusIcon, EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
+import { motion } from 'framer-motion'
+import { Button, Toast, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
+import { AddLinkModal } from '@/components/add-link-modal'
 import { TopBar, BrandMark, AppContainer } from '@/components/primitives'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { ListWithLinks, CreateListForm, LinkCreatePayload } from '@/types'
+import { ListWithLinks, LinkCreatePayload } from '@/types'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
 import {
@@ -60,22 +61,16 @@ const PublicListView = dynamic(() => import('@/components/public-list-view').the
   ssr: false
 })
 
-const CreateList = dynamic(() => import('@/components/create-list').then(mod => ({ default: mod.CreateList })), {
-  loading: () => <ListPageSkeleton />,
-  ssr: false
-})
-
 export default function UserListPage() {
   const params = useParams()
   const username = params?.username as string
   const listId = params?.listId as string
-  const [showCreateList, setShowCreateList] = useState(false)
   const [showCopySuccess, setShowCopySuccess] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showAddLinkModal, setShowAddLinkModal] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
   const { user } = useAuth()
   const router = useRouter()
-  const searchParams = useSearchParams()
   const queryClient = useQueryClient()
 
   // Validate username format
@@ -108,28 +103,19 @@ export default function UserListPage() {
 
   const isAuthenticated = !!user
   const currentUserId = user?.id || null
-  const forceEditView = searchParams?.get('view') === 'edit'
-
-  // Get query string once to avoid recreating on every render
-  const queryString = searchParams?.toString() ?? ''
 
   // Handle redirect for canonical username
   useEffect(() => {
     if (currentList?.user?.username && currentList.user.username !== username) {
-      router.replace(`/${currentList.user.username}/${listId}${queryString ? `?${queryString}` : ''}`)
+      router.replace(`/${currentList.user.username}/${listId}`)
     }
-  }, [currentList, username, listId, queryString, router])
+  }, [currentList, username, listId, router])
 
   // Determine if user can edit this list
   const canEdit = isAuthenticated && currentUserId === currentList?.user_id
 
   // Determine if list should be visible
   const canView = currentList?.is_public || canEdit
-
-  const handleCreateList = async (formData: CreateListForm) => {
-    // Navigate to dashboard to create new lists
-    router.push('/dashboard')
-  }
 
   const handleUpdateList = async (updates: Partial<ListWithLinks>) => {
     if (!currentList) return
@@ -246,124 +232,116 @@ export default function UserListPage() {
     )
   }
 
-  // Show edit view only if explicitly requested via query param AND user is the owner
-  if (forceEditView && canEdit) {
+  // Owners see the unified edit view
+  if (canEdit) {
     return (
-    <div className="min-h-screen bg-background">
-      {/* Copy Success Toast */}
-      <AnimatePresence>
-        {showCopySuccess && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, x: '-50%' }}
-            animate={{ opacity: 1, scale: 1, x: '-50%' }}
-            exit={{ opacity: 0, scale: 0.95, x: '-50%' }}
-            transition={{ duration: 0.2 }}
-            className="fixed top-4 left-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
-          >
-            <DocumentDuplicateIcon className="w-4 h-4" />
-            <span className="font-medium">Link copied to clipboard!</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="min-h-screen bg-background">
+        {/* Copy Success Toast */}
+        <Toast show={showCopySuccess} message="Link copied to clipboard!" variant="copied" />
 
-      <TopBar variant="app">
-        <TopBar.Left>
-          <BrandMark variant="app" href="/dashboard" />
-        </TopBar.Left>
+        <TopBar variant="app">
+          <TopBar.Left>
+            <BrandMark variant="app" href="/dashboard" />
+          </TopBar.Left>
 
-        <TopBar.Right>
-          <Button
-            onClick={() => setShowDeleteModal(true)}
-            variant="muted"
-            size="icon"
-            aria-label="Delete list"
-            className="bg-red-500/10 text-red-600 hover:bg-red-500/20 hover:text-red-700 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20 dark:hover:text-red-300"
-          >
-            <TrashIcon className="w-4 h-4" />
-          </Button>
-          <Button
-            onClick={() => {
-              router.push(`/${username}/${currentList.public_id || listId}`)
-            }}
-            variant="muted"
-            size="icon"
-            aria-label="Preview public view"
-            className="bg-green-500/10 text-green-600 hover:bg-green-500/20 hover:text-green-700 dark:bg-green-500/10 dark:text-green-400 dark:hover:bg-green-500/20 dark:hover:text-green-300"
-          >
-            <CheckIcon className="w-4 h-4" />
-          </Button>
-          <Button
-            onClick={async () => {
-              const url = `${window.location.origin}/${username}/${currentList.public_id || listId}`
-              await navigator.clipboard.writeText(url)
-              setShowCopySuccess(true)
-              setTimeout(() => setShowCopySuccess(false), 2000)
-            }}
-            variant="muted"
-            size="icon"
-            aria-label="Copy link"
-          >
-            <DocumentDuplicateIcon className="w-4 h-4" />
-          </Button>
-          <ThemeToggle />
-        </TopBar.Right>
-      </TopBar>
+          <TopBar.Right>
+            <Button
+              onClick={() => setShowAddLinkModal(true)}
+              variant="muted"
+              size="icon"
+              aria-label="Add link"
+            >
+              <PlusIcon className="w-4 h-4" />
+            </Button>
+            <Button
+              onClick={async () => {
+                const url = `${window.location.origin}/${username}/${currentList.public_id || listId}`
+                await navigator.clipboard.writeText(url)
+                setShowCopySuccess(true)
+                setTimeout(() => setShowCopySuccess(false), 2000)
+              }}
+              variant="muted"
+              size="icon"
+              aria-label="Copy link"
+            >
+              <DocumentDuplicateIcon className="w-4 h-4" />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="muted" size="icon" aria-label="More options">
+                  <EllipsisHorizontalIcon className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => setShowDeleteModal(true)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  Delete list
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <ThemeToggle />
+          </TopBar.Right>
+        </TopBar>
 
-      {/* Main Content */}
-      <AppContainer variant="app">
-        <div className="pt-8 pb-16">
-          <div className="max-w-[560px] w-full mx-auto">
-            <ListEditor
-              list={currentList}
-              onUpdateList={handleUpdateList}
-              onAddLink={handleAddLink}
-              onRemoveLink={handleRemoveLink}
-              onReorderLinks={handleReorderLinks}
-            />
-          </div>
-        </div>
-      </AppContainer>
-
-      {showCreateList && (
-        <CreateList
-          onCreateList={handleCreateList}
-          onClose={() => setShowCreateList(false)}
-        />
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-background border border-border rounded-lg p-4 sm:p-6 max-w-md w-full shadow-lg"
-          >
-            <h3 className="text-xl font-semibold mb-2">Delete List?</h3>
-            <p className="text-muted-foreground mb-6">
-              Are you sure you want to delete &quot;{currentList.title || 'Untitled List'}&quot;? This action cannot be undone.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                disabled={deleteListMutation.isPending}
-                className="px-4 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md transition-colors disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleteListMutation.isPending}
-                className="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive-hover rounded-md transition-colors disabled:opacity-50"
-              >
-                {deleteListMutation.isPending ? 'Deleting...' : 'Delete'}
-              </button>
+        {/* Main Content */}
+        <AppContainer variant="app">
+          <div className="pt-8 pb-16">
+            <div className="max-w-[560px] w-full mx-auto">
+              <ListEditor
+                list={currentList}
+                onUpdateList={handleUpdateList}
+                onAddLink={handleAddLink}
+                onRemoveLink={handleRemoveLink}
+                onReorderLinks={handleReorderLinks}
+              />
             </div>
-          </motion.div>
-        </div>
-      )}
-    </div>
+          </div>
+        </AppContainer>
+
+        {/* Add Link Modal */}
+        <AddLinkModal
+          isOpen={showAddLinkModal}
+          onClose={() => setShowAddLinkModal(false)}
+          onAddLink={async (url) => {
+            await handleAddLink({ url, title: url })
+          }}
+        />
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-background border border-border rounded-lg p-4 sm:p-6 max-w-md w-full shadow-lg"
+            >
+              <h3 className="text-xl font-semibold mb-2">Delete List?</h3>
+              <p className="text-muted-foreground mb-6">
+                Are you sure you want to delete &quot;{currentList.title || 'Untitled List'}&quot;? This action cannot be undone.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={deleteListMutation.isPending}
+                  className="px-4 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleteListMutation.isPending}
+                  className="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive-hover rounded-md transition-colors disabled:opacity-50"
+                >
+                  {deleteListMutation.isPending ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </div>
     )
   }
 

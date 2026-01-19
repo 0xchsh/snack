@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, memo } from 'react'
 import { DocumentDuplicateIcon, ClockIcon, LinkIcon, EyeIcon, StarIcon, PencilIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ListWithLinks, Link as LinkType, Currency } from '@/types'
@@ -14,6 +14,7 @@ import { Header } from './header'
 import { ListPaywall } from './list-paywall'
 import { isListFree } from '@/lib/pricing'
 import { DefaultAvatar } from '@/components/default-avatar'
+import { Toast } from '@/components/ui'
 
 interface PublicListViewProps {
   list: ListWithLinks
@@ -302,37 +303,9 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Copy Success Toast */}
-      <AnimatePresence>
-        {showCopySuccess && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, x: '-50%' }}
-            animate={{ opacity: 1, scale: 1, x: '-50%' }}
-            exit={{ opacity: 0, scale: 0.95, x: '-50%' }}
-            transition={{ duration: 0.2 }}
-            className="fixed top-4 left-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
-          >
-            <DocumentDuplicateIcon className="w-4 h-4" />
-            <span className="font-medium">Link copied to clipboard!</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Save Success Toast */}
-      <AnimatePresence>
-        {showSaveSuccess && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, x: '-50%' }}
-            animate={{ opacity: 1, scale: 1, x: '-50%' }}
-            exit={{ opacity: 0, scale: 0.95, x: '-50%' }}
-            transition={{ duration: 0.2 }}
-            className="fixed top-4 left-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
-          >
-            <StarIcon className="w-4 h-4" />
-            <span className="font-medium">Saved successfully!</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Toasts */}
+      <Toast show={showCopySuccess} message="Link copied to clipboard!" variant="copied" />
+      <Toast show={showSaveSuccess} message="Saved successfully!" variant="saved" />
 
       {isOwner ? (
         <Header
@@ -344,7 +317,7 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
               icon: <PencilIcon className="w-5 h-5" />,
               onClick: () => {
                 const username = user?.username || list.user?.username
-                router.push(`/${username}/${list.public_id || list.id}?view=edit`)
+                router.push(`/${username}/${list.public_id || list.id}`)
               },
               className: "w-icon-button h-icon-button p-0 flex items-center justify-center"
             },
