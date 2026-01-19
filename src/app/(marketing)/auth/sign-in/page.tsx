@@ -1,13 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button, Input, Label, Spinner } from '@/components/ui'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useAuth } from '@/hooks/useAuth'
 
-export default function SignInPage() {
+function SignInContent() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -167,5 +167,20 @@ export default function SignInPage() {
       </div>
     </div>
     </div>
+  )
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Spinner size="lg" className="mx-auto" />
+          <p className="text-muted-foreground">Loading…</p>
+        </div>
+      </div>
+    }>
+      <SignInContent />
+    </Suspense>
   )
 }
