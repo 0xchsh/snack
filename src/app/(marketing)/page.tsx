@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 
 import { Button, Spinner } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
-import { AnimatedListDemo, FeaturesSection, FAQSection, UseCasesSection, UsernameSection } from '@/components/marketing'
+import { AnimatedListDemo, ExtensionSection, FeaturesSection, FAQSection, UseCasesSection, UsernameSection } from '@/components/marketing'
 
 export default function HomePage() {
   const { user, loading } = useAuth()
@@ -77,6 +77,9 @@ export default function HomePage() {
 
       {/* Features */}
       <FeaturesSection />
+
+      {/* Extension */}
+      <ExtensionSection />
 
       {/* Username Section */}
       <UsernameSection />

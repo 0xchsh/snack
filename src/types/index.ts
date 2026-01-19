@@ -236,3 +236,38 @@ export interface ListEarnings {
   first_purchase: string | null
   latest_purchase: string | null
 }
+
+// ============================================================================
+// Extension Types
+// ============================================================================
+
+// Extension token for Chrome extension auth
+export type ExtensionToken = Database['public']['Tables']['extension_tokens']['Row']
+export type ExtensionTokenInsert = Database['public']['Tables']['extension_tokens']['Insert']
+export type ExtensionTokenUpdate = Database['public']['Tables']['extension_tokens']['Update']
+
+// Extension auth code for OAuth-style flow
+export type ExtensionAuthCode = Database['public']['Tables']['extension_auth_codes']['Row']
+export type ExtensionAuthCodeInsert = Database['public']['Tables']['extension_auth_codes']['Insert']
+export type ExtensionAuthCodeUpdate = Database['public']['Tables']['extension_auth_codes']['Update']
+
+// Extension list summary (for dropdown)
+export interface ExtensionListSummary {
+  id: string
+  publicId: string
+  title: string
+  emoji: string | null
+  isPublic: boolean
+  linkCount: number
+  updatedAt: string
+}
+
+// Extension link data for saving
+export interface ExtensionLinkData {
+  url: string
+  title?: string | null
+  description?: string | null
+  imageUrl?: string | null
+  faviconUrl?: string | null
+  position?: number
+}

@@ -28,7 +28,7 @@ export async function GET(
     // First, find the user by username
     const { data: user, error: userError } = await supabase
       .from('users')
-      .select('id, username')
+      .select('id, username, profile_picture_url')
       .eq('username', username)
       .single()
 
@@ -107,7 +107,8 @@ export async function GET(
       ...list,
       links: sortedLinks,
       user: {
-        username: user.username
+        username: user.username,
+        profile_picture_url: user.profile_picture_url
       }
     }
 

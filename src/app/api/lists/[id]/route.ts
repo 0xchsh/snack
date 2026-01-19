@@ -53,7 +53,7 @@ export async function GET(
     // Fetch user data separately
     const { data: userData } = await supabase
       .from('users')
-      .select('id, username')
+      .select('id, username, profile_picture_url')
       .eq('id', list.user_id)
       .single()
 
@@ -63,7 +63,8 @@ export async function GET(
       links: list.links?.sort((a: any, b: any) => a.position - b.position) || [],
       user: userData ? {
         id: userData.id,
-        username: userData.username
+        username: userData.username,
+        profile_picture_url: userData.profile_picture_url
       } : null
     }
 
@@ -150,7 +151,7 @@ export async function PATCH(
     // Fetch user data separately
     const { data: userData } = await supabase
       .from('users')
-      .select('id, username')
+      .select('id, username, profile_picture_url')
       .eq('id', updatedList.user_id)
       .single()
 
@@ -160,7 +161,8 @@ export async function PATCH(
       links: updatedList.links?.sort((a: any, b: any) => a.position - b.position) || [],
       user: userData ? {
         id: userData.id,
-        username: userData.username
+        username: userData.username,
+        profile_picture_url: userData.profile_picture_url
       } : null
     }
 

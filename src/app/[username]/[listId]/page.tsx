@@ -240,7 +240,7 @@ export default function UserListPage() {
         {/* Copy Success Toast */}
         <Toast show={showCopySuccess} message="Link copied to clipboard!" variant="copied" />
 
-        <TopBar variant="app">
+        <TopBar>
           <TopBar.Left>
             <BrandMark variant="app" href="/dashboard" />
           </TopBar.Left>

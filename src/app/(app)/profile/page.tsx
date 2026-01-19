@@ -413,7 +413,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
 
         <div className="flex items-center gap-2">
           <div className="flex-1 relative">
-            <div className="flex items-center h-icon-button border border-border rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:border-transparent">
+            <div className="flex items-center h-icon-button border border-border rounded-lg overflow-hidden">
               <span className="px-3 text-sm text-muted-foreground bg-transparent border-r border-border">
                 snack.xyz/
               </span>
@@ -457,8 +457,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
         <div className="flex gap-2 mt-4">
           <Button
             type="button"
-            variant="ghost"
-            size="sm"
+            variant="outline"
             className="gap-2 text-muted-foreground"
             onClick={async () => {
               await navigator.clipboard.writeText(`https://snack.xyz/${currentUser.username}`)
@@ -471,8 +470,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
           </Button>
           <Button
             type="button"
-            variant="ghost"
-            size="sm"
+            variant="outline"
             className="gap-2 text-muted-foreground"
             asChild
           >

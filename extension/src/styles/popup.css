@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Popup container */
+.popup-container {
+  width: 320px;
+  min-height: 400px;
+  max-height: 500px;
+  background-color: #0a0a0a;
+  color: #fafafa;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #404040;
+}
+
+/* Custom colors */
+.bg-snack-bg {
+  background-color: #0a0a0a;
+}
+
+.bg-snack-bg-elevated {
+  background-color: #171717;
+}
+
+.border-snack-border {
+  border-color: #262626;
+}
+
+.text-snack-text-muted {
+  color: #a3a3a3;
+}
+
+.bg-snack-primary {
+  background-color: #e5e5e5;
+}
+
+.bg-snack-primary:hover,
+.hover\:bg-snack-primary-hover:hover {
+  background-color: #d4d4d4;
+}
+
+.text-snack-primary {
+  color: #e5e5e5;
+}
+
+.hover\:text-snack-primary-hover:hover {
+  color: #d4d4d4;
+}
+
+.focus\:ring-snack-primary:focus {
+  --tw-ring-color: #a3a3a3;
+}
+
+.text-snack-primary-foreground {
+  color: #171717;
+}
+
+/* Animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 0.8s linear infinite;
+}

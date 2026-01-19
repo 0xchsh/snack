@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "A social platform for creating and sharing curated lists of links",
+  "workspaces": [
+    "extension"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",

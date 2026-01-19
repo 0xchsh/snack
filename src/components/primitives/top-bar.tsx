@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils'
 interface TopBarProps {
   children: React.ReactNode
   className?: string
-  variant?: 'app' | 'marketing'
 }
 
 /**
@@ -12,15 +11,12 @@ interface TopBarProps {
  * Provides consistent border, background, and container structure.
  * Use with composition pattern: BrandMark, PrimaryNav, PageActions, UserMenu
  */
-export function TopBar({ children, className, variant = 'app' }: TopBarProps) {
-  const maxWidth = variant === 'marketing' ? 'max-w-container-marketing' : 'max-w-container-app'
-
+export function TopBar({ children, className }: TopBarProps) {
   return (
     <header className="bg-background">
       <div className={cn(
-        'mx-auto w-full',
+        'w-full',
         'px-4 py-6 sm:px-6',
-        maxWidth,
         className
       )}>
         <div className="flex items-center justify-between">

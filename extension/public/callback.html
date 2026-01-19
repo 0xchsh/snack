@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snack - Authentication</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background: #0a0a0a;
+        color: #fafafa;
+      }
+      .container {
+        text-align: center;
+        padding: 2rem;
+      }
+      .logo {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+      h1 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem;
+      }
+      p {
+        color: #a3a3a3;
+        margin: 0;
+      }
+      .spinner {
+        width: 24px;
+        height: 24px;
+        border: 2px solid #262626;
+        border-top-color: #f97316;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 1.5rem auto;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      .error {
+        color: #ef4444;
+        margin-top: 1rem;
+      }
+      .success {
+        color: #22c55e;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="logo">🥨</div>
+      <h1 id="title">Authenticating...</h1>
+      <p id="message">Please wait while we sign you in</p>
+      <div class="spinner" id="spinner"></div>
+      <p class="error" id="error" style="display: none;"></p>
+    </div>
+
+    <script>
+      (async function() {
+        const titleEl = document.getElementById('title');
+        const messageEl = document.getElementById('message');
+        const spinnerEl = document.getElementById('spinner');
+        const errorEl = document.getElementById('error');
+
+        function showError(message) {
+          titleEl.textContent = 'Authentication Failed';
+          messageEl.textContent = 'Please try again';
+          spinnerEl.style.display = 'none';
+          errorEl.textContent = message;
+          errorEl.style.display = 'block';
+        }
+
+        function showSuccess() {
+          titleEl.textContent = 'Success!';
+          titleEl.classList.add('success');
+          messageEl.textContent = 'You can close this tab now';
+          spinnerEl.style.display = 'none';
+        }
+
+        try {
+          // Get the code from URL params
+          const params = new URLSearchParams(window.location.search);
+          const code = params.get('code');
+          const error = params.get('error');
+
+          if (error) {
+            showError(error);
+            return;
+          }
+
+          if (!code) {
+            showError('No authorization code received');
+            return;
+          }
+
+          // Send the code to the background script
+          const response = await chrome.runtime.sendMessage({
+            type: 'EXCHANGE_CODE',
+            code: code,
+          });
+
+          if (response.success) {
+            showSuccess();
+            // Close this tab after a short delay
+            setTimeout(() => {
+              window.close();
+            }, 1500);
+          } else {
+            showError(response.error || 'Failed to complete authentication');
+          }
+        } catch (err) {
+          console.error('Auth callback error:', err);
+          showError('An unexpected error occurred');
+        }
+      })();
+    </script>
+  </body>
+</html>

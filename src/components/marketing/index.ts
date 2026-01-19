@@ -1,5 +1,6 @@
 export { AnimatedListDemo } from './animated-list-demo'
 export { ExampleCards } from './example-cards'
+export { ExtensionSection } from './extension-section'
 export { FeaturesSection } from './features-section'
 export { FAQSection } from './faq-section'
 export { Footer } from './footer'

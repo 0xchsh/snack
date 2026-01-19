@@ -105,6 +105,19 @@ export default async function Image({ params }: { params: Promise<{ username: st
         >
           {title.length > 60 ? title.substring(0, 60) + '...' : title}
         </div>
+
+        {/* Username */}
+        <div
+          style={{
+            display: 'flex',
+            fontSize: 28,
+            fontWeight: 400,
+            color: '#9CA3AF',
+            marginTop: 16,
+          }}
+        >
+          {username}
+        </div>
       </div>
     ),
     {

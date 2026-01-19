@@ -73,7 +73,7 @@ function AppLayoutContent({
         Skip to content
       </a>
 
-      <TopBar variant="app">
+      <TopBar>
         <TopBar.Left>
           <BrandMark variant="app" href="/dashboard" />
         </TopBar.Left>
