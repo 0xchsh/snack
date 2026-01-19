@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { StarIcon, LinkIcon, ListBulletIcon } from '@heroicons/react/24/solid'
-import { Spinner } from '@/components/ui'
+import { StarIcon, LinkIcon, ListBulletIcon, ChevronUpDownIcon } from '@heroicons/react/24/solid'
+import { Spinner, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
 import { useInView } from 'react-intersection-observer'
 import { LoadingState } from '@/components/loading-state'
 import { DefaultAvatar } from '@/components/default-avatar'
@@ -181,39 +181,26 @@ export default function DiscoverPage() {
               <span className="text-sm sm:text-base">{totalCount} {totalCount === 1 ? 'list' : 'lists'}</span>
             </div>
 
-            {/* Right side - Sort controls */}
-            <div className="flex gap-2 w-full sm:w-auto">
-              <button
-                onClick={() => setSortBy('recent')}
-                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  sortBy === 'recent'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-accent'
-                }`}
-              >
-                Recent
-              </button>
-              <button
-                onClick={() => setSortBy('links')}
-                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  sortBy === 'links'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-accent'
-                }`}
-              >
-                Links
-              </button>
-              <button
-                onClick={() => setSortBy('stars')}
-                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  sortBy === 'stars'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-accent'
-                }`}
-              >
-                Stars
-              </button>
-            </div>
+            {/* Right side - Sort dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-1 px-2.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors outline-none rounded-md">
+                  {sortBy === 'recent' ? 'Recent' : sortBy === 'links' ? 'Links' : 'Stars'}
+                  <ChevronUpDownIcon className="w-4 h-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setSortBy('recent')}>
+                  Recent
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('links')}>
+                  Links
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('stars')}>
+                  Stars
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
 
@@ -238,7 +225,7 @@ export default function DiscoverPage() {
                 <Link
                   key={list.id}
                   href={`/${username}/${listSlug}`}
-                  className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 bg-neutral-50 dark:bg-neutral-900 hover:bg-accent active:bg-accent/80 active:scale-[0.995] transition-all duration-150 rounded-md group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700 active:scale-[0.995] transition-all duration-150 rounded-md group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   {/* Left side - emoji and title */}
                   <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -255,13 +242,13 @@ export default function DiscoverPage() {
                     </div>
                   </div>
 
-                  {/* Right side - stats */}
-                  <div className="flex items-center gap-3 ml-4 flex-shrink-0 text-muted-foreground">
+                  {/* Right side - stats - hide stars on very narrow screens */}
+                  <div className="flex items-center gap-2 sm:gap-3 ml-3 sm:ml-4 flex-shrink-0 text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <LinkIcon className="w-4 h-4" />
                       <span className="text-sm">{linkCount}</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="hidden sm:flex items-center gap-1.5">
                       <StarIcon className="w-4 h-4" />
                       <span className="text-sm">{list.save_count || 0}</span>
                     </div>

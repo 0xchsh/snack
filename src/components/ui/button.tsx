@@ -27,6 +27,7 @@ const buttonVariants = cva(
         sm: 'px-3 py-2 rounded-md text-sm',
         lg: 'px-6 py-3 rounded-lg text-base',
         icon: 'h-icon-button w-icon-button rounded-md',
+        'icon-mobile': 'min-h-touch-target min-w-touch-target h-icon-button-mobile w-icon-button-mobile rounded-md', // 44px touch target for mobile
       },
     },
     defaultVariants: {

@@ -3,10 +3,10 @@
 import Link from 'next/link'
 import { Suspense, useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { EyeIcon, StarIcon, LinkIcon, ListBulletIcon, PlusIcon, GlobeAltIcon } from '@heroicons/react/24/solid'
+import { EyeIcon, StarIcon, LinkIcon, ListBulletIcon, PlusIcon, GlobeAltIcon, ChevronUpDownIcon } from '@heroicons/react/24/solid'
 import { useQueryClient } from '@tanstack/react-query'
 
-import { Button, ListRowSkeleton } from '@/components/ui'
+import { Button, ListRowSkeleton, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 import {
   useListsQuery,
@@ -47,6 +47,8 @@ function DashboardContent() {
 
   const { user, loading } = useAuth()
   const [mounted, setMounted] = useState(false)
+  const [sortBy, setSortBy] = useState<'recent' | 'links' | 'alpha'>('recent')
+  const [statsSortBy, setStatsSortBy] = useState<'links' | 'views' | 'stars'>('views')
 
   // TanStack Query hooks
   const { data: lists = [], isLoading: listsLoading } = useListsQuery()
@@ -103,6 +105,20 @@ function DashboardContent() {
 
   const currentTab = tab || 'your-lists'
 
+  // Sort lists based on selected option
+  const sortedLists = [...lists].sort((a, b) => {
+    switch (sortBy) {
+      case 'recent':
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      case 'links':
+        return (b.links?.length || 0) - (a.links?.length || 0)
+      case 'alpha':
+        return (a.title || 'Untitled').localeCompare(b.title || 'Untitled')
+      default:
+        return 0
+    }
+  })
+
   return (
     <div className="min-h-screen bg-background">
       <AppContainer variant="app">
@@ -126,16 +142,39 @@ function DashboardContent() {
                 <ListBulletIcon className="w-4 h-4" />
                 <span className="text-base">{lists.length} lists</span>
               </div>
-              <Button
-                onClick={handleCreateList}
-                disabled={createEmptyListMutation.isPending}
-                variant="outline"
-                size="default"
-                className="gap-2"
-              >
-                <span>Create list</span>
-                <PlusIcon className="w-4 h-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                {lists.length > 1 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex items-center gap-1 px-2.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors outline-none rounded-md">
+                        {sortBy === 'recent' ? 'Recent' : sortBy === 'links' ? 'Links' : 'A-Z'}
+                        <ChevronUpDownIcon className="w-4 h-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setSortBy('recent')}>
+                        Recent
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setSortBy('links')}>
+                        Links
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setSortBy('alpha')}>
+                        A-Z
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+                <Button
+                  onClick={handleCreateList}
+                  disabled={createEmptyListMutation.isPending}
+                  variant="outline"
+                  size="default"
+                  className="gap-2"
+                >
+                  <span>Create list</span>
+                  <PlusIcon className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
 
             {/* Lists */}
@@ -161,12 +200,12 @@ function DashboardContent() {
                   </Button>
                 </div>
               ) : (
-                lists.map((list) => (
+                sortedLists.map((list) => (
                   <div key={list.id}>
                     <Link
                       href={`/${user.username}/${list.public_id || list.id}`}
                       onMouseEnter={() => prefetchList(list.id)}
-                      className="flex items-center justify-between px-3 py-3 bg-neutral-50 dark:bg-neutral-900 hover:bg-accent active:bg-accent/80 active:scale-[0.995] transition-all duration-150 rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      className="flex items-center justify-between px-3 py-3 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700 active:scale-[0.995] transition-all duration-150 rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <span className="text-base flex-shrink-0">{list.emoji || '📋'}</span>
@@ -235,7 +274,7 @@ function DashboardContent() {
                       <Link
                         href={`/${listOwner}/${list.public_id || list.id}`}
                         onMouseEnter={() => prefetchList(list.id)}
-                        className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 bg-neutral-50 dark:bg-neutral-900 hover:bg-accent active:bg-accent/80 active:scale-[0.995] transition-all duration-150 rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700 active:scale-[0.995] transition-all duration-150 rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       >
                         <div className="flex items-center gap-4 min-w-0 flex-1">
                           <span className="text-2xl flex-shrink-0">{list.emoji || '📋'}</span>
@@ -269,29 +308,83 @@ function DashboardContent() {
               />
             </div>
 
-            {/* Summary Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="text-center border border-border rounded-lg py-4">
-                <div className="text-2xl font-bold text-foreground">{formatCount(lists.length)}</div>
-                <div className="text-sm text-muted-foreground">lists</div>
-              </div>
-              <div className="text-center border border-border rounded-lg py-4">
-                <div className="text-2xl font-bold text-foreground">
-                  {analyticsData ? formatCount(analyticsData.totalViews) : '0'}
+            {/* Summary Stats - Stack on very small screens */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              <div className="flex flex-col justify-between border border-border rounded-lg p-4 min-h-[100px]">
+                <LinkIcon className="w-4 h-4 text-muted-foreground" />
+                <div className="mt-6">
+                  <div className="text-2xl font-bold text-foreground">{formatCount(totalLinks)}</div>
+                  <div className="text-sm text-muted-foreground">links</div>
                 </div>
-                <div className="text-sm text-muted-foreground">views</div>
               </div>
-              <div className="text-center border border-border rounded-lg py-4">
-                <div className="text-2xl font-bold text-foreground">
-                  {analyticsData ? formatCount(analyticsData.totalSaves) : '0'}
+              <div className="flex flex-col justify-between border border-border rounded-lg p-4 min-h-[100px]">
+                <EyeIcon className="w-4 h-4 text-muted-foreground" />
+                <div className="mt-6">
+                  <div className="text-2xl font-bold text-foreground">
+                    {analyticsData ? formatCount(analyticsData.totalViews) : '0'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">views</div>
                 </div>
-                <div className="text-sm text-muted-foreground">stars</div>
               </div>
+              <div className="flex flex-col justify-between border border-border rounded-lg p-4 min-h-[100px]">
+                <StarIcon className="w-4 h-4 text-muted-foreground" />
+                <div className="mt-6">
+                  <div className="text-2xl font-bold text-foreground">
+                    {analyticsData ? formatCount(analyticsData.totalSaves) : '0'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">stars</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Per-list stats header */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <ListBulletIcon className="w-4 h-4" />
+                <span className="text-base">{lists.length} lists</span>
+              </div>
+              {lists.length > 1 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-1 px-2.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors outline-none rounded-md">
+                      {statsSortBy === 'links' ? 'Links' : statsSortBy === 'views' ? 'Views' : 'Stars'}
+                      <ChevronUpDownIcon className="w-4 h-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setStatsSortBy('links')}>
+                      Links
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setStatsSortBy('views')}>
+                      Views
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setStatsSortBy('stars')}>
+                      Stars
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
 
             {/* Per-list stats */}
             <div className="space-y-3">
-              {lists.map((list) => {
+              {[...lists].sort((a, b) => {
+                const aId = a.public_id || a.id
+                const bId = b.public_id || b.id
+                const aStats = analyticsData?.listStats[aId] || { views: 0, clicks: 0 }
+                const bStats = analyticsData?.listStats[bId] || { views: 0, clicks: 0 }
+
+                switch (statsSortBy) {
+                  case 'links':
+                    return (b.links?.length || 0) - (a.links?.length || 0)
+                  case 'views':
+                    return bStats.views - aStats.views
+                  case 'stars':
+                    return (b.save_count || 0) - (a.save_count || 0)
+                  default:
+                    return 0
+                }
+              }).map((list) => {
                 const listId = list.public_id || list.id
                 const stats = analyticsData?.listStats[listId] || { views: 0, clicks: 0 }
 
@@ -302,14 +395,14 @@ function DashboardContent() {
                     onMouseEnter={() => prefetchList(list.id)}
                     className="block"
                   >
-                    <div className="flex items-center justify-between px-3 py-3 bg-neutral-50 dark:bg-neutral-900 hover:bg-accent active:bg-accent/80 active:scale-[0.995] transition-all duration-150 rounded-md cursor-pointer">
+                    <div className="flex items-center justify-between px-3 py-3 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700 active:scale-[0.995] transition-all duration-150 rounded-md cursor-pointer">
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="text-base">{list.emoji || '📋'}</span>
                         <span className="text-base font-medium text-foreground truncate">
                           {list.title || 'Untitled List'}
                         </span>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground flex-shrink-0">
+                      <div className="flex items-center gap-2 sm:gap-4 text-sm text-muted-foreground flex-shrink-0">
                         <div className="flex items-center gap-1">
                           <LinkIcon className="h-4 w-4" aria-hidden="true" />
                           <span>{formatCount(list.links?.length || 0)}</span>
@@ -318,7 +411,7 @@ function DashboardContent() {
                           <EyeIcon className="h-4 w-4" aria-hidden="true" />
                           <span>{formatCount(stats.views)}</span>
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="hidden sm:flex items-center gap-1">
                           <StarIcon className="h-4 w-4" aria-hidden="true" />
                           <span>{formatCount(list.save_count || 0)}</span>
                         </div>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button, Input, Label, Spinner } from '@/components/ui'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useAuth } from '@/hooks/useAuth'
@@ -13,14 +13,18 @@ export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, loading, signIn, signInWithGoogle } = useAuth()
+
+  // Get return URL from query params, default to dashboard
+  const returnUrl = searchParams.get('returnUrl') || '/dashboard'
 
   // Redirect if already authenticated
   useEffect(() => {
     if (!loading && user) {
-      router.push('/dashboard')
+      router.push(returnUrl)
     }
-  }, [user, loading, router])
+  }, [user, loading, router, returnUrl])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,7 +32,7 @@ export default function SignInPage() {
     setError('')
 
     try {
-      await signIn(email, password, '/dashboard')
+      await signIn(email, password, returnUrl)
       // signIn function handles the redirect, so we don't need router.push here
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -39,7 +43,7 @@ export default function SignInPage() {
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true)
-      await signInWithGoogle('/dashboard')
+      await signInWithGoogle(returnUrl)
       // signInWithGoogle function handles the redirect
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -76,7 +80,7 @@ export default function SignInPage() {
       <div className="flex items-center justify-center px-4 py-12">
         <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground">Sign In</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Sign In</h1>
           <p className="mt-2 text-muted-foreground">
             Welcome back to Snack
           </p>

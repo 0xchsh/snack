@@ -65,7 +65,7 @@ function MenuButton({ menuItems }: { menuItems: Array<{ label: string; onClick: 
       </Button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-background border border-border rounded-md shadow-lg py-2 z-50">
+        <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-32px)] bg-background border border-border rounded-md shadow-lg py-2 z-50">
           {menuItems.map((item, index) => (
             <Button
               key={index}
@@ -238,7 +238,7 @@ export function Header({
 
   return (
     <div className="bg-background">
-      <div className="mx-auto w-full max-w-container-app px-6 py-6">
+      <div className="w-full px-6 py-6">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href={logoHref} className="flex items-center">

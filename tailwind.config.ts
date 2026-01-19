@@ -26,6 +26,7 @@ const config: Config = {
         'logo-app': '2rem', // 32px - app logo size
         'logo-marketing': '2rem', // 32px - marketing logo size
         'icon-button': '2rem', // 32px - icon button size
+        'icon-button-mobile': '2.75rem', // 44px - mobile touch target (Apple/Google guideline)
         'container-app': '64rem', // 1024px - max-width for app content
         'container-marketing': '80rem', // 1280px - max-width for marketing
       },
@@ -33,6 +34,13 @@ const config: Config = {
         'logo-app': '2rem', // 32px
         'logo-marketing': '2rem', // 32px
         'icon-button': '2rem', // 32px
+        'icon-button-mobile': '2.75rem', // 44px - mobile touch target
+      },
+      minWidth: {
+        'touch-target': '2.75rem', // 44px - minimum touch target
+      },
+      minHeight: {
+        'touch-target': '2.75rem', // 44px - minimum touch target
       },
       maxWidth: {
         'container-app': '64rem', // 1024px - max-width for app content

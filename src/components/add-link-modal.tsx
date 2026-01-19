@@ -97,10 +97,10 @@ export function AddLinkModal({ isOpen, onClose, onAddLink }: AddLinkModalProps) 
             exit={{ opacity: 0, scale: 0.95 }}
             className="relative bg-background border border-border rounded-lg p-4 w-full max-w-md shadow-lg"
           >
-            {/* Close button */}
+            {/* Close button - 44px touch target for mobile */}
             <button
               onClick={onClose}
-              className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
+              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md"
               aria-label="Close"
             >
               <XMarkIcon className="w-5 h-5" />

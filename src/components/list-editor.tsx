@@ -145,13 +145,13 @@ export function ListEditor({
     if (!cardElement) return
 
     const rect = cardElement.getBoundingClientRect()
-    
+
     // Calculate center offset for better drag feel
     dragOffset.current = {
       x: rect.width / 2,
       y: rect.height / 2
     }
-    
+
     setDraggedItemId(linkId)
     setIsDragging(true)
     setDraggedItemPosition({
@@ -159,34 +159,65 @@ export function ListEditor({
       y: e.clientY - dragOffset.current.y,
       width: rect.width
     })
-    
+
     document.body.style.cursor = 'grabbing'
     document.body.style.userSelect = 'none'
   }, [])
 
+  // Touch event handlers for mobile drag-and-drop
+  const handleTouchStart = useCallback((e: React.TouchEvent, linkId: string, index: number) => {
+    e.stopPropagation()
+
+    const touch = e.touches[0]
+    if (!touch) return
+
+    // Find the card wrapper element by data-link-id attribute
+    const cardElement = document.querySelector(`[data-link-id="${linkId}"]`) as HTMLElement
+    if (!cardElement) return
+
+    const rect = cardElement.getBoundingClientRect()
+
+    // Calculate center offset for better drag feel
+    dragOffset.current = {
+      x: rect.width / 2,
+      y: rect.height / 2
+    }
+
+    setDraggedItemId(linkId)
+    setIsDragging(true)
+    setDraggedItemPosition({
+      x: touch.clientX - dragOffset.current.x,
+      y: touch.clientY - dragOffset.current.y,
+      width: rect.width
+    })
+
+    document.body.style.userSelect = 'none'
+    document.body.style.overflow = 'hidden' // Prevent scroll while dragging
+  }, [])
+
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging || !draggedItemId) return
-    
+
     // Update drag preview position
     setDraggedItemPosition(prev => ({
       x: e.clientX - dragOffset.current.x,
       y: e.clientY - dragOffset.current.y,
       width: prev.width
     }))
-    
+
     // Find which item we're hovering over (menu view only)
     const container = document.querySelector('.draggable-list-container')
     if (!container) return
-    
+
     const items = container.children
     let newHoverIndex = null
-    
+
     // Check each item to see if we're hovering over it
     for (let i = 0; i < items.length; i++) {
       const item = items[i] as HTMLElement
       // Skip the drag preview element
       if (item.classList.contains('fixed')) continue
-      
+
       const rect = item.getBoundingClientRect()
 
       // Menu view: check if mouse is in the vertical range
@@ -207,7 +238,61 @@ export function ListEditor({
         }
       }
     }
-    
+
+    if (newHoverIndex !== null) {
+      setDragOverIndex(newHoverIndex)
+    }
+  }, [isDragging, draggedItemId])
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!isDragging || !draggedItemId) return
+
+    const touch = e.touches[0]
+    if (!touch) return
+
+    e.preventDefault() // Prevent scrolling while dragging
+
+    // Update drag preview position
+    setDraggedItemPosition(prev => ({
+      x: touch.clientX - dragOffset.current.x,
+      y: touch.clientY - dragOffset.current.y,
+      width: prev.width
+    }))
+
+    // Find which item we're hovering over
+    const container = document.querySelector('.draggable-list-container')
+    if (!container) return
+
+    const items = container.children
+    let newHoverIndex = null
+
+    // Check each item to see if we're hovering over it
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i] as HTMLElement
+      // Skip the drag preview element
+      if (item.classList.contains('fixed')) continue
+
+      const rect = item.getBoundingClientRect()
+
+      // Check if touch is in the vertical range
+      const midY = rect.top + rect.height / 2
+      if (touch.clientY <= midY) {
+        newHoverIndex = i
+        break
+      }
+    }
+
+    // If we're past all items, set to last position
+    if (newHoverIndex === null && items.length > 0) {
+      const lastItem = items[items.length - 1] as HTMLElement
+      if (!lastItem.classList.contains('fixed')) {
+        const lastRect = lastItem.getBoundingClientRect()
+        if (touch.clientY > lastRect.bottom) {
+          newHoverIndex = items.length - 1
+        }
+      }
+    }
+
     if (newHoverIndex !== null) {
       setDragOverIndex(newHoverIndex)
     }
@@ -240,7 +325,35 @@ export function ListEditor({
 
     cleanup()
   }, [isDragging, optimisticList.links, draggedItemId, dragOverIndex, onReorderLinks])
-  
+
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
+    if (!isDragging || !optimisticList.links || !draggedItemId) {
+      cleanup()
+      return
+    }
+
+    const draggedIndex = optimisticList.links.findIndex(link => link.id === draggedItemId)
+
+    if (draggedIndex !== -1 && dragOverIndex !== null && draggedIndex !== dragOverIndex) {
+      // Reorder the links
+      const newLinks = [...optimisticList.links]
+      const [draggedItem] = newLinks.splice(draggedIndex, 1)
+      if (!draggedItem) {
+        cleanup()
+        return
+      }
+      newLinks.splice(dragOverIndex, 0, draggedItem)
+
+      // Update local state immediately for visual feedback
+      setOptimisticList(prev => ({ ...prev, links: newLinks }))
+
+      // Update the order on the server
+      onReorderLinks?.(newLinks.map(link => link.id))
+    }
+
+    cleanup()
+  }, [isDragging, optimisticList.links, draggedItemId, dragOverIndex, onReorderLinks])
+
   const cleanup = useCallback(() => {
     setIsDragging(false)
     setDraggedItemId(null)
@@ -248,9 +361,10 @@ export function ListEditor({
     setDraggedItemPosition({ x: 0, y: 0, width: 0 })
     document.body.style.cursor = 'auto'
     document.body.style.userSelect = 'auto'
+    document.body.style.overflow = 'auto' // Re-enable scroll after drag
   }, [])
   
-  // Set up global mouse event listeners when dragging starts
+  // Set up global mouse and touch event listeners when dragging starts
   useEffect(() => {
     if (!isDragging) {
       return undefined
@@ -258,12 +372,18 @@ export function ListEditor({
 
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
-    
+    document.addEventListener('touchmove', handleTouchMove, { passive: false })
+    document.addEventListener('touchend', handleTouchEnd)
+    document.addEventListener('touchcancel', handleTouchEnd)
+
     return () => {
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
+      document.removeEventListener('touchcancel', handleTouchEnd)
     }
-  }, [isDragging, handleMouseMove, handleMouseUp])
+  }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd])
 
   // Refresh OG data for all links that don't have images
   const refreshOGData = async () => {
@@ -779,7 +899,7 @@ export function ListEditor({
             </Button>
           )}
 
-          {/* Mobile: Visible paste input */}
+          {/* Mobile: Visible paste input - 44px minimum touch target */}
           {isMobile && (
             <input
               ref={mobilePasteInputRef}
@@ -789,7 +909,7 @@ export function ListEditor({
               placeholder="Paste links here…"
               aria-label="Paste links"
               onPaste={handleMobilePaste}
-              className="flex-1 px-4 py-2 bg-background text-foreground border border-border rounded-md text-base placeholder:text-muted-foreground focus:outline-none focus:border-muted-foreground transition-colors min-w-0"
+              className="flex-1 px-4 py-3 bg-background text-foreground border border-border rounded-md text-base placeholder:text-muted-foreground focus:outline-none focus:border-muted-foreground transition-colors min-w-0 min-h-[44px]"
             />
           )}
         </div>
@@ -833,7 +953,9 @@ export function ListEditor({
                     onRefresh={() => handleRefreshLink(link)}
                     isRefreshing={false}
                     onDragStart={(e) => handleMouseDown(e, link.id, index)}
+                    onTouchDragStart={(e) => handleTouchStart(e, link.id, index)}
                     onOpenLink={() => window.open(link.url, '_blank', 'noopener,noreferrer')}
+                    isMobile={isMobile}
                   />
                 </div>
               )
@@ -861,6 +983,7 @@ export function ListEditor({
                     onRemove={() => {}}
                     onRefresh={() => {}}
                     isRefreshing={false}
+                    isMobile={isMobile}
                   />
                 </div>
               )
@@ -869,10 +992,12 @@ export function ListEditor({
         </div>
 
         {(!optimisticList.links || optimisticList.links.length === 0) && loadingLinks.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">
-            <p>
-              Paste your first link to get started
-            </p>
+          <div className="flex flex-col gap-3">
+            <div className="aspect-video w-full bg-neutral-50 dark:bg-neutral-900 rounded-md flex items-center justify-center">
+              <p className="text-muted-foreground">
+                ⌘V to paste a link or add with the + icon
+              </p>
+            </div>
           </div>
         )}
       </div>
@@ -900,7 +1025,9 @@ interface LinkItemProps {
   onRefresh: () => void
   isRefreshing: boolean
   onDragStart?: (e: React.MouseEvent) => void
+  onTouchDragStart?: (e: React.TouchEvent) => void
   onOpenLink?: () => void
+  isMobile?: boolean
 }
 
 function LinkItem({
@@ -909,7 +1036,9 @@ function LinkItem({
   onRefresh,
   isRefreshing,
   onDragStart,
-  onOpenLink
+  onTouchDragStart,
+  onOpenLink,
+  isMobile
 }: LinkItemProps) {
   // Card layout - full-width cards with OG images
   return (
@@ -971,11 +1100,11 @@ function LinkItem({
           </div>
         )}
 
-        {/* Actions overlay */}
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
+        {/* Actions overlay - visible on hover (desktop) or always visible (mobile) */}
+        <div className={`absolute top-3 right-3 transition-opacity ${isMobile ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'}`}>
           <div className="bg-muted rounded-md px-2 py-2 flex items-center gap-4">
             <div
-              className="flex items-center justify-center text-muted-foreground cursor-grab hover:text-foreground transition-colors"
+              className="flex items-center justify-center text-muted-foreground cursor-grab hover:text-foreground transition-colors min-w-[44px] min-h-[44px] -m-3"
               role="button"
               aria-label="Drag to reorder"
               tabIndex={0}
@@ -983,6 +1112,10 @@ function LinkItem({
                 e.stopPropagation()
                 e.preventDefault()
                 onDragStart?.(e)
+              }}
+              onTouchStart={(e) => {
+                e.stopPropagation()
+                onTouchDragStart?.(e)
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -997,7 +1130,7 @@ function LinkItem({
               onMouseDown={(e) => {
                 e.stopPropagation()
               }}
-              className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm min-w-[44px] min-h-[44px] flex items-center justify-center -m-3"
               aria-label="Refresh link preview"
               disabled={isRefreshing}
             >
@@ -1012,7 +1145,7 @@ function LinkItem({
               onMouseDown={(e) => {
                 e.stopPropagation()
               }}
-              className="text-muted-foreground hover:text-destructive transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              className="text-muted-foreground hover:text-destructive transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm min-w-[44px] min-h-[44px] flex items-center justify-center -m-3"
               aria-label="Delete link"
             >
               <TrashIcon className="w-4 h-4" aria-hidden="true" />
