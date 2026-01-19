@@ -9,7 +9,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useTheme } from '@/components/theme-provider'
@@ -69,7 +68,6 @@ export function UserMenu({ user, onLogout, className }: UserMenuProps) {
           )}
           <span>{mounted ? (theme === 'light' ? 'Dark mode' : 'Light mode') : 'Toggle theme'}</span>
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={onLogout}
           className="text-destructive focus:text-destructive hover:text-destructive"

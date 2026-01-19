@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { DocumentDuplicateIcon, PlusIcon, EllipsisHorizontalIcon, SunIcon, MoonIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { motion } from 'framer-motion'
-import { Button, Toast, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui'
+import { Button, Toast, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
 import { AddLinkModal } from '@/components/add-link-modal'
 import { TopBar, BrandMark, AppContainer } from '@/components/primitives'
 import { useTheme } from '@/components/theme-provider'
@@ -289,7 +289,6 @@ export default function UserListPage() {
                     </>
                   )}
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setShowDeleteModal(true)}
                   className="text-destructive focus:text-destructive"

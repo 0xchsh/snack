@@ -48,16 +48,22 @@ export function SnackButton({
   }, [isOpen])
 
   const handleSave = async (listId: string) => {
-    if (isSaving) return
+    console.log('[Snack] SnackButton.handleSave called with listId:', listId)
+    if (isSaving) {
+      console.log('[Snack] Already saving, returning')
+      return
+    }
 
     setIsSaving(true)
     try {
+      console.log('[Snack] Calling onSave...')
       await onSave(listId)
+      console.log('[Snack] onSave completed successfully')
       setShowSuccess(true)
       setIsOpen(false)
       setTimeout(() => setShowSuccess(false), 1500)
     } catch (error) {
-      console.error('Failed to save:', error)
+      console.error('[Snack] Failed to save:', error)
     } finally {
       setIsSaving(false)
     }

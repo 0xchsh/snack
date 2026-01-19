@@ -264,10 +264,22 @@ export function ListDropdown({
           </div>
         ) : (
           sortedLists.map((list) => (
-            <button
+            <div
               key={list.id}
-              onClick={() => onSelect(list.id)}
-              disabled={isSaving}
+              role="button"
+              tabIndex={0}
+              ref={(el) => {
+                if (el) {
+                  el.onclick = (e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    console.log('[Snack] List clicked (native):', list.id, list.title)
+                    if (!isSaving) {
+                      onSelect(list.id)
+                    }
+                  }
+                }
+              }}
               onMouseEnter={() => setHoveredId(list.id)}
               onMouseLeave={() => setHoveredId(null)}
               style={{
@@ -286,7 +298,7 @@ export function ListDropdown({
                   {list.linkCount} link{list.linkCount !== 1 ? 's' : ''}
                 </div>
               </div>
-            </button>
+            </div>
           ))
         )}
       </div>

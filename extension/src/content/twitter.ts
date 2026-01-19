@@ -104,10 +104,14 @@ function handleSignIn() {
 
 // Save links to list
 async function handleSave(listId: string, links: ExtractedLink[]): Promise<void> {
+  console.log('[Snack] Saving links to list:', listId, links)
+
   const linkData: LinkData[] = links.map((link) => ({
     url: link.expandedUrl,
     title: null, // Will be fetched by server
   }))
+
+  console.log('[Snack] Sending ADD_LINKS message:', { listId, links: linkData })
 
   const response = await sendMessage({
     type: 'ADD_LINKS',
@@ -115,7 +119,10 @@ async function handleSave(listId: string, links: ExtractedLink[]): Promise<void>
     links: linkData,
   })
 
+  console.log('[Snack] ADD_LINKS response:', response)
+
   if (!response.success) {
+    console.error('[Snack] Save failed:', response.error)
     throw new Error(response.error || 'Failed to save')
   }
 
