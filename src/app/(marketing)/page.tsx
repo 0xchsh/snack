@@ -78,8 +78,8 @@ export default function HomePage() {
       {/* Features */}
       <FeaturesSection />
 
-      {/* Extension */}
-      <ExtensionSection />
+      {/* Extension - hidden until Chrome store approval */}
+      {/* <ExtensionSection /> */}
 
       {/* Username Section */}
       <UsernameSection />

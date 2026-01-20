@@ -107,4 +107,5 @@ export interface ToastData {
   type: ToastType
   message: string
   duration?: number
+  listPublicId?: string // For linking to the list
 }

@@ -48,7 +48,16 @@ function getExpandedUrl(linkElement: HTMLAnchorElement): string | null {
 
   // Method 6: If display text looks like a domain/URL (even truncated), try to extract
   // Handle truncation markers: … (unicode) or ... (ascii)
-  const cleanText = spanText.replace(/…$/, '').replace(/\.\.\.$/, '').trim()
+  let cleanText = spanText.replace(/…$/, '').replace(/\.\.\.$/, '').trim()
+
+  // Remove any trailing path or query that might be cut off
+  // e.g., "example.com/pa" -> "example.com"
+  if (cleanText.includes('/') && !cleanText.startsWith('http')) {
+    const parts = cleanText.split('/')
+    if (parts[0].includes('.')) {
+      cleanText = parts[0]
+    }
+  }
 
   if (cleanText && !cleanText.includes(' ')) {
     // Check if it's already a valid URL format
@@ -58,6 +67,20 @@ function getExpandedUrl(linkElement: HTMLAnchorElement): string | null {
     // If it looks like a domain, prepend https://
     if (cleanText.includes('.') && !cleanText.startsWith('@') && !cleanText.startsWith('#')) {
       return `https://${cleanText}`
+    }
+  }
+
+  // Method 7: Try to extract domain from any child text nodes
+  // This handles cases where Twitter wraps the URL differently
+  const allTextNodes = linkElement.querySelectorAll('span')
+  for (const span of allTextNodes) {
+    const spanContent = span.textContent?.trim() || ''
+    if (spanContent.includes('.') && !spanContent.includes(' ') &&
+        !spanContent.startsWith('@') && !spanContent.startsWith('#')) {
+      const domain = spanContent.replace(/…$/, '').replace(/\.\.\.$/, '').trim()
+      if (domain.includes('.')) {
+        return `https://${domain}`
+      }
     }
   }
 

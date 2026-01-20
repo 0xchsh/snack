@@ -31,25 +31,34 @@ function hashString(str: string): string {
 }
 
 // Process a single tweet element
-function processTweet(element: Element, callback: TweetCallback): void {
+function processTweet(element: Element, callback: TweetCallback, isRetry = false): void {
   const tweetKey = getTweetKey(element)
 
-  // Skip if already processed
-  if (processedTweets.has(tweetKey)) {
+  // Skip if already processed (unless it's a retry for no-links case)
+  if (processedTweets.has(tweetKey) && !isRetry) {
     return
   }
 
   // Extract links
   const links = extractLinksFromTweet(element)
 
-  console.log('[Snack] Processing tweet:', tweetKey, '- found', links.length, 'external links')
+  console.log('[Snack] Processing tweet:', tweetKey, '- found', links.length, 'external links', isRetry ? '(retry)' : '')
   if (links.length > 0) {
     console.log('[Snack] Links found:', links.map(l => l.expandedUrl))
   }
 
   // Skip tweets without external links
   if (links.length === 0) {
-    // Mark as processed even if no links, to avoid re-checking
+    // If not a retry, schedule a retry in case links load later
+    if (!isRetry) {
+      setTimeout(() => {
+        // Only retry if still no button injected
+        if (!element.querySelector('.snack-button-root')) {
+          processTweet(element, callback, true)
+        }
+      }, 1000) // Retry after 1 second
+    }
+    // Mark as processed to avoid duplicate retries
     processedTweets.add(tweetKey)
     return
   }
@@ -114,9 +123,24 @@ export function startTweetDetection(callback: TweetCallback): () => void {
     subtree: true,
   })
 
+  // Periodic re-scan to catch any missed tweets (e.g., due to lazy loading)
+  const intervalId = setInterval(() => {
+    const tweets = document.querySelectorAll(TWITTER_SELECTORS.tweet)
+    tweets.forEach((tweet) => {
+      // Process if no snack button exists yet
+      if (!tweet.querySelector('.snack-button-root')) {
+        const tweetKey = getTweetKey(tweet)
+        // Remove from processed set to allow re-processing
+        processedTweets.delete(tweetKey)
+        processTweet(tweet, callback)
+      }
+    })
+  }, 1500) // Check every 1.5 seconds
+
   // Return cleanup function
   return () => {
     observer.disconnect()
+    clearInterval(intervalId)
     processedTweets.clear()
   }
 }
