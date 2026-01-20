@@ -24,6 +24,9 @@ dist/
 .env.test.local
 .env.production.local
 
+# Extension
+extension/
+
 # Taskmaster
 .taskmaster/
 .claude/
