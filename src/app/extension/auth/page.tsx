@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 
-export default function ExtensionAuthPage() {
+function ExtensionAuthContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [status, setStatus] = useState<'loading' | 'authorizing' | 'success' | 'error'>('loading')
@@ -128,5 +128,27 @@ export default function ExtensionAuthPage() {
         )}
       </div>
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-md text-center">
+        <div className="text-6xl mb-6">🥨</div>
+        <h1 className="text-xl font-semibold text-foreground mb-2">
+          Loading...
+        </h1>
+        <div className="w-8 h-8 border-2 border-muted border-t-primary rounded-full animate-spin mx-auto" />
+      </div>
+    </div>
+  )
+}
+
+export default function ExtensionAuthPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ExtensionAuthContent />
+    </Suspense>
   )
 }

@@ -1,9 +1,9 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
-export default function ExtensionCallbackPage() {
+function ExtensionCallbackContent() {
   const searchParams = useSearchParams()
   const code = searchParams.get('code')
   const error = searchParams.get('error')
@@ -73,5 +73,27 @@ export default function ExtensionCallbackPage() {
         )}
       </div>
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-md text-center">
+        <div className="text-6xl mb-6">🥨</div>
+        <h1 className="text-xl font-semibold text-foreground mb-2">
+          Processing...
+        </h1>
+        <div className="w-8 h-8 border-2 border-muted border-t-primary rounded-full animate-spin mx-auto" />
+      </div>
+    </div>
+  )
+}
+
+export default function ExtensionCallbackPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ExtensionCallbackContent />
+    </Suspense>
   )
 }
