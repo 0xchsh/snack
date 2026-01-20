@@ -40,7 +40,7 @@ export default function HomePage() {
           </p>
 
           <div className="flex items-center justify-center gap-3 mb-12">
-            <Button asChild variant="outline" className="px-6">
+            <Button asChild className="px-6 border border-neutral-300 bg-transparent text-neutral-900 hover:bg-neutral-100">
               <Link href="/auth/sign-in">Login</Link>
             </Button>
             <Button asChild className="px-6 bg-neutral-900 hover:bg-neutral-800 text-white">

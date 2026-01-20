@@ -111,10 +111,18 @@ function MarketingLayoutContent({
 
             {/* Right side */}
             <div className="flex items-center gap-3">
-              <Button asChild variant={isHomepage ? undefined : 'secondary'} className={isHomepage ? 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200' : undefined}>
-                <Link href="/auth/sign-in">Get Started</Link>
-              </Button>
-              {!isHomepage && <ThemeToggle />}
+              {isHomepage ? (
+                <Button asChild className="bg-neutral-900 text-white hover:bg-neutral-800">
+                  <Link href="/auth/sign-in">Get Started</Link>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild variant="secondary">
+                    <Link href="/auth/sign-in">Get Started</Link>
+                  </Button>
+                  <ThemeToggle />
+                </>
+              )}
             </div>
           </div>
         </div>

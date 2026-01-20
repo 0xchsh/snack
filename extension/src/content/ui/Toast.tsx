@@ -134,7 +134,7 @@ export function Toast({ toast, onRemove }: ToastProps) {
 
   const handleClick = () => {
     if (isClickable && toast.listPublicId) {
-      window.open(`https://snack.pub/list/${toast.listPublicId}`, '_blank')
+      window.open(`https://snack.xyz/list/${toast.listPublicId}`, '_blank')
     }
   }
 
