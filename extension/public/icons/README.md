@@ -11,14 +11,14 @@ Before loading the extension in Chrome, you need to create PNG icons in these si
 
 ### Option 1: Online Tool (Easiest)
 1. Go to https://realfavicongenerator.net/
-2. Upload a 512x512 or larger image of the pretzel (🥨) on orange (#f97316) background
+2. Upload a 512x512 or larger image of the pretzel on dark (#171717) background
 3. Download the generated icons
 4. Rename and place here
 
 ### Option 2: Using ImageMagick
 ```bash
 # Create a base SVG first, then convert:
-convert -size 128x128 xc:#f97316 -fill white -gravity center \
+convert -size 128x128 xc:#171717 -fill '#e5e5e5' -gravity center \
   -font Apple-Color-Emoji -pointsize 80 -annotate +0+0 '🥨' \
   icon128.png
 
@@ -30,12 +30,12 @@ convert icon128.png -resize 16x16 icon16.png
 
 ### Option 3: Using Figma/Sketch
 1. Create a 128x128 frame
-2. Fill with #f97316 (Snack orange)
-3. Add 🥨 emoji or pretzel vector icon
+2. Fill with #171717 (dark)
+3. Add 🥨 emoji or pretzel vector icon in #e5e5e5 (light gray)
 4. Export at 1x, 0.375x, 0.25x, 0.125x for different sizes
 
 ## Design Guidelines
-- Background: #f97316 (Snack brand orange)
-- Icon: Pretzel emoji or custom pretzel icon
-- Style: Solid background with white/light icon
+- Background: #171717 (dark)
+- Icon: Pretzel emoji or custom pretzel icon in #e5e5e5 (light gray)
+- Style: Dark background with light icon
 - Corners: Slightly rounded for larger sizes

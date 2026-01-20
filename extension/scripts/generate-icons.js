@@ -24,8 +24,8 @@
  *
  * Or create simple icons with an emoji:
  *   1. Create a 128x128 canvas in any image editor
- *   2. Set background to #f97316 (orange)
- *   3. Add the 🥨 emoji centered
+ *   2. Set background to #171717 (dark)
+ *   3. Add the 🥨 emoji or pretzel icon in #e5e5e5 (light gray)
  *   4. Export as PNG and resize to other sizes
  */
 
@@ -42,7 +42,7 @@ function generatePlaceholderIcon(size) {
   // This creates a minimal valid PNG file
   // In production, use proper icons created with design tools
 
-  // PNG header and minimal orange square
+  // PNG header and minimal dark square
   // This is a simplified placeholder - replace with real icons
   const header = Buffer.from([
     0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A
@@ -79,8 +79,8 @@ async function main() {
   console.log('  - favicon-generator.org')
   console.log('')
   console.log('Icon design suggestion:')
-  console.log('  - Background: #f97316 (orange)')
-  console.log('  - Content: 🥨 emoji or pretzel icon')
+  console.log('  - Background: #171717 (dark)')
+  console.log('  - Content: 🥨 emoji or pretzel icon in #e5e5e5 (light gray)')
   console.log('  - Style: Rounded corners for larger sizes')
 }
 

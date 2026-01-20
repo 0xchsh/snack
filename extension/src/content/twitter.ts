@@ -215,6 +215,18 @@ function injectSnackButton(tweet: TweetData) {
   container.style.display = 'inline-flex'
   container.style.alignItems = 'center'
 
+  // CRITICAL: Stop all events from bubbling to Twitter's handlers
+  // This prevents Twitter from navigating to the tweet when clicking our button
+  const stopPropagation = (e: Event) => {
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+  }
+  container.addEventListener('click', stopPropagation, true)
+  container.addEventListener('mousedown', stopPropagation, true)
+  container.addEventListener('mouseup', stopPropagation, true)
+  container.addEventListener('pointerdown', stopPropagation, true)
+  container.addEventListener('pointerup', stopPropagation, true)
+
   // Create shadow root
   const shadow = container.attachShadow({ mode: 'open' })
 
@@ -589,9 +601,46 @@ function observeShareMenu() {
   return observer
 }
 
+// Set up document-level event interception for Snack buttons
+// This catches events in capture phase before Twitter's handlers can process them
+function setupGlobalEventInterception() {
+  const interceptEvent = (e: Event) => {
+    // Check if the click target is within a snack button container
+    const target = e.target as Element
+    if (!target) return
+
+    // Use composedPath to handle Shadow DOM events
+    const path = e.composedPath()
+    const isSnackButton = path.some((el) => {
+      if (el instanceof Element) {
+        return el.classList?.contains('snack-button-root') ||
+               el.closest?.('.snack-button-root')
+      }
+      return false
+    })
+
+    if (isSnackButton) {
+      e.stopPropagation()
+      e.stopImmediatePropagation()
+      // Don't preventDefault for click events, let React handle them
+      if (e.type !== 'click') {
+        e.preventDefault()
+      }
+    }
+  }
+
+  // Capture phase listeners at document level
+  document.addEventListener('pointerdown', interceptEvent, true)
+  document.addEventListener('mousedown', interceptEvent, true)
+  document.addEventListener('touchstart', interceptEvent, true)
+}
+
 // Initialize
 async function init() {
   console.log('[Snack] Initializing Twitter content script')
+
+  // Set up global event interception for Snack buttons
+  setupGlobalEventInterception()
 
   // Initialize toast container
   initToastContainer()

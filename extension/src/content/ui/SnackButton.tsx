@@ -100,11 +100,39 @@ export function SnackButton({
     transform: isOpen || isHovered ? 'scale(1.05)' : 'scale(1)',
   }
 
+  // Stop event propagation to prevent Twitter from navigating
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    // Also stop native event propagation
+    e.nativeEvent.stopImmediatePropagation()
+    setIsOpen(!isOpen)
+  }
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.nativeEvent.stopImmediatePropagation()
+  }
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.nativeEvent.stopImmediatePropagation()
+  }
+
   return (
-    <div style={{ position: 'relative', display: 'inline-flex' }}>
+    <div
+      style={{ position: 'relative', display: 'inline-flex' }}
+      onClick={(e) => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation() }}
+      onMouseDown={(e) => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation() }}
+      onPointerDown={(e) => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation() }}
+    >
       <button
         ref={buttonRef}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleButtonClick}
+        onMouseDown={handleMouseDown}
+        onPointerDown={handlePointerDown}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         disabled={isSaving}
