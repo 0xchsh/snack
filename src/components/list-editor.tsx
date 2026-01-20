@@ -892,10 +892,13 @@ export function ListEditor({
               type="button"
               onClick={pasteFromClipboard}
               variant="outline"
-              className="flex items-center gap-2 px-4 py-2 text-base text-muted-foreground hover:text-foreground hover:border-muted-foreground flex-shrink-0"
+              className="gap-3"
             >
               <span>Paste links</span>
-              <span className="text-sm">⌘V</span>
+              <span className="flex items-center gap-1">
+                <kbd className="px-1.5 py-0.5 text-xs font-medium text-muted-foreground bg-muted rounded">⌘</kbd>
+                <kbd className="px-1.5 py-0.5 text-xs font-medium text-muted-foreground bg-muted rounded">V</kbd>
+              </span>
             </Button>
           )}
 

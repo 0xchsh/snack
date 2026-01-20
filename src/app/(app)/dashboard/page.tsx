@@ -247,7 +247,7 @@ function DashboardContent() {
               >
                 <Link href="/discover">
                   <span>Discover</span>
-                  <GlobeAltIcon className="w-4 h-4" />
+                  <GlobeAltIcon className="w-4 h-4 !text-muted-foreground" />
                 </Link>
               </Button>
             </div>
@@ -311,28 +311,28 @@ function DashboardContent() {
             {/* Summary Stats - Stack on very small screens */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               <div className="flex flex-col justify-between border border-border rounded-lg p-4 min-h-[100px]">
-                <LinkIcon className="w-4 h-4 text-muted-foreground" />
-                <div className="mt-6">
-                  <div className="text-2xl font-bold text-foreground">{formatCount(totalLinks)}</div>
-                  <div className="text-sm text-muted-foreground">links</div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <LinkIcon className="w-4 h-4" />
+                  <span className="text-sm">Links</span>
+                </div>
+                <div className="text-2xl font-bold text-foreground">{formatCount(totalLinks)}</div>
+              </div>
+              <div className="flex flex-col justify-between border border-border rounded-lg p-4 min-h-[100px]">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <EyeIcon className="w-4 h-4" />
+                  <span className="text-sm">Views</span>
+                </div>
+                <div className="text-2xl font-bold text-foreground">
+                  {analyticsData ? formatCount(analyticsData.totalViews) : '0'}
                 </div>
               </div>
               <div className="flex flex-col justify-between border border-border rounded-lg p-4 min-h-[100px]">
-                <EyeIcon className="w-4 h-4 text-muted-foreground" />
-                <div className="mt-6">
-                  <div className="text-2xl font-bold text-foreground">
-                    {analyticsData ? formatCount(analyticsData.totalViews) : '0'}
-                  </div>
-                  <div className="text-sm text-muted-foreground">views</div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <StarIcon className="w-4 h-4" />
+                  <span className="text-sm">Stars</span>
                 </div>
-              </div>
-              <div className="flex flex-col justify-between border border-border rounded-lg p-4 min-h-[100px]">
-                <StarIcon className="w-4 h-4 text-muted-foreground" />
-                <div className="mt-6">
-                  <div className="text-2xl font-bold text-foreground">
-                    {analyticsData ? formatCount(analyticsData.totalSaves) : '0'}
-                  </div>
-                  <div className="text-sm text-muted-foreground">stars</div>
+                <div className="text-2xl font-bold text-foreground">
+                  {analyticsData ? formatCount(analyticsData.totalSaves) : '0'}
                 </div>
               </div>
             </div>
