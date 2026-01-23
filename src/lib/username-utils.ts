@@ -31,7 +31,7 @@ const RESERVED_WORDS = new Set([
 
   // Misc reserved
   'feed', 'trending', 'popular', 'new', 'search', 'notifications',
-  'messages', 'inbox', 'activity', 'analytics', 'stats'
+  'messages', 'inbox', 'activity', 'analytics', 'stats', 'rgb', 'gerund','ai','claude','cmyk','rat','ratlabs'
 ])
 
 /**

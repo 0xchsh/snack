@@ -10,6 +10,8 @@ import { Favicon } from './favicon'
 import { fetchOGDataClient } from '@/lib/og-client'
 import { Button, Toast, LinkCardSkeleton } from '@/components/ui'
 
+const MAX_LINKS_PER_PASTE = 25
+
 interface ListEditorProps {
   list: ListWithLinks
   onUpdateList?: (updates: Partial<ListWithLinks>) => void
@@ -46,6 +48,8 @@ export function ListEditor({
   const [isMobile, setIsMobile] = useState(false)
   const [showCopySuccess, setShowCopySuccess] = useState(false)
   const [refreshingLinkIds, setRefreshingLinkIds] = useState<Record<string, boolean>>({})
+  const [showPasteError, setShowPasteError] = useState(false)
+  const [pasteErrorMessage, setPasteErrorMessage] = useState('')
   const dragStartPosition = useRef({ x: 0, y: 0 })
   const dragOffset = useRef({ x: 0, y: 0 })
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
@@ -60,6 +64,12 @@ export function ListEditor({
     }
     checkMobile()
   }, [])
+
+  const showPasteErrorToast = (message: string) => {
+    setPasteErrorMessage(message)
+    setShowPasteError(true)
+    setTimeout(() => setShowPasteError(false), 3000)
+  }
 
   const handleTitleSave = () => {
     const trimmedTitle = title.trim()
@@ -99,6 +109,12 @@ export function ListEditor({
 
     if (hasInvalidUrls) {
       setLinkError('Please enter a valid URL')
+      return
+    }
+
+    // Check for max links limit
+    if (validUrls.length > MAX_LINKS_PER_PASTE) {
+      showPasteErrorToast(`You can only paste up to ${MAX_LINKS_PER_PASTE} links at a time`)
       return
     }
 
@@ -470,6 +486,12 @@ export function ListEditor({
       }
     })
 
+    // Check for max links limit
+    if (validUrls.length > MAX_LINKS_PER_PASTE) {
+      showPasteErrorToast(`You can only paste up to ${MAX_LINKS_PER_PASTE} links at a time`)
+      return
+    }
+
     if (validUrls.length > 0) {
       // Add ghost loading placeholders immediately
       setLoadingLinks(validUrls)
@@ -791,6 +813,12 @@ export function ListEditor({
 
       console.log('Valid URLs:', validUrls)
 
+      // Check for max links limit
+      if (validUrls.length > MAX_LINKS_PER_PASTE) {
+        showPasteErrorToast(`You can only paste up to ${MAX_LINKS_PER_PASTE} links at a time`)
+        return
+      }
+
       // If we have valid URLs, add them to the list
       if (validUrls.length > 0) {
         // Add ghost loading placeholders immediately
@@ -833,6 +861,9 @@ export function ListEditor({
     <div className="pb-18">
       {/* Copy Success Toast */}
       <Toast show={showCopySuccess} message="Link copied to clipboard!" variant="copied" />
+
+      {/* Paste Error Toast */}
+      <Toast show={showPasteError} message={pasteErrorMessage} variant="error" />
 
       <div className="flex flex-col gap-4 md:gap-6">
         {/* Emoji */}

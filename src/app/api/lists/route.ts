@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { CreateListForm } from '@/types'
+import { getRandomEmoji } from '@/lib/emoji'
 
 // GET /api/lists - Get all lists for current user
 export async function GET() {
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.id,
         title: body.title || 'Untitled',
-        emoji: body.emoji || '🎯',
+        emoji: body.emoji || getRandomEmoji(),
         is_public: body.is_public !== undefined ? body.is_public : true
       })
       .select()

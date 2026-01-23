@@ -4,11 +4,15 @@
   "private": true,
   "description": "A social platform for creating and sharing curated lists of links",
   "workspaces": [
+    "packages/*",
+    "apps/*",
     "extension"
   ],
   "scripts": {
     "dev": "next dev",
+    "dev:mobile": "npm run dev --workspace=@snack/mobile",
     "build": "next build",
+    "build:mobile": "npm run build --workspace=@snack/mobile",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
