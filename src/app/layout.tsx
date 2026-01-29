@@ -5,6 +5,7 @@ import { ErrorBoundary } from '@/components/error-boundary'
 import { ToastProvider } from '@/components/toast'
 import { AuthProvider } from '@/hooks/useAuth'
 import { QueryProvider } from '@/providers/query-provider'
+import { Agentation } from 'agentation'
 
 export const metadata: Metadata = {
   title: 'Snack - Curated Link Collections',
@@ -53,6 +54,7 @@ export default function RootLayout({
               </ToastProvider>
             </QueryProvider>
           </ErrorBoundary>
+          {process.env.NODE_ENV === 'development' && <Agentation />}
         </ThemeProvider>
       </body>
     </html>

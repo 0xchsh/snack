@@ -146,7 +146,7 @@ export default function UsernamePage() {
       <Toast show={showCopySuccess} message="Profile link copied!" variant="copied" />
       {/* Header */}
       <div className="bg-background">
-        <div className="mx-auto w-full max-w-container-app px-6 py-6">
+        <div className="w-full px-4 py-6 sm:px-6">
           <div className="flex items-center justify-between">
             <Link href={user ? "/dashboard" : "/"} className="flex items-center">
               <Image

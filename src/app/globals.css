@@ -185,7 +185,7 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     letter-spacing: var(--tracking-normal);
     font-size: 16px;
-    font-weight: 400;
+    font-weight: 450;
   }
 
   h1, h2 {
@@ -194,12 +194,12 @@
 
   p {
     font-size: 1rem;
-    font-weight: 400;
+    font-weight: 450;
     line-height: 1.5;
   }
 
   button {
-    font-weight: 500;
+    font-weight: 450;
   }
 }
 

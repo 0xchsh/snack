@@ -53,6 +53,17 @@ const config: Config = {
         sans: ['Geist', 'ui-sans-serif', 'sans-serif', 'system-ui'],
         mono: ['Geist Mono', 'monospace'],
       },
+      fontWeight: {
+        thin: '450',
+        extralight: '450',
+        light: '450',
+        normal: '450',
+        medium: '450',
+        semibold: '450',
+        bold: '450',
+        extrabold: '450',
+        black: '450',
+      },
       colors: {
         border: "var(--border)",
         input: "var(--input)",
