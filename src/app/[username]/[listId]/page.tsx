@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { DocumentDuplicateIcon, PlusIcon, EllipsisHorizontalIcon, SunIcon, MoonIcon, TrashIcon } from '@heroicons/react/24/solid'
+import { DocumentDuplicateIcon, PlusIcon, EllipsisHorizontalIcon, SunIcon, MoonIcon, TrashIcon, ClipboardDocumentListIcon, ArrowDownTrayIcon } from '@heroicons/react/24/solid'
 import { motion } from 'framer-motion'
 import { Button, Toast, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
 import { AddLinkModal } from '@/components/add-link-modal'
@@ -66,6 +66,7 @@ export default function UserListPage() {
   const username = params?.username as string
   const listId = params?.listId as string
   const [showCopySuccess, setShowCopySuccess] = useState(false)
+  const [showCopyLinksSuccess, setShowCopyLinksSuccess] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showAddLinkModal, setShowAddLinkModal] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
@@ -176,6 +177,39 @@ export default function UserListPage() {
     }
   }
 
+  const handleCopyLinks = async () => {
+    if (!currentList?.links?.length) return
+    const urls = currentList.links.map((link) => link.url).join('\n')
+    await navigator.clipboard.writeText(urls)
+    setShowCopyLinksSuccess(true)
+    setTimeout(() => setShowCopyLinksSuccess(false), 2000)
+  }
+
+  const handleExportMarkdown = () => {
+    if (!currentList) return
+    const title = currentList.title || 'Untitled List'
+    const emoji = currentList.emoji ? `${currentList.emoji} ` : ''
+    const linkCount = currentList.links.length
+    const lines = [`# ${emoji}${title} by ${username}`, '', `${linkCount} link${linkCount !== 1 ? 's' : ''}`, '']
+    currentList.links.forEach((link) => {
+      const label = link.title || link.url
+      lines.push(`- [${label}](${link.url})`)
+      if (link.description) {
+        lines.push(`  ${link.description}`)
+      }
+      lines.push('')
+    })
+    lines.push('---')
+    lines.push(`Exported from [Snack](${window.location.origin}/${username}/${currentList.public_id || listId})`)
+    const blob = new Blob([lines.join('\n')], { type: 'text/markdown' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${title.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.md`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const handleDelete = async () => {
     if (!currentList) return
 
@@ -239,6 +273,7 @@ export default function UserListPage() {
       <div className="min-h-screen bg-background">
         {/* Copy Success Toast */}
         <Toast show={showCopySuccess} message="Link copied to clipboard!" variant="copied" />
+        <Toast show={showCopyLinksSuccess} message="Links copied to clipboard!" variant="copied" />
 
         <TopBar>
           <TopBar.Left>
@@ -274,6 +309,14 @@ export default function UserListPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleCopyLinks}>
+                  <ClipboardDocumentListIcon className="w-4 h-4" />
+                  Copy all links
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportMarkdown}>
+                  <ArrowDownTrayIcon className="w-4 h-4" />
+                  Export list to .md
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
                 >
