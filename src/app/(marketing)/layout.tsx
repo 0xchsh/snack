@@ -112,7 +112,7 @@ function MarketingLayoutContent({
             {/* Right side */}
             <div className="flex items-center gap-3">
               {isHomepage ? (
-                <Button asChild className="bg-neutral-900 text-white hover:bg-neutral-800">
+                <Button asChild variant="primary">
                   <Link href="/auth/sign-in">Get Started</Link>
                 </Button>
               ) : (
