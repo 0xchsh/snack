@@ -33,7 +33,10 @@ export async function GET() {
           view_count,
           save_count,
           created_at,
-          user_id
+          user_id,
+          links (
+            id
+          )
         )
       `)
       .eq('user_id', user.id)
