@@ -509,7 +509,7 @@ const PublicLinkItem = memo(function PublicLinkItem({
       onClick={onClick}
     >
       {/* OG Image Preview */}
-      <div className="aspect-video bg-accent relative rounded-md overflow-hidden">
+      <div className="aspect-video bg-accent relative rounded-md overflow-hidden shadow-[0_2px_2px_0_rgba(0,0,0,0.25)]">
         {link.image_url ? (
           <>
             <Image
