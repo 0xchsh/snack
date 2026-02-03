@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Suspense, useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { EyeIcon, StarIcon, LinkIcon, ListBulletIcon, PlusIcon, GlobeAltIcon, ChevronUpDownIcon } from '@heroicons/react/24/solid'
+import { EyeIcon, StarIcon, LinkIcon, ListBulletIcon, PlusIcon, GlobeAltIcon, ChevronUpDownIcon, BanknotesIcon } from '@heroicons/react/24/solid'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { Button, ListRowSkeleton, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
@@ -18,6 +18,8 @@ import {
 import { AppContainer } from '@/components/primitives'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { LoadingState } from '@/components/loading-state'
+import { isListPaid, formatListPrice, formatCurrency } from '@/lib/pricing'
+import type { Currency } from '@/types'
 
 function ListsSkeleton({ count = 3 }: { count?: number }) {
   return (
@@ -49,6 +51,8 @@ function DashboardContent() {
   const [mounted, setMounted] = useState(false)
   const [sortBy, setSortBy] = useState<'recent' | 'links' | 'alpha'>('recent')
   const [statsSortBy, setStatsSortBy] = useState<'links' | 'views' | 'stars'>('views')
+  const [totalEarnings, setTotalEarnings] = useState<number>(0)
+  const [earningsCurrency, setEarningsCurrency] = useState<Currency>('usd')
 
   // TanStack Query hooks
   const { data: lists = [], isLoading: listsLoading } = useListsQuery()
@@ -73,6 +77,22 @@ function DashboardContent() {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Fetch earnings data for stats tab
+  useEffect(() => {
+    if (tab === 'stats') {
+      fetch('/api/stripe/connect/status')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data?.onboarding_complete) {
+            // Earnings will show once Stripe is connected
+            // Placeholder until earnings API endpoint is wired
+            setTotalEarnings(0)
+          }
+        })
+        .catch(() => {})
+    }
+  }, [tab])
 
   const handleCreateList = async () => {
     try {
@@ -213,9 +233,16 @@ function DashboardContent() {
                           {list.title || 'Untitled List'}
                         </span>
                       </div>
-                      <span className="text-sm text-muted-foreground flex-shrink-0 ml-3">
-                        {list.links?.length || 0} links
-                      </span>
+                      <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                        {isListPaid((list as any).price_cents) && (
+                          <span className="text-xs font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                            {formatListPrice((list as any).price_cents, (list as any).currency || 'usd')}
+                          </span>
+                        )}
+                        <span className="text-sm text-muted-foreground">
+                          {list.links?.length || 0} links
+                        </span>
+                      </div>
                     </Link>
                   </div>
                 ))
@@ -308,8 +335,8 @@ function DashboardContent() {
               />
             </div>
 
-            {/* Summary Stats - Stack on very small screens */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            {/* Summary Stats - 2x2 grid */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="flex flex-col justify-between border border-border rounded-lg p-4 min-h-[100px]">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <LinkIcon className="w-4 h-4" />
@@ -335,6 +362,19 @@ function DashboardContent() {
                   {analyticsData ? formatCount(analyticsData.totalSaves) : '0'}
                 </div>
               </div>
+              <Link
+                href="/profile"
+                onClick={() => {/* will navigate to monetization tab */}}
+                className="flex flex-col justify-between border border-border rounded-lg p-4 min-h-[100px] hover:bg-accent/50 transition-colors"
+              >
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <BanknotesIcon className="w-4 h-4" />
+                  <span className="text-sm">Earnings</span>
+                </div>
+                <div className="text-2xl font-bold text-foreground">
+                  {formatCurrency(totalEarnings, earningsCurrency)}
+                </div>
+              </Link>
             </div>
 
             {/* Per-list stats header */}
@@ -401,6 +441,11 @@ function DashboardContent() {
                         <span className="text-base font-medium text-foreground truncate">
                           {list.title || 'Untitled List'}
                         </span>
+                        {isListPaid((list as any).price_cents) && (
+                          <span className="text-xs font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded flex-shrink-0">
+                            {formatListPrice((list as any).price_cents, (list as any).currency || 'usd')}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 sm:gap-4 text-sm text-muted-foreground flex-shrink-0">
                         <div className="flex items-center gap-1">

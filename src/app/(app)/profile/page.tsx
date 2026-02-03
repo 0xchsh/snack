@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRightStartOnRectangleIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid'
+import { ArrowRightStartOnRectangleIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckCircleIcon, XCircleIcon, CurrencyDollarIcon, ShoppingCartIcon, CreditCardIcon } from '@heroicons/react/24/solid'
 
 import { Button, Spinner, Toast } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
@@ -12,11 +12,15 @@ import { LoadingState } from '@/components/loading-state'
 import { AppContainer } from '@/components/primitives'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { DefaultAvatar } from '@/components/default-avatar'
+import { StripeConnectButton } from '@/components/stripe-connect-button'
+import { formatCurrency } from '@/lib/pricing'
+import type { Currency } from '@/types'
 
 export default function ProfilePage() {
   const router = useRouter()
   const { user, loading, signOut } = useAuth()
   const [mounted, setMounted] = useState(false)
+  const [activeTab, setActiveTab] = useState<'account' | 'monetization'>('account')
 
   // Handle client-side mounting
   useEffect(() => {
@@ -64,7 +68,41 @@ export default function ProfilePage() {
               />
             </div>
 
-            <AccountTab user={user} signOut={signOut} />
+            {/* Tab Navigation */}
+            <div className="flex gap-1 mb-6 border-b border-border">
+              <button
+                onClick={() => setActiveTab('account')}
+                className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+                  activeTab === 'account'
+                    ? 'text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Account
+                {activeTab === 'account' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab('monetization')}
+                className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+                  activeTab === 'monetization'
+                    ? 'text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Monetization
+                {activeTab === 'monetization' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground" />
+                )}
+              </button>
+            </div>
+
+            {activeTab === 'account' ? (
+              <AccountTab user={user} signOut={signOut} />
+            ) : (
+              <MonetizationTab />
+            )}
           </div>
         </div>
       </AppContainer>
@@ -520,6 +558,131 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
             )}
           </Button>
         </div>
+      </div>
+    </div>
+  )
+}
+
+function MonetizationTab() {
+  const [earnings, setEarnings] = useState<{ total_earnings: number; total_purchases: number; currency: Currency } | null>(null)
+  const [paidLists, setPaidLists] = useState<Array<{ list_id: string; list_title: string; total_purchases: number; total_earnings: number; currency: Currency }>>([])
+  const [loading, setLoading] = useState(true)
+  const [stripeConnected, setStripeConnected] = useState(false)
+  const [checkingStripe, setCheckingStripe] = useState(true)
+
+  useEffect(() => {
+    const checkStripe = async () => {
+      try {
+        const response = await fetch('/api/stripe/connect/status')
+        const data = await response.json()
+        if (data.success && data.data) {
+          setStripeConnected(data.data.onboarding_complete)
+        }
+      } catch (error) {
+        console.error('Error checking Stripe status:', error)
+      } finally {
+        setCheckingStripe(false)
+      }
+    }
+
+    const fetchEarnings = async () => {
+      try {
+        // Use placeholder since earnings API is server-side only
+        setEarnings({ total_earnings: 0, total_purchases: 0, currency: 'usd' })
+        setPaidLists([])
+      } catch (error) {
+        console.error('Error fetching earnings:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkStripe()
+    fetchEarnings()
+  }, [])
+
+  return (
+    <div className="space-y-3">
+      {/* Stripe Connect Card */}
+      <div className="bg-background border border-border rounded-xl p-6">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h3 className="font-semibold mb-1">Stripe Account</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {checkingStripe
+                ? 'Checking connection status...'
+                : stripeConnected
+                ? 'Your Stripe account is connected. Payments will be deposited automatically.'
+                : 'Connect your Stripe account to receive payments when users purchase your lists.'}
+            </p>
+            <StripeConnectButton size="sm" />
+          </div>
+        </div>
+      </div>
+
+      {/* Earnings Summary */}
+      <div className="bg-background border border-border rounded-xl p-6">
+        <h3 className="font-semibold mb-4">Earnings Summary</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="border border-border rounded-lg p-4">
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
+              <CurrencyDollarIcon className="w-4 h-4" />
+              <span className="text-sm">Total Earned</span>
+            </div>
+            <p className="text-2xl font-bold">
+              {loading ? '...' : formatCurrency(earnings?.total_earnings || 0, earnings?.currency || 'usd')}
+            </p>
+          </div>
+          <div className="border border-border rounded-lg p-4">
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
+              <ShoppingCartIcon className="w-4 h-4" />
+              <span className="text-sm">Total Sales</span>
+            </div>
+            <p className="text-2xl font-bold">
+              {loading ? '...' : (earnings?.total_purchases || 0)}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Paid Lists */}
+      <div className="bg-background border border-border rounded-xl p-6">
+        <h3 className="font-semibold mb-4">Paid Lists</h3>
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <Spinner size="md" />
+          </div>
+        ) : paidLists.length > 0 ? (
+          <div className="space-y-3">
+            {paidLists.map((item) => (
+              <div key={item.list_id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                <div>
+                  <p className="font-medium text-sm">{item.list_title}</p>
+                  <p className="text-xs text-muted-foreground">{item.total_purchases} sales</p>
+                </div>
+                <p className="font-semibold text-sm">
+                  {formatCurrency(item.total_earnings, item.currency)}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            <CreditCardIcon className="w-10 h-10 mx-auto mb-3 opacity-40" />
+            <p className="text-sm font-medium mb-1">No paid lists yet</p>
+            <p className="text-xs">Set a price on any list to start earning</p>
+          </div>
+        )}
+      </div>
+
+      {/* Payout Info */}
+      <div className="bg-background border border-border rounded-xl p-6">
+        <h3 className="font-semibold mb-2">About Payouts</h3>
+        <ul className="space-y-1.5 text-sm text-muted-foreground">
+          <li>Payments are automatically transferred to your Stripe account.</li>
+          <li>Stripe handles payouts to your bank on a rolling basis.</li>
+          <li>You can manage payout settings in your Stripe Dashboard.</li>
+        </ul>
       </div>
     </div>
   )

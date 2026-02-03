@@ -46,6 +46,8 @@ export async function GET(
         emoji,
         save_count,
         view_count,
+        price_cents,
+        currency,
         created_at,
         updated_at,
         links(count)

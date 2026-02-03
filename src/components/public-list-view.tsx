@@ -301,8 +301,10 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
     checkPurchaseStatus()
   }, [list.id, list.price_cents, isOwner])
 
+  const isLocked = !hasAccess && !isListFree(list.price_cents)
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen bg-background ${isLocked ? 'overflow-hidden max-h-screen' : ''}`}>
       {/* Toasts */}
       <Toast show={showCopySuccess} message="Link copied to clipboard!" variant="copied" />
       <Toast show={showSaveSuccess} message="Saved successfully!" variant="saved" />
@@ -437,14 +439,40 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
 
           {/* Links List or Paywall */}
           {!hasAccess && !isListFree(list.price_cents) ? (
-            <ListPaywall
-              listId={list.id}
-              title={list.title}
-              emoji={list.emoji}
-              priceCents={list.price_cents!}
-              currency={(list.currency as Currency) || 'usd'}
-              creatorName={displayName}
-            />
+            <div>
+              {/* Blurred links teaser */}
+              <div className="relative overflow-hidden max-h-[200px] select-none pointer-events-none" aria-hidden="true">
+                <div className="blur-md opacity-50 space-y-6">
+                  {list.links && list.links.length > 0 ? (
+                    list.links.slice(0, 4).map((link, index) => (
+                      <PublicLinkItem
+                        key={link.id}
+                        link={link}
+                        onClick={() => {}}
+                        isClicked={false}
+                        index={index}
+                        hasAnimated={true}
+                        prefersReducedMotion={true}
+                      />
+                    ))
+                  ) : (
+                    <div className="h-48" />
+                  )}
+                </div>
+                {/* Gradient fade */}
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent" />
+              </div>
+              {/* Paywall card */}
+              <ListPaywall
+                listId={list.id}
+                title={list.title}
+                emoji={list.emoji}
+                priceCents={list.price_cents!}
+                currency={(list.currency as Currency) || 'usd'}
+                creatorName={displayName}
+                linkCount={list.links?.length}
+              />
+            </div>
           ) : (
             <div className="space-y-6">
               {list.links && list.links.length > 0 ? (

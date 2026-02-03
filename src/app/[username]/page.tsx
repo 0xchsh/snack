@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ListBulletIcon, LinkIcon, StarIcon, DocumentDuplicateIcon } from '@heroicons/react/24/solid'
+import { isListPaid, formatListPrice } from '@/lib/pricing'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -29,6 +30,8 @@ interface PublicProfile {
     description: string | null
     emoji: string | null
     save_count: number
+    price_cents: number | null
+    currency?: string
     created_at: string
     links: Array<{ count: number }>
   }>
@@ -245,9 +248,16 @@ export default function UsernamePage() {
                           {list.title || 'Untitled List'}
                         </span>
                       </div>
-                      <span className="text-base text-muted-foreground ml-4 flex-shrink-0">
-                        {linkCount} {linkCount === 1 ? 'link' : 'links'}
-                      </span>
+                      <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+                        {isListPaid(list.price_cents) && (
+                          <span className="text-xs font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                            {formatListPrice(list.price_cents, (list.currency as any) || 'usd')}
+                          </span>
+                        )}
+                        <span className="text-base text-muted-foreground">
+                          {linkCount} {linkCount === 1 ? 'link' : 'links'}
+                        </span>
+                      </div>
                     </Link>
                   </div>
                 )

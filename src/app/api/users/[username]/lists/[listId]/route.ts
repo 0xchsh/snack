@@ -50,6 +50,8 @@ export async function GET(
       emoji,
       view_mode,
       is_public,
+      price_cents,
+      currency,
       save_count,
       created_at,
       updated_at,

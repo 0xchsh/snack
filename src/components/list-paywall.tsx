@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { LockClosedIcon } from '@heroicons/react/24/solid'
+import { LockClosedIcon, LinkIcon, ShieldCheckIcon } from '@heroicons/react/24/solid'
 import { useRouter } from 'next/navigation'
 import { formatCurrency } from '@/lib/pricing'
 import type { Currency } from '@/types'
@@ -15,6 +15,7 @@ interface ListPaywallProps {
   priceCents: number
   currency: Currency
   creatorName: string
+  linkCount?: number
 }
 
 export function ListPaywall({
@@ -24,6 +25,7 @@ export function ListPaywall({
   priceCents,
   currency,
   creatorName,
+  linkCount,
 }: ListPaywallProps) {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -44,9 +46,7 @@ export function ListPaywall({
         const errorData = await response.json()
         console.error('Checkout error:', errorData)
 
-        // Handle specific error cases
         if (response.status === 401) {
-          // Not logged in - redirect to sign in
           router.push('/auth/sign-in?redirect=' + encodeURIComponent(window.location.pathname))
           return
         }
@@ -58,7 +58,6 @@ export function ListPaywall({
 
       const data = await response.json()
 
-      // Redirect to Stripe Checkout
       if (data.data?.url) {
         window.location.href = data.data.url
       } else {
@@ -73,60 +72,55 @@ export function ListPaywall({
     }
   }
 
+  const price = formatCurrency(priceCents, currency)
+
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-4">
-      <div className="max-w-md w-full">
-        {/* Lock Icon */}
-        <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
-            <LockClosedIcon className="w-8 h-8 text-muted-foreground" />
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-semibold mb-3 flex items-center justify-center gap-2">
-            {emoji && <span className="text-3xl">{emoji}</span>}
-            <span>Unlock {title}</span>
-          </h2>
-          <p className="text-muted-foreground text-base mb-6">
-            Purchase this list from {creatorName} to access all links
-          </p>
-
-          {/* Price */}
-          <div className="bg-accent/50 rounded-lg p-6 mb-6">
-            <div className="text-4xl font-bold mb-2">
-              {formatCurrency(priceCents, currency)}
+    <div className="flex flex-col items-center py-12 px-4">
+      <div className="max-w-sm w-full">
+        {/* Card */}
+        <div className="bg-background border border-border rounded-xl p-6 space-y-5 shadow-lg">
+          {/* Lock + info */}
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+              <LockClosedIcon className="w-5 h-5 text-muted-foreground" />
             </div>
-            <div className="text-sm text-muted-foreground">
-              One-time payment • Lifetime access
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground">
+                This is a paid list
+              </p>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Purchase to unlock{linkCount ? ` all ${linkCount} links` : ' all links'}
+              </p>
             </div>
           </div>
-        </div>
 
-        {/* Purchase Button */}
-        <Button
-          onClick={handlePurchase}
-          disabled={isLoading}
-          className="w-full h-12 text-base font-semibold"
-          size="lg"
-        >
-          {isLoading ? (
-            <>
-              <Spinner size="sm" className="mr-2" />
-              Loading checkout…
-            </>
-          ) : (
-            <>
-              Purchase for {formatCurrency(priceCents, currency)}
-            </>
-          )}
-        </Button>
+          {/* Price row */}
+          <div className="flex items-baseline justify-between">
+            <span className="text-3xl font-bold tracking-tight">{price}</span>
+            <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-1 rounded-full">one-time</span>
+          </div>
 
-        {/* Trust Signals */}
-        <div className="mt-6 text-center text-sm text-muted-foreground">
-          <p>Secure payment powered by Stripe</p>
-          <p className="mt-2">Cancel anytime before completing payment</p>
+          {/* Purchase button */}
+          <Button
+            onClick={handlePurchase}
+            disabled={isLoading}
+            className="w-full h-11 text-sm font-semibold"
+          >
+            {isLoading ? (
+              <>
+                <Spinner size="sm" className="mr-2" />
+                Redirecting to checkout...
+              </>
+            ) : (
+              `Purchase for ${price}`
+            )}
+          </Button>
+
+          {/* Trust line */}
+          <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+            <ShieldCheckIcon className="w-3.5 h-3.5" />
+            <span>Secure checkout via Stripe</span>
+          </div>
         </div>
       </div>
     </div>

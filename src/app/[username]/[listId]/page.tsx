@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { DocumentDuplicateIcon, PlusIcon, EllipsisHorizontalIcon, SunIcon, MoonIcon, TrashIcon, ClipboardDocumentListIcon, ArrowDownTrayIcon } from '@heroicons/react/24/solid'
+import { DocumentDuplicateIcon, PlusIcon, EllipsisHorizontalIcon, SunIcon, MoonIcon, TrashIcon, ClipboardDocumentListIcon, ArrowDownTrayIcon, GlobeAltIcon, LockClosedIcon } from '@heroicons/react/24/solid'
 import { motion } from 'framer-motion'
 import { Button, Toast, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
 import { AddLinkModal } from '@/components/add-link-modal'
+import { PricingModal } from '@/components/pricing-modal'
 import { TopBar, BrandMark, AppContainer } from '@/components/primitives'
 import { useTheme } from '@/components/theme-provider'
 import { ListWithLinks, LinkCreatePayload } from '@/types'
@@ -69,6 +70,7 @@ export default function UserListPage() {
   const [showCopyLinksSuccess, setShowCopyLinksSuccess] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showAddLinkModal, setShowAddLinkModal] = useState(false)
+  const [showPricingModal, setShowPricingModal] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
   const { user } = useAuth()
   const router = useRouter()
@@ -302,6 +304,18 @@ export default function UserListPage() {
             >
               <DocumentDuplicateIcon className="w-4 h-4" />
             </Button>
+            <Button
+              onClick={() => setShowPricingModal(true)}
+              variant="muted"
+              size="icon"
+              aria-label="List options"
+            >
+              {currentList.is_public ? (
+                <GlobeAltIcon className="w-4 h-4" />
+              ) : (
+                <LockClosedIcon className="w-4 h-4" />
+              )}
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="muted" size="icon" aria-label="More options">
@@ -365,6 +379,19 @@ export default function UserListPage() {
           onClose={() => setShowAddLinkModal(false)}
           onAddLink={async (url) => {
             await handleAddLink({ url, title: url })
+          }}
+        />
+
+        {/* List Options Modal */}
+        <PricingModal
+          listId={currentList.id}
+          initialPriceCents={currentList.price_cents ?? null}
+          initialCurrency={(currentList as any).currency || 'usd'}
+          initialIsPublic={currentList.is_public}
+          isOpen={showPricingModal}
+          onClose={() => setShowPricingModal(false)}
+          onUpdate={() => {
+            queryClient.invalidateQueries({ queryKey: listKeys.publicList(username, listId) })
           }}
         />
 

@@ -114,6 +114,8 @@ export async function PATCH(
     if (body.emoji !== undefined) updateData.emoji = body.emoji
     if (body.is_public !== undefined) updateData.is_public = body.is_public
     if (body.view_mode !== undefined) updateData.view_mode = body.view_mode
+    if (body.price_cents !== undefined) updateData.price_cents = body.price_cents
+    if (body.currency !== undefined) updateData.currency = body.currency
 
     // Update the list
     const { error: updateError } = await supabase
