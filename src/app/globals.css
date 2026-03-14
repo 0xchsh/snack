@@ -95,6 +95,13 @@
     @apply font-sans antialiased;
   }
 
+  /* Remove default blue focus outline from Base UI menu components */
+  [data-slot="dropdown-menu-trigger"],
+  [data-slot="dropdown-menu-content"],
+  [data-slot="dropdown-menu-item"] {
+    outline: none !important;
+  }
+
   /* shincn: tabular-nums for number columns */
   [data-tabular-nums] {
     font-variant-numeric: tabular-nums;

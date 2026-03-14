@@ -22,13 +22,14 @@ function DropdownMenuTrigger({
     return (
       <MenuPrimitive.Trigger
         data-slot="dropdown-menu-trigger"
+        className="outline-none"
         render={children}
         {...props}
       />
     )
   }
   return (
-    <MenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props}>
+    <MenuPrimitive.Trigger data-slot="dropdown-menu-trigger" className="outline-none" {...props}>
       {children}
     </MenuPrimitive.Trigger>
   )
