@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
@@ -5,29 +7,34 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_*]:text-inherit',
+  'inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*="size-"])]:size-4',
   {
     variants: {
       variant: {
         primary:
-          'bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active active:scale-[0.98]',
+          'btn-classic btn-classic-primary bg-primary text-primary-foreground',
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary-hover active:bg-secondary-active active:scale-[0.98]',
+          'btn-classic btn-classic-secondary bg-secondary text-secondary-foreground hover:bg-secondary/80',
         muted:
-          'bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted-hover active:bg-muted-active active:scale-[0.98]',
+          'hover:bg-muted hover:text-foreground text-muted-foreground',
         ghost:
-          'text-muted-foreground hover:text-foreground hover:bg-secondary-hover active:bg-secondary-active active:scale-[0.98]',
+          'hover:bg-muted hover:text-foreground',
         outline:
-          'border border-border bg-transparent text-foreground hover:bg-secondary-hover active:bg-secondary-active active:scale-[0.98]',
+          'btn-classic btn-classic-outline bg-background hover:bg-muted hover:text-foreground',
         destructive:
-          'bg-destructive text-destructive-foreground hover:bg-destructive-hover active:bg-destructive-active active:scale-[0.98]',
+          'btn-classic btn-classic-destructive bg-destructive text-white focus-visible:border-destructive/40 focus-visible:ring-destructive/20',
+        link: 'text-primary underline-offset-4 hover:underline hover:decoration-dotted hover:decoration-muted-foreground/50',
       },
       size: {
-        default: 'h-icon-button px-3 rounded-lg text-sm',
-        sm: 'px-3 py-2 rounded-md text-sm',
-        lg: 'px-6 py-3 rounded-lg text-base',
-        icon: 'h-icon-button w-icon-button rounded-md',
-        'icon-mobile': 'min-h-touch-target min-w-touch-target h-icon-button-mobile w-icon-button-mobile rounded-md', // 44px touch target for mobile
+        default: 'h-8 gap-1.5 px-2.5',
+        xs: 'h-6 gap-1 rounded-md px-2 text-xs [&_svg:not([class*="size-"])]:size-3',
+        sm: 'h-7 gap-1 rounded-md px-2.5 text-[0.8rem] [&_svg:not([class*="size-"])]:size-3.5',
+        lg: 'h-9 gap-1.5 px-2.5',
+        icon: 'size-8',
+        'icon-xs': 'size-6 rounded-md [&_svg:not([class*="size-"])]:size-3',
+        'icon-sm': 'size-7 rounded-md',
+        'icon-lg': 'size-9',
+        'icon-mobile': 'min-h-[2.75rem] min-w-[2.75rem] size-[2.75rem] rounded-md',
       },
     },
     defaultVariants: {
@@ -49,6 +56,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <Comp
+        data-slot="button"
         className={cn(buttonVariants({ variant, size }), className)}
         ref={ref}
         {...props}

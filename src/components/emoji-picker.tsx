@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState } from 'react'
 import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
-import { useTheme } from './theme-provider'
+import { useTheme } from 'next-themes'
 
 interface EmojiPickerProps {
   isOpen: boolean

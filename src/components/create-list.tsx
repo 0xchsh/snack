@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useRef, useState, useMemo } from 'react'
-import { XMarkIcon } from '@heroicons/react/24/solid'
+import { X } from '@phosphor-icons/react'
 
 import { Button, Input, Label } from '@/components/ui'
 import { CreateListForm } from '@/types'
@@ -71,7 +71,7 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
               className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
               aria-label="Close dialog"
             >
-              <XMarkIcon className="w-6 h-6" aria-hidden="true" />
+              <X weight="bold" className="size-6" aria-hidden="true" />
             </Button>
           </div>
 
@@ -112,7 +112,7 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
                 placeholder="My awesome list…"
                 maxLength={100}
                 required
-                variant="secondary"
+                className="bg-secondary border-transparent"
                 autoComplete="off"
               />
             </div>

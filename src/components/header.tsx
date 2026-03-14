@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState, ReactNode } from 'react'
-import { ChartBarIcon, StarIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, EllipsisVerticalIcon, Cog6ToothIcon, UserIcon } from '@heroicons/react/24/solid'
+import { ChartBar, Star, Copy, ArrowSquareOut, DotsThreeVertical, Gear, User } from '@phosphor-icons/react'
 
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
@@ -61,7 +61,7 @@ function MenuButton({ menuItems }: { menuItems: Array<{ label: string; onClick: 
         aria-label="More options"
         aria-expanded={isOpen}
       >
-        <EllipsisVerticalIcon className={NAV_CONSTANTS.ICON_SIZE} aria-hidden="true" />
+        <DotsThreeVertical weight="bold" className={NAV_CONSTANTS.ICON_SIZE} aria-hidden="true" />
       </Button>
 
       {isOpen && (
@@ -111,7 +111,7 @@ export function Header({
             className={cn('gap-2 font-medium', button.className)}
           >
             {button.label || 'View'}
-            <ArrowTopRightOnSquareIcon className="w-4 h-4" aria-hidden="true" />
+            <ArrowSquareOut weight="bold" className="size-4" aria-hidden="true" />
           </Button>
         )
 
@@ -125,7 +125,7 @@ export function Header({
             className={cn('gap-2 font-medium', button.className)}
           >
             {button.label || 'Copy'}
-            <DocumentDuplicateIcon className="w-4 h-4" aria-hidden="true" />
+            <Copy weight="bold" className="size-4" aria-hidden="true" />
           </Button>
         )
 
@@ -143,7 +143,7 @@ export function Header({
           >
             <Link href={button.href || '/dashboard?tab=saved'}>
               {button.label || 'Saved'}
-              <StarIcon className="w-4 h-4" aria-hidden="true" />
+              <Star weight="bold" className="size-4" aria-hidden="true" />
             </Link>
           </Button>
         )
@@ -162,7 +162,7 @@ export function Header({
           >
             <Link href={button.href || '/dashboard?tab=stats'}>
               {button.label || 'Stats'}
-              <ChartBarIcon className="w-4 h-4" aria-hidden="true" />
+              <ChartBar weight="bold" className="size-4" aria-hidden="true" />
             </Link>
           </Button>
         )
@@ -178,7 +178,7 @@ export function Header({
             aria-label="Settings"
           >
             <Link href={button.href || '/profile'}>
-              <Cog6ToothIcon className={NAV_CONSTANTS.ICON_SIZE} aria-hidden="true" />
+              <Gear weight="bold" className={NAV_CONSTANTS.ICON_SIZE} aria-hidden="true" />
             </Link>
           </Button>
         )
@@ -194,7 +194,7 @@ export function Header({
             aria-label="View profile"
           >
             <Link href={button.href || `/${username}`}>
-              <UserIcon className={NAV_CONSTANTS.ICON_SIZE} aria-hidden="true" />
+              <User weight="bold" className={NAV_CONSTANTS.ICON_SIZE} aria-hidden="true" />
             </Link>
           </Button>
         )

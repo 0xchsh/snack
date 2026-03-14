@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CurrencyDollarIcon, ShoppingCartIcon, CreditCardIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid'
+import { CurrencyDollar, ShoppingCart, CreditCard, Warning } from '@phosphor-icons/react'
 import { Spinner } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 import { StripeConnectButton } from '@/components/stripe-connect-button'
@@ -107,7 +107,7 @@ export default function EarningsDashboardPage() {
         {!stripeConnected && (
           <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-6 mb-8">
             <div className="flex items-start gap-4">
-              <ExclamationTriangleIcon className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" />
+              <Warning weight="bold" className="size-6 text-orange-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <h3 className="font-semibold text-orange-900 dark:text-orange-100 mb-2">
                   Connect Stripe to receive payments
@@ -135,7 +135,7 @@ export default function EarningsDashboardPage() {
           <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-muted-foreground">Total Earnings</h3>
-              <CurrencyDollarIcon className="w-5 h-5 text-muted-foreground" />
+              <CurrencyDollar weight="bold" className="size-5 text-muted-foreground" />
             </div>
             <p className="text-3xl font-bold">
               {formatCurrency(earningsData?.total_earnings || 0, earningsData?.currency || 'usd')}
@@ -145,7 +145,7 @@ export default function EarningsDashboardPage() {
           <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-muted-foreground">Total Sales</h3>
-              <ShoppingCartIcon className="w-5 h-5 text-muted-foreground" />
+              <ShoppingCart weight="bold" className="size-5 text-muted-foreground" />
             </div>
             <p className="text-3xl font-bold">{earningsData?.total_purchases || 0}</p>
           </div>
@@ -177,7 +177,7 @@ export default function EarningsDashboardPage() {
             </div>
           ) : (
             <div className="p-12 text-center text-muted-foreground">
-              <CreditCardIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <CreditCard weight="bold" className="size-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">No sales yet</p>
               <p className="text-sm">
                 {stripeConnected

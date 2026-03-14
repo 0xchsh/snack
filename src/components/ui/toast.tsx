@@ -1,55 +1,35 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
-import { CheckCircleIcon, XCircleIcon, ClipboardIcon, StarIcon } from '@heroicons/react/24/solid'
+import { useTheme } from 'next-themes'
+import { Toaster as Sonner, type ToasterProps } from 'sonner'
+import { CheckCircle, Info, Warning, XCircle, SpinnerGap } from '@phosphor-icons/react'
 
-type ToastVariant = 'success' | 'error' | 'copied' | 'saved'
-
-interface ToastProps {
-  show: boolean
-  message: string
-  variant?: ToastVariant
-}
-
-const variantConfig: Record<ToastVariant, { icon: typeof CheckCircleIcon; className: string }> = {
-  success: {
-    icon: CheckCircleIcon,
-    className: 'bg-green-500 text-white',
-  },
-  error: {
-    icon: XCircleIcon,
-    className: 'bg-red-500 text-white',
-  },
-  copied: {
-    icon: ClipboardIcon,
-    className: 'bg-green-500 text-white',
-  },
-  saved: {
-    icon: StarIcon,
-    className: 'bg-green-500 text-white',
-  },
-}
-
-export function Toast({ show, message, variant = 'success' }: ToastProps) {
-  const config = variantConfig[variant]
-  const Icon = config.icon
+function Toaster(props: ToasterProps) {
+  const { theme } = useTheme()
+  const resolvedTheme = (theme ?? 'system') as 'light' | 'dark' | 'system'
 
   return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, x: '-50%' }}
-          animate={{ opacity: 1, scale: 1, x: '-50%' }}
-          exit={{ opacity: 0, scale: 0.95, x: '-50%' }}
-          transition={{ duration: 0.2 }}
-          className={`fixed top-4 left-1/2 z-50 px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 ${config.className}`}
-          role="status"
-          aria-live="polite"
-        >
-          <Icon className="w-4 h-4" aria-hidden="true" />
-          <span className="text-sm font-medium">{message}</span>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <Sonner
+      theme={resolvedTheme}
+      className="toaster group"
+      icons={{
+        success: <CheckCircle className="size-4" weight="bold" />,
+        info: <Info className="size-4" weight="bold" />,
+        warning: <Warning className="size-4" weight="bold" />,
+        error: <XCircle className="size-4" weight="bold" />,
+        loading: <SpinnerGap className="size-4 animate-spin" />,
+      }}
+      style={
+        {
+          '--normal-bg': 'var(--popover)',
+          '--normal-text': 'var(--popover-foreground)',
+          '--normal-border': 'var(--border)',
+          '--border-radius': 'var(--radius)',
+        } as React.CSSProperties
+      }
+      {...props}
+    />
   )
 }
+
+export { Toaster }

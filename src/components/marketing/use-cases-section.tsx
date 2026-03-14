@@ -1,21 +1,21 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { SwatchIcon, PaperAirplaneIcon, VideoCameraIcon, CodeBracketIcon, BookOpenIcon, UsersIcon, RocketLaunchIcon, MusicalNoteIcon, CameraIcon, FireIcon, PuzzlePieceIcon } from '@heroicons/react/24/solid'
+import { Palette, PaperPlaneTilt, VideoCamera, Code, BookOpen, Users, Rocket, MusicNote, Camera, Fire, PuzzlePiece } from '@phosphor-icons/react'
 
 const useCases = [
-  { icon: SwatchIcon, label: 'Designers', bg: 'bg-pink-100', color: 'text-pink-600' },
-  { icon: PaperAirplaneIcon, label: 'Travelers', bg: 'bg-sky-100', color: 'text-sky-600' },
-  { icon: VideoCameraIcon, label: 'Creators', bg: 'bg-red-100', color: 'text-red-600' },
-  { icon: CodeBracketIcon, label: 'Developers', bg: 'bg-violet-100', color: 'text-violet-600' },
-  { icon: FireIcon, label: 'Foodies', bg: 'bg-orange-100', color: 'text-orange-600' },
-  { icon: BookOpenIcon, label: 'Writers', bg: 'bg-amber-100', color: 'text-amber-600' },
-  { icon: UsersIcon, label: 'Communities', bg: 'bg-teal-100', color: 'text-teal-600' },
-  { icon: RocketLaunchIcon, label: 'Founders', bg: 'bg-indigo-100', color: 'text-indigo-600' },
-  { icon: MusicalNoteIcon, label: 'Musicians', bg: 'bg-fuchsia-100', color: 'text-fuchsia-600' },
-  { icon: CameraIcon, label: 'Photographers', bg: 'bg-slate-200', color: 'text-slate-600' },
-  { icon: FireIcon, label: 'Fitness', bg: 'bg-lime-100', color: 'text-lime-600' },
-  { icon: PuzzlePieceIcon, label: 'Gamers', bg: 'bg-cyan-100', color: 'text-cyan-600' },
+  { icon: Palette, label: 'Designers', bg: 'bg-pink-100', color: 'text-pink-600' },
+  { icon: PaperPlaneTilt, label: 'Travelers', bg: 'bg-sky-100', color: 'text-sky-600' },
+  { icon: VideoCamera, label: 'Creators', bg: 'bg-red-100', color: 'text-red-600' },
+  { icon: Code, label: 'Developers', bg: 'bg-violet-100', color: 'text-violet-600' },
+  { icon: Fire, label: 'Foodies', bg: 'bg-orange-100', color: 'text-orange-600' },
+  { icon: BookOpen, label: 'Writers', bg: 'bg-amber-100', color: 'text-amber-600' },
+  { icon: Users, label: 'Communities', bg: 'bg-teal-100', color: 'text-teal-600' },
+  { icon: Rocket, label: 'Founders', bg: 'bg-indigo-100', color: 'text-indigo-600' },
+  { icon: MusicNote, label: 'Musicians', bg: 'bg-fuchsia-100', color: 'text-fuchsia-600' },
+  { icon: Camera, label: 'Photographers', bg: 'bg-slate-200', color: 'text-slate-600' },
+  { icon: Fire, label: 'Fitness', bg: 'bg-lime-100', color: 'text-lime-600' },
+  { icon: PuzzlePiece, label: 'Gamers', bg: 'bg-cyan-100', color: 'text-cyan-600' },
 ]
 
 export function UseCasesSection() {
@@ -69,8 +69,8 @@ export function UseCasesSection() {
                 key={i}
                 className="flex items-center gap-2 bg-neutral-50 hover:bg-neutral-100 transition-colors rounded-full px-5 py-3 cursor-default"
               >
-                <div className={`w-7 h-7 rounded-full ${item.bg} flex items-center justify-center`}>
-                  <item.icon className={`w-3.5 h-3.5 ${item.color}`} />
+                <div className={`size-7 rounded-full ${item.bg} flex items-center justify-center`}>
+                  <item.icon weight="bold" className={`size-3.5 ${item.color}`} />
                 </div>
                 <span className="font-medium text-neutral-900 whitespace-nowrap">{item.label}</span>
               </div>

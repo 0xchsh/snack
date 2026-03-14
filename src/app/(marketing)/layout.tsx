@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { StarIcon, ChartBarIcon, ListBulletIcon } from '@heroicons/react/24/solid'
+import { Star, ChartBar, ListBullets } from '@phosphor-icons/react'
 import { usePathname } from 'next/navigation'
 
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -47,7 +47,7 @@ function MarketingLayoutContent({
               aria-label="Your lists"
             >
               <Link href="/dashboard">
-                <ListBulletIcon className="w-4 h-4" />
+                <ListBullets weight="bold" className="size-4" />
               </Link>
             </Button>
             <Button
@@ -57,7 +57,7 @@ function MarketingLayoutContent({
               aria-label="Saved lists"
             >
               <Link href="/dashboard?tab=saved">
-                <StarIcon className="w-4 h-4" />
+                <Star weight="bold" className="size-4" />
               </Link>
             </Button>
             <Button
@@ -67,7 +67,7 @@ function MarketingLayoutContent({
               aria-label="Stats"
             >
               <Link href="/dashboard?tab=stats">
-                <ChartBarIcon className="w-4 h-4" />
+                <ChartBar weight="bold" className="size-4" />
               </Link>
             </Button>
             <UserMenu

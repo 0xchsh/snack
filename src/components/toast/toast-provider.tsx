@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon, InformationCircleIcon, XMarkIcon } from '@heroicons/react/24/solid'
+import { CheckCircle, XCircle, Warning, Info, X } from '@phosphor-icons/react'
 
 type ToastType = 'success' | 'error' | 'warning' | 'info'
 
@@ -30,10 +30,10 @@ interface ToastContextType {
 const ToastContext = createContext<ToastContextType | undefined>(undefined)
 
 const toastIcons: Record<ToastType, ReactNode> = {
-  success: <CheckCircleIcon className="w-5 h-5" aria-hidden="true" />,
-  error: <XCircleIcon className="w-5 h-5" aria-hidden="true" />,
-  warning: <ExclamationTriangleIcon className="w-5 h-5" aria-hidden="true" />,
-  info: <InformationCircleIcon className="w-5 h-5" aria-hidden="true" />,
+  success: <CheckCircle weight="bold" className="size-5" aria-hidden="true" />,
+  error: <XCircle weight="bold" className="size-5" aria-hidden="true" />,
+  warning: <Warning weight="bold" className="size-5" aria-hidden="true" />,
+  info: <Info weight="bold" className="size-5" aria-hidden="true" />,
 }
 
 const toastStyles: Record<ToastType, string> = {
@@ -150,7 +150,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 className="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity"
                 aria-label="Close notification"
               >
-                <XMarkIcon className="w-4 h-4" />
+                <X weight="bold" className="size-4" />
               </button>
             </motion.div>
           ))}

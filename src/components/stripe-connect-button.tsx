@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CheckCircleIcon, ExclamationTriangleIcon, CreditCardIcon } from '@heroicons/react/24/solid'
+import { CheckCircle, Warning, CreditCard } from '@phosphor-icons/react'
 import { Button, Spinner } from './ui'
 
 interface StripeConnectButtonProps {
@@ -96,7 +96,7 @@ export function StripeConnectButton({
   if (status.onboarding_complete) {
     return (
       <Button variant="outline" size={size} className={className} disabled>
-        <CheckCircleIcon className="w-4 h-4 mr-2 text-green-600" />
+        <CheckCircle weight="bold" className="size-4 mr-2 text-green-600" />
         Stripe Connected
       </Button>
     )
@@ -118,7 +118,7 @@ export function StripeConnectButton({
           </>
         ) : (
           <>
-            <ExclamationTriangleIcon className="w-4 h-4 mr-2 text-orange-600" />
+            <Warning weight="bold" className="size-4 mr-2 text-orange-600" />
             Complete Stripe Setup
           </>
         )}
@@ -141,7 +141,7 @@ export function StripeConnectButton({
         </>
       ) : (
         <>
-          <CreditCardIcon className="w-4 h-4 mr-2" />
+          <CreditCard weight="bold" className="size-4 mr-2" />
           Connect Stripe
         </>
       )}

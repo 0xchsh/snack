@@ -1,14 +1,15 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Bars3Icon, TrashIcon, ArrowPathIcon, LinkIcon } from '@heroicons/react/24/solid'
+import { List as ListIcon, Trash, ArrowClockwise, Link as LinkIcon } from '@phosphor-icons/react'
 import Image from 'next/image'
 import { ListWithLinks, Link, LinkCreatePayload } from '@/types'
 import { EmojiPicker } from './emoji-picker'
 import { validateAndNormalizeUrl, getHostname } from '@/lib/url-utils'
 import { Favicon } from './favicon'
 import { fetchOGDataClient } from '@/lib/og-client'
-import { Button, Toast, LinkCardSkeleton } from '@/components/ui'
+import { toast } from 'sonner'
+import { Button, LinkCardSkeleton } from '@/components/ui'
 
 const MAX_LINKS_PER_PASTE = 25
 
@@ -46,10 +47,7 @@ export function ListEditor({
   const [isDragging, setIsDragging] = useState(false)
   const [draggedItemPosition, setDraggedItemPosition] = useState({ x: 0, y: 0, width: 0 })
   const [isMobile, setIsMobile] = useState(false)
-  const [showCopySuccess, setShowCopySuccess] = useState(false)
   const [refreshingLinkIds, setRefreshingLinkIds] = useState<Record<string, boolean>>({})
-  const [showPasteError, setShowPasteError] = useState(false)
-  const [pasteErrorMessage, setPasteErrorMessage] = useState('')
   const dragStartPosition = useRef({ x: 0, y: 0 })
   const dragOffset = useRef({ x: 0, y: 0 })
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
@@ -66,9 +64,7 @@ export function ListEditor({
   }, [])
 
   const showPasteErrorToast = (message: string) => {
-    setPasteErrorMessage(message)
-    setShowPasteError(true)
-    setTimeout(() => setShowPasteError(false), 3000)
+    toast.error(message)
   }
 
   const handleTitleSave = () => {
@@ -606,8 +602,7 @@ export function ListEditor({
     try {
       const url = `${window.location.origin}/${list.user?.username || 'list'}/${list.id}`
       await navigator.clipboard.writeText(url)
-      setShowCopySuccess(true)
-      setTimeout(() => setShowCopySuccess(false), 2000)
+      toast.success('Link copied to clipboard!')
     } catch (error) {
       console.error('Failed to copy list link:', error)
       // Fallback for browsers that don't support clipboard API
@@ -859,12 +854,6 @@ export function ListEditor({
 
   return (
     <div className="pb-18">
-      {/* Copy Success Toast */}
-      <Toast show={showCopySuccess} message="Link copied to clipboard!" variant="copied" />
-
-      {/* Paste Error Toast */}
-      <Toast show={showPasteError} message={pasteErrorMessage} variant="error" />
-
       <div className="flex flex-col gap-4 md:gap-6">
         {/* Emoji */}
         <div className="w-12 h-12">
@@ -913,7 +902,7 @@ export function ListEditor({
         {/* Stats row */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-muted-foreground flex-shrink-0">
-            <LinkIcon className="w-4 h-4" aria-hidden="true" />
+            <LinkIcon weight="bold" className="size-4" aria-hidden="true" />
             <span className="text-base">{optimisticList.links?.length || 0} links</span>
           </div>
 
@@ -1153,7 +1142,7 @@ function LinkItem({
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Bars3Icon className="w-4 h-4" aria-hidden="true" />
+              <ListIcon weight="bold" className="size-4" aria-hidden="true" />
             </div>
             <button
               type="button"
@@ -1168,7 +1157,7 @@ function LinkItem({
               aria-label="Refresh link preview"
               disabled={isRefreshing}
             >
-              <ArrowPathIcon className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} aria-hidden="true" />
+              <ArrowClockwise weight="bold" className={`size-4 ${isRefreshing ? 'animate-spin' : ''}`} aria-hidden="true" />
             </button>
             <button
               type="button"
@@ -1182,7 +1171,7 @@ function LinkItem({
               className="text-muted-foreground hover:text-destructive transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm min-w-[44px] min-h-[44px] flex items-center justify-center -m-3"
               aria-label="Delete link"
             >
-              <TrashIcon className="w-4 h-4" aria-hidden="true" />
+              <Trash weight="bold" className="size-4" aria-hidden="true" />
             </button>
           </div>
         </div>

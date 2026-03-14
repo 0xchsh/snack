@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, memo } from 'react'
-import { DocumentDuplicateIcon, ClockIcon, LinkIcon, EyeIcon, StarIcon, PencilIcon } from '@heroicons/react/24/solid'
+import { Copy, Clock, Link as LinkIcon, Eye, Star, Pencil } from '@phosphor-icons/react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -14,7 +14,7 @@ import { Header } from './header'
 import { ListPaywall } from './list-paywall'
 import { isListFree } from '@/lib/pricing'
 import { DefaultAvatar } from '@/components/default-avatar'
-import { Toast } from '@/components/ui'
+import { toast } from 'sonner'
 
 interface PublicListViewProps {
   list: ListWithLinks
@@ -48,8 +48,6 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
   const [clickedLinks, setClickedLinks] = useState<Set<string>>(new Set())
   const [hasAnimated, setHasAnimated] = useState(false)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
-  const [showCopySuccess, setShowCopySuccess] = useState(false)
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [hasAccess, setHasAccess] = useState(true) // Assume access by default
@@ -123,8 +121,7 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href)
-      setShowCopySuccess(true)
-      setTimeout(() => setShowCopySuccess(false), 2000)
+      toast.success('Link copied to clipboard!')
     } catch {
       // Silently handle error
     }
@@ -171,8 +168,7 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
           const data = await response.json()
           console.log('Save API response:', data)
           setIsSaved(true)
-          setShowSaveSuccess(true)
-          setTimeout(() => setShowSaveSuccess(false), 2000)
+          toast.success('Saved successfully!')
 
           // Update save count from API response
           if (data.data && typeof data.data.save_count === 'number') {
@@ -305,10 +301,6 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
 
   return (
     <div className={`min-h-screen bg-background ${isLocked ? 'overflow-hidden max-h-screen' : ''}`}>
-      {/* Toasts */}
-      <Toast show={showCopySuccess} message="Link copied to clipboard!" variant="copied" />
-      <Toast show={showSaveSuccess} message="Saved successfully!" variant="saved" />
-
       {isOwner ? (
         <Header
           logoHref="/dashboard"
@@ -316,7 +308,7 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
           buttons={[
             {
               type: 'custom',
-              icon: <PencilIcon className="w-5 h-5" />,
+              icon: <Pencil weight="bold" className="size-5" />,
               onClick: () => {
                 const username = user?.username || list.user?.username
                 router.push(`/${username}/${list.public_id || list.id}`)
@@ -325,12 +317,11 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
             },
             {
               type: 'custom',
-              icon: <DocumentDuplicateIcon className="w-5 h-5" />,
+              icon: <Copy weight="bold" className="size-5" />,
               onClick: async () => {
                 const url = `${window.location.origin}/${list.user?.username}/${list.public_id || list.id}`
                 await navigator.clipboard.writeText(url)
-                setShowCopySuccess(true)
-                setTimeout(() => setShowCopySuccess(false), 2000)
+                toast.success('Link copied to clipboard!')
               },
               className: "w-icon-button h-icon-button p-0 flex items-center justify-center"
             }
@@ -344,16 +335,16 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
             {
               type: 'custom',
               icon: isSaved ? (
-                <StarIcon className="w-5 h-5 fill-yellow-500 text-yellow-500" />
+                <Star weight="bold" className="size-5 fill-yellow-500 text-yellow-500" />
               ) : (
-                <StarIcon className="w-5 h-5" />
+                <Star weight="bold" className="size-5" />
               ),
               onClick: handleSave,
               className: "w-icon-button h-icon-button p-0 flex items-center justify-center"
             },
             {
               type: 'custom',
-              icon: <DocumentDuplicateIcon className="w-5 h-5" />,
+              icon: <Copy weight="bold" className="size-5" />,
               onClick: handleCopy,
               className: "w-icon-button h-icon-button p-0 flex items-center justify-center"
             },
@@ -423,15 +414,15 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
             {/* Right: Links, Time, Saves */}
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               <div className="flex items-center gap-1.5">
-                <ClockIcon className="w-4 h-4 text-muted-foreground" />
+                <Clock weight="bold" className="size-4 text-muted-foreground" />
                 <span className="text-sm sm:text-base text-muted-foreground">{getRelativeTime(list.created_at)}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <LinkIcon className="w-4 h-4 text-muted-foreground" />
+                <LinkIcon weight="bold" className="size-4 text-muted-foreground" />
                 <span className="text-sm sm:text-base text-muted-foreground">{list.links?.length || 0}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <StarIcon className="w-4 h-4 text-muted-foreground" />
+                <Star weight="bold" className="size-4 text-muted-foreground" />
                 <span className="text-sm sm:text-base text-muted-foreground">{formatCount(list.save_count || 0)}</span>
               </div>
             </div>

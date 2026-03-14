@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { XMarkIcon, GlobeAltIcon, LockClosedIcon, EyeSlashIcon } from '@heroicons/react/24/solid'
+import { X, Globe, Lock, EyeSlash } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from './ui/button'
 import { StripeConnectButton } from './stripe-connect-button'
@@ -172,8 +172,8 @@ export function PricingModal({
   const creatorEarnings = computedPriceCents && platformFee !== null ? computedPriceCents - platformFee : null
 
   const VISIBILITY_OPTIONS = [
-    { value: 'public' as Visibility, label: 'Public', icon: GlobeAltIcon, desc: 'Anyone with the link can view' },
-    { value: 'private' as Visibility, label: 'Private', icon: LockClosedIcon, desc: 'Only you can view' },
+    { value: 'public' as Visibility, label: 'Public', icon: Globe, desc: 'Anyone with the link can view' },
+    { value: 'private' as Visibility, label: 'Private', icon: Lock, desc: 'Only you can view' },
   ]
 
   return (
@@ -193,7 +193,7 @@ export function PricingModal({
             onClick={onClose}
             className="p-1 -mr-1 rounded-md text-muted-foreground hover:text-foreground transition-colors"
           >
-            <XMarkIcon className="w-4 h-4" />
+            <X weight="bold" className="size-4" />
           </button>
         </div>
 
@@ -217,7 +217,7 @@ export function PricingModal({
                         : 'border border-border text-foreground hover:bg-secondary'
                     }`}
                   >
-                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <Icon weight="bold" className="size-4 flex-shrink-0" />
                     <div className="min-w-0">
                       <p className="text-sm font-medium leading-tight">{opt.label}</p>
                       <p className={`text-xs leading-tight mt-0.5 ${isActive ? 'opacity-70' : 'text-muted-foreground'}`}>

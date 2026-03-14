@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CurrencyDollarIcon, LockClosedIcon, LockOpenIcon } from '@heroicons/react/24/solid'
+import { CurrencyDollar, Lock, LockOpen } from '@phosphor-icons/react'
 import { Button } from './ui/button'
 import { formatCurrency, parseCurrencyToCents, validatePrice, isListFree } from '@/lib/pricing'
 import type { Currency } from '@/types'
@@ -109,12 +109,12 @@ export function ListPricingSettings({
         >
           {isPaid ? (
             <>
-              <LockClosedIcon className="w-4 h-4" />
+              <Lock weight="bold" className="size-4" />
               Paid
             </>
           ) : (
             <>
-              <LockOpenIcon className="w-4 h-4" />
+              <LockOpen weight="bold" className="size-4" />
               Free
             </>
           )}
@@ -128,7 +128,7 @@ export function ListPricingSettings({
               Price <span className="text-muted-foreground">(USD)</span>
             </label>
             <div className="relative">
-              <CurrencyDollarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <CurrencyDollar weight="bold" className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <input
                 type="text"
                 value={priceInput}

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { StarIcon, LinkIcon, ListBulletIcon, ChevronUpDownIcon } from '@heroicons/react/24/solid'
+import { Star, Link as LinkPhosphor, ListBullets, CaretUpDown } from '@phosphor-icons/react'
 import { Spinner, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
 import { useInView } from 'react-intersection-observer'
 import { LoadingState } from '@/components/loading-state'
@@ -177,7 +177,7 @@ export default function DiscoverPage() {
           <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             {/* Left side - Total lists */}
             <div className="flex items-center gap-1.5 text-muted-foreground">
-              <ListBulletIcon className="w-4 h-4" />
+              <ListBullets weight="bold" className="size-4" />
               <span className="text-sm sm:text-base">{totalCount} {totalCount === 1 ? 'list' : 'lists'}</span>
             </div>
 
@@ -186,7 +186,7 @@ export default function DiscoverPage() {
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-1 px-2.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors outline-none rounded-md">
                   {sortBy === 'recent' ? 'Recent' : sortBy === 'links' ? 'Links' : 'Stars'}
-                  <ChevronUpDownIcon className="w-4 h-4" />
+                  <CaretUpDown weight="bold" className="size-4" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -245,11 +245,11 @@ export default function DiscoverPage() {
                   {/* Right side - stats - hide stars on very narrow screens */}
                   <div className="flex items-center gap-2 sm:gap-3 ml-3 sm:ml-4 flex-shrink-0 text-muted-foreground">
                     <div className="flex items-center gap-1.5">
-                      <LinkIcon className="w-4 h-4" />
+                      <LinkPhosphor weight="bold" className="size-4" />
                       <span className="text-sm">{linkCount}</span>
                     </div>
                     <div className="hidden sm:flex items-center gap-1.5">
-                      <StarIcon className="w-4 h-4" />
+                      <Star weight="bold" className="size-4" />
                       <span className="text-sm">{list.save_count || 0}</span>
                     </div>
                   </div>

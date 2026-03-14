@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ArrowLeftIcon, ChartBarIcon, HeartIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, MoonIcon, EllipsisVerticalIcon, Cog6ToothIcon, SunIcon, UserIcon } from '@heroicons/react/24/solid'
+import { ArrowLeft, ChartBar, Heart, Copy, ArrowSquareOut, Moon, DotsThreeVertical, Gear, Sun, User } from '@phosphor-icons/react'
 
 import { Button, Card, CardDescription, CardFooter, CardHeader, CardTitle, Input, Label, Textarea } from '@/components/ui'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -63,7 +63,7 @@ export default function StylesPage() {
         <div className="container mx-auto px-nav-x py-nav-y">
           <div className="flex items-center justify-between">
             <Link href="/dashboard" className="flex items-center gap-3 text-foreground hover:text-muted-foreground transition-colors">
-              <ArrowLeftIcon className="w-5 h-5" />
+              <ArrowLeft weight="bold" className="size-5" />
               <h1 className="text-xl font-semibold">Design System</h1>
             </Link>
             <ThemeToggle />
@@ -204,29 +204,29 @@ export default function StylesPage() {
                 <div className="flex flex-wrap gap-3">
                   <Button variant="muted" className="gap-2 font-medium">
                     View
-                    <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                    <ArrowSquareOut weight="bold" className="size-4" />
                   </Button>
                   <Button variant="muted" className="gap-2 font-medium">
                     Copy
-                    <DocumentDuplicateIcon className="w-4 h-4" />
+                    <Copy weight="bold" className="size-4" />
                   </Button>
                   <Button asChild variant="muted" className="gap-2 font-medium">
                     <Link href="#">
                       Saved
-                      <HeartIcon className="w-4 h-4" />
+                      <Heart weight="bold" className="size-4" />
                     </Link>
                   </Button>
                   <Button asChild variant="muted" className="gap-2 font-medium">
                     <Link href="#">
                       Stats
-                      <ChartBarIcon className="w-4 h-4" />
+                      <ChartBar weight="bold" className="size-4" />
                     </Link>
                   </Button>
                 </div>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto mt-4">
 {`<Button variant="muted" className="gap-2 font-medium">
   View
-  <ArrowSquareOut weight="fill" className="w-4 h-4" />
+  <ArrowSquareOut weight="bold" className="w-4 h-4" />
 </Button>`}
                 </pre>
               </div>
@@ -238,21 +238,21 @@ export default function StylesPage() {
               <div className="bg-secondary p-6 rounded-lg border border-border">
                 <div className="flex flex-wrap gap-3">
                   <Button variant="muted" size="icon">
-                    <UserIcon className="w-5 h-5" />
+                    <User weight="bold" className="size-5" />
                   </Button>
                   <Button variant="muted" size="icon">
-                    <Cog6ToothIcon className="w-5 h-5" />
+                    <Gear weight="bold" className="size-5" />
                   </Button>
                   <Button variant="muted" size="icon">
-                    <EllipsisVerticalIcon className="w-5 h-5" />
+                    <DotsThreeVertical weight="bold" className="size-5" />
                   </Button>
                   <Button variant="muted" size="icon">
-                    <SunIcon className="w-5 h-5" />
+                    <Sun weight="bold" className="size-5" />
                   </Button>
                 </div>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto mt-4">
 {`<Button variant="muted" size="icon">
-  <User weight="fill" className="w-5 h-5" />
+  <User weight="bold" className="w-5 h-5" />
 </Button>`}
                 </pre>
               </div>
@@ -292,7 +292,7 @@ export default function StylesPage() {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder="Enter text..."
-                    size="sm"
+                    className="h-7 text-sm"
                   />
                 </div>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto">
@@ -337,7 +337,7 @@ export default function StylesPage() {
                     id="alt-input"
                     type="email"
                     placeholder="name@example.com"
-                    variant="secondary"
+                    className="bg-secondary border-transparent"
                   />
                 </div>
                 <pre className="text-xs font-mono text-muted-foreground overflow-x-auto">
@@ -567,44 +567,44 @@ className="w-full px-4 py-2 text-left text-sm
 
         {/* Icons */}
         <section className="mb-16">
-          <h2 className="text-2xl font-bold mb-6 text-foreground">Icons (Heroicons)</h2>
+          <h2 className="text-2xl font-bold mb-6 text-foreground">Icons (Phosphor)</h2>
           <div className="bg-secondary p-6 rounded-lg border border-border">
             <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-6">
               <div className="flex flex-col items-center gap-2">
-                <UserIcon className="w-6 h-6 text-foreground" />
+                <User weight="bold" className="size-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">User</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <Cog6ToothIcon className="w-6 h-6 text-foreground" />
+                <Gear weight="bold" className="size-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">Settings</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <HeartIcon className="w-6 h-6 text-foreground" />
+                <Heart weight="bold" className="size-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">Heart</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <ChartBarIcon className="w-6 h-6 text-foreground" />
+                <ChartBar weight="bold" className="size-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">BarChart3</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <DocumentDuplicateIcon className="w-6 h-6 text-foreground" />
+                <Copy weight="bold" className="size-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">Copy</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <ArrowTopRightOnSquareIcon className="w-6 h-6 text-foreground" />
+                <ArrowSquareOut weight="bold" className="size-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">External</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <SunIcon className="w-6 h-6 text-foreground" />
+                <Sun weight="bold" className="size-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">Sun</p>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <MoonIcon className="w-6 h-6 text-foreground" />
+                <Moon weight="bold" className="size-6 text-foreground" />
                 <p className="text-xs text-muted-foreground">Moon</p>
               </div>
             </div>
             <p className="text-sm text-muted-foreground mt-6">
-              View all icons at <a href="https://heroicons.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">heroicons.com</a>
+              View all icons at <a href="https://phosphoricons.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">phosphoricons.com</a>
             </p>
           </div>
         </section>

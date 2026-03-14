@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui'
-import { useToast } from '@/components/toast'
+import { toast } from 'sonner'
 import { AppContainer } from '@/components/primitives'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -13,7 +13,6 @@ import { useAuth } from '@/hooks/useAuth'
  * 3. Logout functionality
  */
 export default function TestFeaturesPage() {
-  const toast = useToast()
   const { user, signOut, loading } = useAuth()
   const [shouldError, setShouldError] = useState(false)
 
@@ -23,32 +22,32 @@ export default function TestFeaturesPage() {
   }
 
   const handleTestToasts = () => {
-    toast.success('Success toast!', 'This is a success message')
+    toast.success('Success toast!', { description: 'This is a success message' })
 
     setTimeout(() => {
-      toast.error('Error toast!', 'This is an error message')
+      toast.error('Error toast!', { description: 'This is an error message' })
     }, 500)
 
     setTimeout(() => {
-      toast.warning('Warning toast!', 'This is a warning message')
+      toast.warning('Warning toast!', { description: 'This is a warning message' })
     }, 1000)
 
     setTimeout(() => {
-      toast.info('Info toast!', 'This is an info message')
+      toast.info('Info toast!', { description: 'This is an info message' })
     }, 1500)
   }
 
   const handleTestLogout = async () => {
     if (!user) {
-      toast.error('Not logged in', 'Please log in first to test logout')
+      toast.error('Not logged in', { description: 'Please log in first to test logout' })
       return
     }
 
     try {
-      toast.info('Logging out...', 'Testing logout functionality')
+      toast.info('Logging out...', { description: 'Testing logout functionality' })
       await signOut()
     } catch (error) {
-      toast.error('Logout failed', error instanceof Error ? error.message : 'Unknown error')
+      toast.error('Logout failed', { description: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
 
@@ -107,7 +106,7 @@ export default function TestFeaturesPage() {
                 </Button>
 
                 <Button
-                  onClick={() => toast.success('Success!', 'Operation completed')}
+                  onClick={() => toast.success('Success!', { description: 'Operation completed' })}
                   variant="outline"
                   size="sm"
                   className="border-green-500 text-green-500 hover:bg-green-500/10"
@@ -116,7 +115,7 @@ export default function TestFeaturesPage() {
                 </Button>
 
                 <Button
-                  onClick={() => toast.error('Error!', 'Something went wrong')}
+                  onClick={() => toast.error('Error!', { description: 'Something went wrong' })}
                   variant="outline"
                   size="sm"
                   className="border-red-500 text-red-500 hover:bg-red-500/10"
@@ -125,7 +124,7 @@ export default function TestFeaturesPage() {
                 </Button>
 
                 <Button
-                  onClick={() => toast.warning('Warning!', 'Please be careful')}
+                  onClick={() => toast.warning('Warning!', { description: 'Please be careful' })}
                   variant="outline"
                   size="sm"
                   className="border-yellow-500 text-yellow-500 hover:bg-yellow-500/10"
@@ -134,7 +133,7 @@ export default function TestFeaturesPage() {
                 </Button>
 
                 <Button
-                  onClick={() => toast.info('Info!', 'Here is some information')}
+                  onClick={() => toast.info('Info!', { description: 'Here is some information' })}
                   variant="outline"
                   size="sm"
                   className="border-blue-500 text-blue-500 hover:bg-blue-500/10"

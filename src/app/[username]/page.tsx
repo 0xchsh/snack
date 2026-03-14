@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ListBulletIcon, LinkIcon, StarIcon, DocumentDuplicateIcon } from '@heroicons/react/24/solid'
+import { ListBullets, Link as LinkPhosphor, Star, Copy } from '@phosphor-icons/react'
 import { isListPaid, formatListPrice } from '@/lib/pricing'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LoadingState } from '@/components/loading-state'
-import { Button, Toast } from '@/components/ui'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui'
 import { DefaultAvatar } from '@/components/default-avatar'
 
 interface PublicProfile {
@@ -50,8 +51,6 @@ export default function UsernamePage() {
   const [profile, setProfile] = useState<PublicProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [showCopySuccess, setShowCopySuccess] = useState(false)
-
   useEffect(() => {
     if (!username) return
 
@@ -139,14 +138,11 @@ export default function UsernamePage() {
   const handleCopyProfile = async () => {
     const url = `${window.location.origin}/${profile.user.username}`
     await navigator.clipboard.writeText(url)
-    setShowCopySuccess(true)
-    setTimeout(() => setShowCopySuccess(false), 2000)
+    toast.success('Profile link copied!')
   }
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Copy Success Toast */}
-      <Toast show={showCopySuccess} message="Profile link copied!" variant="copied" />
       {/* Header */}
       <div className="bg-background">
         <div className="w-full px-4 py-6 sm:px-6">
@@ -168,7 +164,7 @@ export default function UsernamePage() {
                 size="icon"
                 aria-label="Copy profile link"
               >
-                <DocumentDuplicateIcon className="w-5 h-5" />
+                <Copy weight="bold" className="size-5" />
               </Button>
               <ThemeToggle />
             </div>
@@ -214,16 +210,16 @@ export default function UsernamePage() {
           {/* Stats */}
           <div className="flex flex-row items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 text-muted-foreground">
-              <ListBulletIcon className="w-4 h-4" />
+              <ListBullets weight="bold" className="size-4" />
               <span className="text-sm sm:text-base">{profile.stats.total_public_lists} lists</span>
             </div>
             <div className="flex items-center gap-3 sm:gap-3 text-muted-foreground">
               <div className="flex items-center gap-1.5">
-                <LinkIcon className="w-4 h-4" />
+                <LinkPhosphor weight="bold" className="size-4" />
                 <span className="text-sm sm:text-base">{profile.stats.total_links}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <StarIcon className="w-4 h-4" />
+                <Star weight="bold" className="size-4" />
                 <span className="text-sm sm:text-base">{profile.stats.total_saves_received}</span>
               </div>
             </div>

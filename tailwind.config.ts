@@ -50,19 +50,8 @@ const config: Config = {
         'nav': '0.5rem', // 8px - gap between nav items
       },
       fontFamily: {
-        sans: ['Geist', 'ui-sans-serif', 'sans-serif', 'system-ui'],
-        mono: ['Geist Mono', 'monospace'],
-      },
-      fontWeight: {
-        thin: '450',
-        extralight: '450',
-        light: '450',
-        normal: '450',
-        medium: '450',
-        semibold: '450',
-        bold: '450',
-        extrabold: '450',
-        black: '450',
+        sans: ['"SF Pro Rounded"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        mono: ['"SF Mono"', 'ui-monospace', 'monospace'],
       },
       colors: {
         border: "var(--border)",

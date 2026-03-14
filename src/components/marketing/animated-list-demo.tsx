@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ClockIcon, LinkIcon, StarIcon, UserIcon } from '@heroicons/react/24/solid'
+import { Clock, Link as LinkIcon, Star, User } from '@phosphor-icons/react'
 
 const DEMO_LINKS = [
   {
@@ -91,8 +91,8 @@ export function AnimatedListDemo() {
         <div className="flex items-center justify-between">
           {/* Author */}
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-neutral-200 flex items-center justify-center overflow-hidden">
-              <UserIcon className="w-3.5 h-3.5 text-neutral-500" />
+            <div className="size-6 rounded-full bg-neutral-200 flex items-center justify-center overflow-hidden">
+              <User weight="bold" className="size-3.5 text-neutral-500" />
             </div>
             <span className="text-sm text-neutral-500">{DEMO_AUTHOR}</span>
           </div>
@@ -100,15 +100,15 @@ export function AnimatedListDemo() {
           {/* Stats */}
           <div className="flex items-center gap-3 text-sm text-neutral-400">
             <div className="flex items-center gap-1">
-              <ClockIcon className="w-3.5 h-3.5" />
+              <Clock weight="bold" className="size-3.5" />
               <span>2m</span>
             </div>
             <div className="flex items-center gap-1">
-              <LinkIcon className="w-3.5 h-3.5" />
+              <LinkIcon weight="bold" className="size-3.5" />
               <span>{linkCount}</span>
             </div>
             <div className="flex items-center gap-1">
-              <StarIcon className="w-3.5 h-3.5" />
+              <Star weight="bold" className="size-3.5" />
               <span>0</span>
             </div>
           </div>

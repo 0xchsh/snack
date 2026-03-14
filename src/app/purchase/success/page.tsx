@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/24/solid'
+import { CheckCircle, ArrowRight } from '@phosphor-icons/react'
 import { Button, Spinner } from '@/components/ui'
 import { Header } from '@/components/header'
 import { useAuth } from '@/hooks/useAuth'
@@ -86,7 +86,7 @@ function PurchaseSuccessContent() {
           {/* Success Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-20 h-20 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
-              <CheckCircleIcon className="w-12 h-12 text-green-600 dark:text-green-500" />
+              <CheckCircle weight="bold" className="size-12 text-green-600 dark:text-green-500" />
             </div>
           </div>
 
@@ -101,15 +101,15 @@ function PurchaseSuccessContent() {
             <h2 className="font-semibold mb-4">What's next?</h2>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
-                <CheckCircleIcon className="w-4 h-4 mt-0.5 text-green-600" />
+                <CheckCircle weight="bold" className="size-4 mt-0.5 text-green-600" />
                 <span>You can access all links in this list anytime</span>
               </li>
               <li className="flex items-start gap-2">
-                <CheckCircleIcon className="w-4 h-4 mt-0.5 text-green-600" />
+                <CheckCircle weight="bold" className="size-4 mt-0.5 text-green-600" />
                 <span>Your purchase is saved to your account</span>
               </li>
               <li className="flex items-start gap-2">
-                <CheckCircleIcon className="w-4 h-4 mt-0.5 text-green-600" />
+                <CheckCircle weight="bold" className="size-4 mt-0.5 text-green-600" />
                 <span>A receipt has been sent to your email</span>
               </li>
             </ul>
@@ -123,7 +123,7 @@ function PurchaseSuccessContent() {
               size="lg"
             >
               Go to Dashboard
-              <ArrowRightIcon className="w-4 h-4" />
+              <ArrowRight weight="bold" className="size-4" />
             </Button>
             <Button onClick={() => router.back()} variant="outline" size="lg">
               View List

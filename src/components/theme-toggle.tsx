@@ -1,10 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { SunIcon, MoonIcon } from '@heroicons/react/24/solid'
+import { Sun, Moon } from '@phosphor-icons/react'
 import { Button } from '@/components/ui'
 
-import { useTheme } from './theme-provider'
+import { useTheme } from 'next-themes'
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -44,9 +44,9 @@ export function ThemeToggle() {
       aria-pressed={theme === 'dark'}
     >
       {theme === 'light' ? (
-        <SunIcon className="w-4 h-4" />
+        <Sun className="size-4" weight="bold" />
       ) : (
-        <MoonIcon className="w-4 h-4" />
+        <Moon className="size-4" weight="bold" />
       )}
     </Button>
   )

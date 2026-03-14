@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { DocumentDuplicateIcon, PlusIcon, EllipsisHorizontalIcon, SunIcon, MoonIcon, TrashIcon, ClipboardDocumentListIcon, ArrowDownTrayIcon, GlobeAltIcon, LockClosedIcon } from '@heroicons/react/24/solid'
+import { Copy, Plus, DotsThree, Sun, Moon, Trash, ClipboardText, DownloadSimple, Globe, Lock } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
-import { Button, Toast, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
+import { toast } from 'sonner'
+import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
 import { AddLinkModal } from '@/components/add-link-modal'
 import { PricingModal } from '@/components/pricing-modal'
 import { TopBar, BrandMark, AppContainer } from '@/components/primitives'
-import { useTheme } from '@/components/theme-provider'
+import { useTheme } from 'next-themes'
 import { ListWithLinks, LinkCreatePayload } from '@/types'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
@@ -66,8 +67,6 @@ export default function UserListPage() {
   const params = useParams()
   const username = params?.username as string
   const listId = params?.listId as string
-  const [showCopySuccess, setShowCopySuccess] = useState(false)
-  const [showCopyLinksSuccess, setShowCopyLinksSuccess] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showAddLinkModal, setShowAddLinkModal] = useState(false)
   const [showPricingModal, setShowPricingModal] = useState(false)
@@ -183,8 +182,7 @@ export default function UserListPage() {
     if (!currentList?.links?.length) return
     const urls = currentList.links.map((link) => link.url).join('\n')
     await navigator.clipboard.writeText(urls)
-    setShowCopyLinksSuccess(true)
-    setTimeout(() => setShowCopyLinksSuccess(false), 2000)
+    toast.success('Links copied to clipboard!')
   }
 
   const handleExportMarkdown = () => {
@@ -273,10 +271,6 @@ export default function UserListPage() {
   if (canEdit) {
     return (
       <div className="min-h-screen bg-background">
-        {/* Copy Success Toast */}
-        <Toast show={showCopySuccess} message="Link copied to clipboard!" variant="copied" />
-        <Toast show={showCopyLinksSuccess} message="Links copied to clipboard!" variant="copied" />
-
         <TopBar>
           <TopBar.Left>
             <BrandMark variant="app" href="/dashboard" />
@@ -289,20 +283,19 @@ export default function UserListPage() {
               size="icon"
               aria-label="Add link"
             >
-              <PlusIcon className="w-4 h-4" />
+              <Plus weight="bold" className="size-4" />
             </Button>
             <Button
               onClick={async () => {
                 const url = `${window.location.origin}/${username}/${currentList.public_id || listId}`
                 await navigator.clipboard.writeText(url)
-                setShowCopySuccess(true)
-                setTimeout(() => setShowCopySuccess(false), 2000)
+                toast.success('Link copied to clipboard!')
               }}
               variant="muted"
               size="icon"
               aria-label="Copy link"
             >
-              <DocumentDuplicateIcon className="w-4 h-4" />
+              <Copy weight="bold" className="size-4" />
             </Button>
             <Button
               onClick={() => setShowPricingModal(true)}
@@ -311,24 +304,24 @@ export default function UserListPage() {
               aria-label="List options"
             >
               {currentList.is_public ? (
-                <GlobeAltIcon className="w-4 h-4" />
+                <Globe weight="bold" className="size-4" />
               ) : (
-                <LockClosedIcon className="w-4 h-4" />
+                <Lock weight="bold" className="size-4" />
               )}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="muted" size="icon" aria-label="More options">
-                  <EllipsisHorizontalIcon className="w-4 h-4" />
+                  <DotsThree weight="bold" className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleCopyLinks}>
-                  <ClipboardDocumentListIcon className="w-4 h-4" />
+                  <ClipboardText weight="bold" className="size-4" />
                   Copy all links
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleExportMarkdown}>
-                  <ArrowDownTrayIcon className="w-4 h-4" />
+                  <DownloadSimple weight="bold" className="size-4" />
                   Export list to .md
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -336,12 +329,12 @@ export default function UserListPage() {
                 >
                   {theme === 'light' ? (
                     <>
-                      <MoonIcon className="w-4 h-4" />
+                      <Moon weight="bold" className="size-4" />
                       Dark mode
                     </>
                   ) : (
                     <>
-                      <SunIcon className="w-4 h-4" />
+                      <Sun weight="bold" className="size-4" />
                       Light mode
                     </>
                   )}
@@ -350,7 +343,7 @@ export default function UserListPage() {
                   onClick={() => setShowDeleteModal(true)}
                   className="text-destructive focus:text-destructive"
                 >
-                  <TrashIcon className="w-4 h-4" />
+                  <Trash weight="bold" className="size-4" />
                   Delete list
                 </DropdownMenuItem>
               </DropdownMenuContent>

@@ -1,26 +1,26 @@
 import { cn } from '@/lib/utils'
+import { SpinnerGap } from '@phosphor-icons/react'
 
 interface SpinnerProps {
   size?: 'xs' | 'sm' | 'md' | 'lg'
-  className?: string
+  className?: string | undefined
 }
 
 const sizeClasses = {
-  xs: 'w-3 h-3 border',
-  sm: 'w-4 h-4 border-2',
-  md: 'w-6 h-6 border-2',
-  lg: 'w-8 h-8 border-2',
+  xs: 'size-3',
+  sm: 'size-4',
+  md: 'size-6',
+  lg: 'size-8',
 }
 
-export function Spinner({ size = 'sm', className }: SpinnerProps) {
+function Spinner({ size = 'sm', className }: SpinnerProps) {
   return (
-    <div
-      className={cn(
-        'rounded-full animate-spin border-muted-foreground/30 border-t-muted-foreground',
-        sizeClasses[size],
-        className
-      )}
-      aria-hidden="true"
+    <SpinnerGap
+      role="status"
+      aria-label="Loading"
+      className={cn('animate-spin', sizeClasses[size], className)}
     />
   )
 }
+
+export { Spinner }

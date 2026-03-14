@@ -6,8 +6,9 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
+      data-slot="card"
       className={cn(
-        'rounded-xl border border-border bg-background text-foreground shadow-sm',
+        'flex flex-col gap-4 overflow-hidden rounded-xl bg-card py-4 text-sm text-card-foreground ring-1 ring-foreground/10',
         className
       )}
       {...props}
@@ -22,7 +23,8 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex flex-col gap-1.5 p-6', className)}
+    data-slot="card-header"
+    className={cn('flex flex-col gap-1.5 px-4', className)}
     {...props}
   />
 ))
@@ -34,7 +36,8 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn('text-xl font-semibold leading-none tracking-tight', className)}
+    data-slot="card-title"
+    className={cn('text-base leading-snug font-medium', className)}
     {...props}
   />
 ))
@@ -46,6 +49,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
+    data-slot="card-description"
     className={cn('text-sm text-muted-foreground', className)}
     {...props}
   />
@@ -56,7 +60,7 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
+  <div ref={ref} data-slot="card-content" className={cn('px-4', className)} {...props} />
 ))
 CardContent.displayName = 'CardContent'
 
@@ -64,7 +68,15 @@ const CardFooter = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
+  <div
+    ref={ref}
+    data-slot="card-footer"
+    className={cn(
+      'flex items-center rounded-b-xl border-t bg-muted/50 p-4',
+      className
+    )}
+    {...props}
+  />
 ))
 CardFooter.displayName = 'CardFooter'
 

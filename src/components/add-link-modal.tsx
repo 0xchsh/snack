@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { XMarkIcon } from '@heroicons/react/24/solid'
+import { X } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui'
 import { validateAndNormalizeUrl } from '@/lib/url-utils'
@@ -103,7 +103,7 @@ export function AddLinkModal({ isOpen, onClose, onAddLink }: AddLinkModalProps) 
               className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md"
               aria-label="Close"
             >
-              <XMarkIcon className="w-5 h-5" />
+              <X weight="bold" className="size-5" />
             </button>
 
             {/* Header */}

@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { LockClosedIcon, LinkIcon, ShieldCheckIcon } from '@heroicons/react/24/solid'
+import { Lock, Link as LinkIcon, ShieldCheck } from '@phosphor-icons/react'
 import { useRouter } from 'next/navigation'
 import { formatCurrency } from '@/lib/pricing'
 import type { Currency } from '@/types'
 import { Button, Spinner } from './ui'
-import { useToast } from './toast/toast-provider'
+import { toast } from 'sonner'
 
 interface ListPaywallProps {
   listId: string
@@ -29,8 +29,6 @@ export function ListPaywall({
 }: ListPaywallProps) {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const toast = useToast()
-
   const handlePurchase = async () => {
     setIsLoading(true)
 
@@ -82,7 +80,7 @@ export function ListPaywall({
           {/* Lock + info */}
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-              <LockClosedIcon className="w-5 h-5 text-muted-foreground" />
+              <Lock weight="bold" className="size-5 text-muted-foreground" />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-medium text-foreground">
@@ -118,7 +116,7 @@ export function ListPaywall({
 
           {/* Trust line */}
           <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-            <ShieldCheckIcon className="w-3.5 h-3.5" />
+            <ShieldCheck weight="bold" className="size-3.5" />
             <span>Secure checkout via Stripe</span>
           </div>
         </div>

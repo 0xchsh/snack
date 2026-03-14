@@ -4,9 +4,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRightStartOnRectangleIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon, CheckCircleIcon, XCircleIcon, CurrencyDollarIcon, ShoppingCartIcon, CreditCardIcon } from '@heroicons/react/24/solid'
+import { SignOut, Copy, ArrowSquareOut, CheckCircle, XCircle, CurrencyDollar, ShoppingCart, CreditCard } from '@phosphor-icons/react'
 
-import { Button, Spinner, Toast } from '@/components/ui'
+import { toast } from 'sonner'
+
+import { Button, Spinner } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 import { LoadingState } from '@/components/loading-state'
 import { AppContainer } from '@/components/primitives'
@@ -115,7 +117,6 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
   const [isSaving, setIsSaving] = useState(false)
   const [uploadingPicture, setUploadingPicture] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [currentUser, setCurrentUser] = useState(user)
   const [formData, setFormData] = useState<{
     first_name: string
@@ -142,7 +143,6 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true)
-      setMessage(null)
 
       // Use the auth context signOut method
       await signOut()
@@ -151,7 +151,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
       // No need to manually redirect here
     } catch (error) {
       console.error('Error logging out:', error)
-      setMessage({ type: 'error', text: 'Failed to sign out. Please try again.' })
+      toast.error('Failed to sign out. Please try again.')
       setIsLoggingOut(false)
     }
   }
@@ -173,7 +173,6 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
     if (!file) return
 
     setUploadingPicture(true)
-    setMessage(null)
 
     try {
       const formData = new FormData()
@@ -191,13 +190,13 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
       }
 
       setCurrentUser(result.data.user)
-      setMessage({ type: 'success', text: 'Profile picture updated successfully!' })
+      toast.success('Profile picture updated successfully!')
       
       // Refresh the page to update all user contexts
       window.location.reload()
     } catch (error: any) {
       console.error('Error uploading picture:', error)
-      setMessage({ type: 'error', text: error.message || 'Failed to upload picture' })
+      toast.error(error.message || 'Failed to upload picture')
     } finally {
       setUploadingPicture(false)
     }
@@ -209,7 +208,6 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
     }
 
     setUploadingPicture(true)
-    setMessage(null)
 
     try {
       const response = await fetch('/api/profile/picture', {
@@ -223,13 +221,13 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
       }
 
       setCurrentUser(result.data.user)
-      setMessage({ type: 'success', text: 'Profile picture removed successfully!' })
+      toast.success('Profile picture removed successfully!')
       
       // Refresh the page to update all user contexts
       window.location.reload()
     } catch (error: any) {
       console.error('Error removing picture:', error)
-      setMessage({ type: 'error', text: error.message || 'Failed to remove picture' })
+      toast.error(error.message || 'Failed to remove picture')
     } finally {
       setUploadingPicture(false)
     }
@@ -237,12 +235,11 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
 
   const handleSaveProfile = async () => {
     if (!formData.username || !formData.email) {
-      setMessage({ type: 'error', text: 'Username and email are required' })
+      toast.error('Username and email are required')
       return
     }
 
     setIsSaving(true)
-    setMessage(null)
 
     try {
       const response = await fetch('/api/profile', {
@@ -260,13 +257,13 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
       }
 
       setCurrentUser(result.data)
-      setMessage({ type: 'success', text: result.warning || 'Profile updated successfully!' })
+      toast.success(result.warning || 'Profile updated successfully!')
       
       // Refresh the page to update all user contexts
       setTimeout(() => window.location.reload(), 1000)
     } catch (error: any) {
       console.error('Error saving profile:', error)
-      setMessage({ type: 'error', text: error.message || 'Failed to update profile' })
+      toast.error(error.message || 'Failed to update profile')
     } finally {
       setIsSaving(false)
     }
@@ -280,7 +277,6 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
       email: currentUser.email || '',
       profile_is_public: currentUser.profile_is_public ?? true,
     })
-    setMessage(null)
   }
 
   // Handle username input change with debounced validation
@@ -354,10 +350,9 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
       setCurrentUser(result.data)
       setFormData(prev => ({ ...prev, username: usernameInput }))
       setUsernameStatus('idle')
-      setMessage({ type: 'success', text: 'Username updated successfully!' })
-      setTimeout(() => setMessage(null), 3000)
+      toast.success('Username updated successfully!')
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || 'Failed to update username' })
+      toast.error(error.message || 'Failed to update username')
     } finally {
       setIsSavingUsername(false)
     }
@@ -374,13 +369,6 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
 
   return (
     <div className="space-y-3">
-      {/* Toast Notification */}
-      <Toast
-        show={!!message}
-        message={message?.text || ''}
-        variant={message?.type === 'success' ? 'success' : 'error'}
-      />
-
       {/* Profile Picture Section */}
       <div className="bg-background border border-border rounded-xl p-6">
         <div className="flex items-center gap-6">
@@ -469,10 +457,10 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
                   <Spinner size="sm" className="text-muted-foreground" />
                 )}
                 {usernameStatus === 'available' && (
-                  <CheckCircleIcon className="w-5 h-5 text-green-500" />
+                  <CheckCircle weight="bold" className="size-5 text-green-500" />
                 )}
                 {(usernameStatus === 'taken' || usernameStatus === 'invalid') && (
-                  <XCircleIcon className="w-5 h-5 text-red-500" />
+                  <XCircle weight="bold" className="size-5 text-red-500" />
                 )}
               </div>
             </div>
@@ -499,11 +487,10 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
             className="gap-2 text-muted-foreground"
             onClick={async () => {
               await navigator.clipboard.writeText(`https://snack.xyz/${currentUser.username}`)
-              setMessage({ type: 'success', text: 'Profile URL copied!' })
-              setTimeout(() => setMessage(null), 2000)
+              toast.success('Profile URL copied!')
             }}
           >
-            <DocumentDuplicateIcon className="w-4 h-4" />
+            <Copy weight="bold" className="size-4" />
             Copy URL
           </Button>
           <Button
@@ -513,7 +500,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
             asChild
           >
             <Link href={`/${currentUser.username}`} target="_blank">
-              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+              <ArrowSquareOut weight="bold" className="size-4" />
               View Profile
             </Link>
           </Button>
@@ -552,7 +539,7 @@ function AccountTab({ user, signOut }: { user: any; signOut: () => Promise<void>
               </>
             ) : (
               <>
-                <ArrowRightStartOnRectangleIcon className="w-4 h-4" aria-hidden="true" />
+                <SignOut weight="bold" className="size-4" aria-hidden="true" />
                 Log Out
               </>
             )}
@@ -626,7 +613,7 @@ function MonetizationTab() {
         <div className="grid grid-cols-2 gap-4">
           <div className="border border-border rounded-lg p-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-2">
-              <CurrencyDollarIcon className="w-4 h-4" />
+              <CurrencyDollar weight="bold" className="size-4" />
               <span className="text-sm">Total Earned</span>
             </div>
             <p className="text-2xl font-bold">
@@ -635,7 +622,7 @@ function MonetizationTab() {
           </div>
           <div className="border border-border rounded-lg p-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-2">
-              <ShoppingCartIcon className="w-4 h-4" />
+              <ShoppingCart weight="bold" className="size-4" />
               <span className="text-sm">Total Sales</span>
             </div>
             <p className="text-2xl font-bold">
@@ -668,7 +655,7 @@ function MonetizationTab() {
           </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
-            <CreditCardIcon className="w-10 h-10 mx-auto mb-3 opacity-40" />
+            <CreditCard weight="bold" className="size-10 mx-auto mb-3 opacity-40" />
             <p className="text-sm font-medium mb-1">No paid lists yet</p>
             <p className="text-xs">Set a price on any list to start earning</p>
           </div>

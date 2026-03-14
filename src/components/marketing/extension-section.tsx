@@ -1,20 +1,20 @@
 'use client'
 
-import { PuzzlePieceIcon, BoltIcon, BookmarkIcon } from '@heroicons/react/24/solid'
+import { PuzzlePiece, Lightning, BookmarkSimple } from '@phosphor-icons/react'
 
 const features = [
   {
-    icon: PuzzlePieceIcon,
+    icon: PuzzlePiece,
     title: 'One-click save',
     description: 'Save any link from X/Twitter directly to your Snack lists without leaving the page.',
   },
   {
-    icon: BoltIcon,
+    icon: Lightning,
     title: 'Lightning fast',
     description: 'Add links to your lists instantly. No copy-pasting, no switching tabs.',
   },
   {
-    icon: BookmarkIcon,
+    icon: BookmarkSimple,
     title: 'Stay organized',
     description: 'Choose which list to save to, or create new lists on the fly.',
   },
@@ -132,7 +132,7 @@ export function ExtensionSection() {
                 {/* Save to Snack button */}
                 <div className="mt-6 flex justify-end">
                   <div className="bg-neutral-900 text-white rounded-full px-5 py-2.5 shadow-lg flex items-center gap-2 font-medium">
-                    <BookmarkIcon className="w-4 h-4" />
+                    <BookmarkSimple weight="bold" className="size-4" />
                     Save to Snack
                   </div>
                 </div>
@@ -145,8 +145,8 @@ export function ExtensionSection() {
         <div className="grid md:grid-cols-3 gap-6">
           {features.map((feature, i) => (
             <div key={i} className="bg-white rounded-xl p-6">
-              <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
-                <feature.icon className="w-5 h-5 text-neutral-600" />
+              <div className="size-10 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
+                <feature.icon weight="bold" className="size-5 text-neutral-600" />
               </div>
               <h3 className="text-lg font-semibold text-neutral-900 mb-2">{feature.title}</h3>
               <p className="text-neutral-500 text-sm">{feature.description}</p>

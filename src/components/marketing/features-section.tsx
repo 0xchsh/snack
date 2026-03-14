@@ -1,16 +1,16 @@
 'use client'
 
-import { SparklesIcon, LinkIcon, ShareIcon, ChartBarIcon, SwatchIcon, UsersIcon, BookmarkIcon, BoltIcon } from '@heroicons/react/24/solid'
+import { Sparkle, Link, ShareNetwork, ChartBar, Palette, Users, BookmarkSimple, Lightning } from '@phosphor-icons/react'
 
 const features = [
-  { icon: SparklesIcon, label: 'Curate your favorite links' },
-  { icon: LinkIcon, label: 'Share with one link' },
-  { icon: ShareIcon, label: 'Perfect for X/Twitter' },
-  { icon: ChartBarIcon, label: 'Track your analytics' },
-  { icon: SwatchIcon, label: 'Customize your lists' },
-  { icon: UsersIcon, label: 'Build your audience' },
-  { icon: BookmarkIcon, label: 'Save links instantly' },
-  { icon: BoltIcon, label: 'Quick and lightweight' },
+  { icon: Sparkle, label: 'Curate your favorite links' },
+  { icon: Link, label: 'Share with one link' },
+  { icon: ShareNetwork, label: 'Perfect for X/Twitter' },
+  { icon: ChartBar, label: 'Track your analytics' },
+  { icon: Palette, label: 'Customize your lists' },
+  { icon: Users, label: 'Build your audience' },
+  { icon: BookmarkSimple, label: 'Save links instantly' },
+  { icon: Lightning, label: 'Quick and lightweight' },
 ]
 
 export function FeaturesSection() {
@@ -23,8 +23,8 @@ export function FeaturesSection() {
               key={i}
               className="bg-neutral-50 rounded-xl p-5 hover:bg-neutral-100 transition-colors cursor-default"
             >
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-4">
-                <feature.icon className="w-5 h-5 text-neutral-600" aria-hidden="true" />
+              <div className="size-10 bg-white rounded-full flex items-center justify-center mb-4">
+                <feature.icon weight="bold" className="size-5 text-neutral-600" aria-hidden="true" />
               </div>
               <p className="text-base font-medium text-neutral-900">
                 {feature.label}

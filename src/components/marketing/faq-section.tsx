@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDownIcon } from '@heroicons/react/24/solid'
+import { CaretDown } from '@phosphor-icons/react'
 
 const FAQ_ITEMS = [
   {
@@ -52,7 +52,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          <ChevronDownIcon className="w-5 h-5 text-neutral-400" aria-hidden="true" />
+          <CaretDown weight="bold" className="size-5 text-neutral-400" aria-hidden="true" />
         </motion.div>
       </button>
 

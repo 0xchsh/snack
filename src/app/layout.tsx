@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ErrorBoundary } from '@/components/error-boundary'
-import { ToastProvider } from '@/components/toast'
+import { Toaster } from '@/components/ui/toast'
 import { AuthProvider } from '@/hooks/useAuth'
 import { QueryProvider } from '@/providers/query-provider'
 import { Agentation } from 'agentation'
@@ -44,16 +44,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased" suppressHydrationWarning>
-        <ThemeProvider defaultTheme="system" storageKey="snack-theme">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <ErrorBoundary>
             <QueryProvider>
-              <ToastProvider>
-                <AuthProvider>
-                  {children}
-                </AuthProvider>
-              </ToastProvider>
+              <AuthProvider>
+                {children}
+              </AuthProvider>
             </QueryProvider>
           </ErrorBoundary>
+          <Toaster />
           {process.env.NODE_ENV === 'development' && <Agentation />}
         </ThemeProvider>
       </body>

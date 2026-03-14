@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Suspense, useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { EyeIcon, StarIcon, LinkIcon, ListBulletIcon, PlusIcon, GlobeAltIcon, ChevronUpDownIcon, BanknotesIcon } from '@heroicons/react/24/solid'
+import { Eye, Star, Link as LinkPhosphor, ListBullets, Plus, Globe, CaretUpDown, Money } from '@phosphor-icons/react'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { Button, ListRowSkeleton, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
@@ -159,7 +159,7 @@ function DashboardContent() {
             {/* Header with count and create button */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <ListBulletIcon className="w-4 h-4" />
+                <ListBullets weight="bold" className="size-4" />
                 <span className="text-base">{lists.length} lists</span>
               </div>
               <div className="flex items-center gap-2">
@@ -168,7 +168,7 @@ function DashboardContent() {
                     <DropdownMenuTrigger asChild>
                       <button className="flex items-center gap-1 px-2.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors outline-none rounded-md">
                         {sortBy === 'recent' ? 'Recent' : sortBy === 'links' ? 'Links' : 'A-Z'}
-                        <ChevronUpDownIcon className="w-4 h-4" />
+                        <CaretUpDown weight="bold" className="size-4" />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -192,7 +192,7 @@ function DashboardContent() {
                   className="gap-2"
                 >
                   <span>Create list</span>
-                  <PlusIcon className="w-4 h-4" />
+                  <Plus weight="bold" className="size-4" />
                 </Button>
               </div>
             </div>
@@ -263,7 +263,7 @@ function DashboardContent() {
             {/* Header with count and discover button */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <StarIcon className="w-4 h-4" />
+                <Star weight="bold" className="size-4" />
                 <span className="text-base">{savedLists.length} saved lists</span>
               </div>
               <Button
@@ -274,7 +274,7 @@ function DashboardContent() {
               >
                 <Link href="/discover">
                   <span>Discover</span>
-                  <GlobeAltIcon className="w-4 h-4 !text-muted-foreground" />
+                  <Globe weight="bold" className="size-4 !text-muted-foreground" />
                 </Link>
               </Button>
             </div>
@@ -339,14 +339,14 @@ function DashboardContent() {
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="flex flex-col justify-between border border-border rounded-lg p-4 min-h-[100px]">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <LinkIcon className="w-4 h-4" />
+                  <LinkPhosphor weight="bold" className="size-4" />
                   <span className="text-sm">Links</span>
                 </div>
                 <div className="text-2xl font-bold text-foreground">{formatCount(totalLinks)}</div>
               </div>
               <div className="flex flex-col justify-between border border-border rounded-lg p-4 min-h-[100px]">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <EyeIcon className="w-4 h-4" />
+                  <Eye weight="bold" className="size-4" />
                   <span className="text-sm">Views</span>
                 </div>
                 <div className="text-2xl font-bold text-foreground">
@@ -355,7 +355,7 @@ function DashboardContent() {
               </div>
               <div className="flex flex-col justify-between border border-border rounded-lg p-4 min-h-[100px]">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <StarIcon className="w-4 h-4" />
+                  <Star weight="bold" className="size-4" />
                   <span className="text-sm">Stars</span>
                 </div>
                 <div className="text-2xl font-bold text-foreground">
@@ -368,7 +368,7 @@ function DashboardContent() {
                 className="flex flex-col justify-between border border-border rounded-lg p-4 min-h-[100px] hover:bg-accent/50 transition-colors"
               >
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <BanknotesIcon className="w-4 h-4" />
+                  <Money weight="bold" className="size-4" />
                   <span className="text-sm">Earnings</span>
                 </div>
                 <div className="text-2xl font-bold text-foreground">
@@ -380,7 +380,7 @@ function DashboardContent() {
             {/* Per-list stats header */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <ListBulletIcon className="w-4 h-4" />
+                <ListBullets weight="bold" className="size-4" />
                 <span className="text-base">{lists.length} lists</span>
               </div>
               {lists.length > 1 && (
@@ -388,7 +388,7 @@ function DashboardContent() {
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center gap-1 px-2.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors outline-none rounded-md">
                       {statsSortBy === 'links' ? 'Links' : statsSortBy === 'views' ? 'Views' : 'Stars'}
-                      <ChevronUpDownIcon className="w-4 h-4" />
+                      <CaretUpDown weight="bold" className="size-4" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -449,15 +449,15 @@ function DashboardContent() {
                       </div>
                       <div className="flex items-center gap-2 sm:gap-4 text-sm text-muted-foreground flex-shrink-0">
                         <div className="flex items-center gap-1">
-                          <LinkIcon className="h-4 w-4" aria-hidden="true" />
+                          <LinkPhosphor weight="bold" className="size-4" aria-hidden="true" />
                           <span>{formatCount(list.links?.length || 0)}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <EyeIcon className="h-4 w-4" aria-hidden="true" />
+                          <Eye weight="bold" className="size-4" aria-hidden="true" />
                           <span>{formatCount(stats.views)}</span>
                         </div>
                         <div className="hidden sm:flex items-center gap-1">
-                          <StarIcon className="h-4 w-4" aria-hidden="true" />
+                          <Star weight="bold" className="size-4" aria-hidden="true" />
                           <span>{formatCount(list.save_count || 0)}</span>
                         </div>
                       </div>

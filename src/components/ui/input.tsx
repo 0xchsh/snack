@@ -1,39 +1,25 @@
 import * as React from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
+import { Input as InputPrimitive } from '@base-ui/react/input'
 
 import { cn } from '@/lib/utils'
 
-const inputVariants = cva(
-  'block w-full rounded-lg text-base text-foreground placeholder:text-muted-foreground transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
-  {
-    variants: {
-      variant: {
-        default: 'bg-background border border-border focus-visible:border-transparent',
-        secondary:
-          'bg-secondary border border-transparent focus-visible:border-transparent',
-      },
-      size: {
-        default: 'px-4 py-3',
-        sm: 'px-3 py-2 text-sm',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-      size: 'default',
-    },
-  }
-)
-
-export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
-    VariantProps<typeof inputVariants> {}
+export interface InputProps extends React.ComponentProps<'input'> {}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, variant, size, type = 'text', ...props }, ref) => {
+  ({ className, type, ...props }, ref) => {
     return (
-      <input
+      <InputPrimitive
         type={type}
-        className={cn(inputVariants({ variant, size }), className)}
+        data-slot="input"
+        className={cn(
+          'h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none',
+          'file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground',
+          'placeholder:text-muted-foreground',
+          'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
+          'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+          'md:text-sm',
+          className
+        )}
         ref={ref}
         {...props}
       />
@@ -43,4 +29,4 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
 Input.displayName = 'Input'
 
-export { Input, inputVariants }
+export { Input }

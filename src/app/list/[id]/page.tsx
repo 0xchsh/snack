@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeftIcon, DocumentDuplicateIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid'
+import { ArrowLeft, Copy, ArrowSquareOut } from '@phosphor-icons/react'
 import { Button } from '@/components/ui'
 import { ListEditor } from '@/components/list-editor'
 import { PublicListView } from '@/components/public-list-view'
@@ -242,7 +242,7 @@ export default function ListPage({ params }: ListPageProps) {
               href="/dashboard" 
               className="navigation-button flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors bg-neutral-100 rounded-full no-underline"
             >
-              <ArrowLeftIcon className="w-4 h-4" />
+              <ArrowLeft weight="bold" className="size-4" />
               Back
             </Link>
             
@@ -257,7 +257,7 @@ export default function ListPage({ params }: ListPageProps) {
                 className="gap-2 rounded-full bg-neutral-100 text-muted-foreground hover:text-foreground"
               >
                 Copy
-                <DocumentDuplicateIcon className="w-4 h-4" />
+                <Copy weight="bold" className="size-4" />
               </Button>
               <Link
                 href={`/${user?.username || 'list'}/${currentList.public_id || currentList.id}?view=public`}
@@ -266,7 +266,7 @@ export default function ListPage({ params }: ListPageProps) {
                 className="navigation-button flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors bg-neutral-100 rounded-full no-underline"
               >
                 View
-                <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                <ArrowSquareOut weight="bold" className="size-4" />
               </Link>
             </div>
           </div>
