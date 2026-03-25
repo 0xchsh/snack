@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import { useWebHaptics } from 'web-haptics/react'
+import { useWebHaptics } from "web-haptics/react"
 
 export function useHaptics(options?: { sound?: boolean }) {
   const { trigger, cancel, isSupported } = useWebHaptics({

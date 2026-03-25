@@ -1,5 +1,17 @@
 import type { Metadata } from 'next'
+import localFont from 'next/font/local'
 import './globals.css'
+
+const openRunde = localFont({
+  src: [
+    { path: '../../public/fonts/OpenRunde-Regular.woff2', weight: '400', style: 'normal' },
+    { path: '../../public/fonts/OpenRunde-Medium.woff2', weight: '500', style: 'normal' },
+    { path: '../../public/fonts/OpenRunde-Semibold.woff2', weight: '600', style: 'normal' },
+    { path: '../../public/fonts/OpenRunde-Bold.woff2', weight: '700', style: 'normal' },
+  ],
+  variable: '--font-sans',
+  display: 'swap',
+})
 import { ThemeProvider } from '@/components/theme-provider'
 import { ErrorBoundary } from '@/components/error-boundary'
 import { Toaster } from '@/components/ui/toast'
@@ -42,7 +54,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={openRunde.variable}>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <ErrorBoundary>

@@ -50,7 +50,7 @@ const config: Config = {
         'nav': '0.5rem', // 8px - gap between nav items
       },
       fontFamily: {
-        sans: ['"SF Pro Rounded"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        sans: ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['"SF Mono"', 'ui-monospace', 'monospace'],
       },
       colors: {

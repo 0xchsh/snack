@@ -39,7 +39,7 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
-    --font-sans: "SF Pro Rounded", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: "Open Runde", Inter, system-ui, sans-serif;
     --font-mono: "SF Mono", ui-monospace, monospace;
     --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
     --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);

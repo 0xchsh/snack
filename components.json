@@ -1,6 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "new-york",
+  "style": "base-nova",
   "rsc": true,
   "tsx": true,
   "tailwind": {
@@ -18,8 +18,8 @@
     "hooks": "@/hooks"
   },
   "registries": {
-    "shincn": {
-      "url": "https://ui.ch.sh/r"
+    "@shincn": {
+      "url": "https://ui.ch.sh/r/{name}.json"
     }
   }
 }
