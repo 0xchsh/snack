@@ -1,9 +1,13 @@
 'use client'
 
 import { useRef, useEffect, useState } from 'react'
-import data from '@emoji-mart/data'
-import Picker from '@emoji-mart/react'
-import { useTheme } from 'next-themes'
+import {
+  type EmojiPickerListCategoryHeaderProps,
+  type EmojiPickerListEmojiProps,
+  type EmojiPickerListRowProps,
+  EmojiPicker as EmojiPickerPrimitive,
+} from 'frimousse'
+import { MagnifyingGlass, SpinnerGap } from '@phosphor-icons/react'
 
 interface EmojiPickerProps {
   isOpen: boolean
@@ -13,6 +17,36 @@ interface EmojiPickerProps {
   onClose: () => void
 }
 
+function EmojiPickerRow({ children, ...props }: EmojiPickerListRowProps) {
+  return (
+    <div {...props} className="scroll-my-1 px-1">
+      {children}
+    </div>
+  )
+}
+
+function EmojiPickerEmoji({ emoji, className, ...props }: EmojiPickerListEmojiProps) {
+  return (
+    <button
+      {...props}
+      className="data-[active]:bg-secondary flex size-7 items-center justify-center rounded-sm text-base cursor-pointer"
+    >
+      {emoji.emoji}
+    </button>
+  )
+}
+
+function EmojiPickerCategoryHeader({ category, ...props }: EmojiPickerListCategoryHeaderProps) {
+  return (
+    <div
+      {...props}
+      className="bg-popover text-muted-foreground px-3 pb-2 pt-3.5 text-xs leading-none"
+    >
+      {category.label}
+    </div>
+  )
+}
+
 export function EmojiPicker({
   isOpen,
   triggerRef,
@@ -20,42 +54,31 @@ export function EmojiPicker({
   onSelectEmoji,
   onClose
 }: EmojiPickerProps) {
-  const { resolvedTheme } = useTheme()
   const [position, setPosition] = useState({ top: 0, left: 0 })
-  const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
 
-  // Wait for mount to get correct theme and detect mobile
   useEffect(() => {
-    setMounted(true)
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 400)
-    }
+    const checkMobile = () => setIsMobile(window.innerWidth < 400)
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
-
-  // Determine the actual theme to use
-  const actualTheme = mounted ? resolvedTheme : 'light'
 
   useEffect(() => {
     if (isOpen && triggerRef.current) {
       const triggerRect = triggerRef.current.getBoundingClientRect()
       const viewportWidth = window.innerWidth
       const viewportHeight = window.innerHeight
-      const pickerWidth = isMobile ? Math.min(352, viewportWidth - 32) : 352 // Constrain width on mobile
-      const pickerHeight = 435 // emoji-mart default height
+      const pickerWidth = isMobile ? Math.min(352, viewportWidth - 32) : 352
+      const pickerHeight = 435
 
       let left = triggerRect.left
       let top = triggerRect.bottom + 8
 
-      // On mobile, center the picker horizontally
       if (isMobile) {
         left = (viewportWidth - pickerWidth) / 2
       } else {
-        // Adjust if picker would go off-screen
         if (left + pickerWidth > viewportWidth - 16) {
           left = viewportWidth - pickerWidth - 16
         }
@@ -65,7 +88,6 @@ export function EmojiPicker({
         top = triggerRect.top - pickerHeight - 8
       }
 
-      // Ensure minimum margins
       left = Math.max(16, left)
       top = Math.max(16, top)
 
@@ -73,14 +95,7 @@ export function EmojiPicker({
     }
   }, [isOpen, triggerRef, isMobile])
 
-  const handleEmojiSelect = (emoji: any) => {
-    onSelectEmoji(emoji.native)
-    onClose()
-  }
-
-  if (!isOpen) {
-    return null
-  }
+  if (!isOpen) return null
 
   return (
     <>
@@ -93,24 +108,50 @@ export function EmojiPicker({
         tabIndex={-1}
       />
 
-      {/* Emoji Mart Picker */}
+      {/* Picker */}
       <div
         ref={pickerRef}
         className="fixed z-50"
         style={{
           top: position.top,
           left: position.left,
-          maxWidth: isMobile ? 'calc(100vw - 32px)' : undefined
+          maxWidth: isMobile ? 'calc(100vw - 32px)' : undefined,
         }}
       >
-        <Picker
-          data={data}
-          onEmojiSelect={handleEmojiSelect}
-          theme={actualTheme}
-          previewPosition="none"
-          skinTonePosition="search"
-          perLine={isMobile ? 7 : 9}
-        />
+        <EmojiPickerPrimitive.Root
+          className="bg-popover text-popover-foreground border border-border isolate flex h-[435px] w-[352px] flex-col overflow-hidden rounded-xl shadow-lg"
+          onEmojiSelect={({ emoji }) => {
+            onSelectEmoji(emoji)
+            onClose()
+          }}
+        >
+          {/* Search */}
+          <div className="flex h-9 items-center gap-2 border-b border-border px-3">
+            <MagnifyingGlass className="size-4 shrink-0 opacity-50" />
+            <EmojiPickerPrimitive.Search
+              className="outline-none placeholder:text-muted-foreground flex h-10 w-full bg-transparent py-3 text-sm"
+              placeholder="Search emoji…"
+            />
+          </div>
+
+          {/* Content */}
+          <EmojiPickerPrimitive.Viewport className="outline-none relative flex-1">
+            <EmojiPickerPrimitive.Loading className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+              <SpinnerGap className="size-4 animate-spin" />
+            </EmojiPickerPrimitive.Loading>
+            <EmojiPickerPrimitive.Empty className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
+              No emoji found.
+            </EmojiPickerPrimitive.Empty>
+            <EmojiPickerPrimitive.List
+              className="select-none pb-1"
+              components={{
+                Row: EmojiPickerRow,
+                Emoji: EmojiPickerEmoji,
+                CategoryHeader: EmojiPickerCategoryHeader,
+              }}
+            />
+          </EmojiPickerPrimitive.Viewport>
+        </EmojiPickerPrimitive.Root>
       </div>
     </>
   )
