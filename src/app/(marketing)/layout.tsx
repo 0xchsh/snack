@@ -85,7 +85,7 @@ function MarketingLayoutContent({
   }
 
   return (
-    <div className={isHomepage ? 'light' : ''} style={isHomepage ? { colorScheme: 'light' } : undefined}>
+    <div className={isHomepage ? 'light' : ''} style={isHomepage ? { colorScheme: 'light', color: 'oklch(0.145 0 0)', backgroundColor: 'oklch(1 0 0)' } : undefined}>
       {/* Skip to content link for accessibility */}
       <a
         href="#main-content"
