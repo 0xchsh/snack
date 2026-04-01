@@ -32,7 +32,7 @@ export default function HomePage() {
       {/* Hero */}
       <section className="pt-16 pb-12 px-4">
         <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-4xl sm:text-5xl font-semibold text-neutral-900 mb-4">
+          <h1 className="text-4xl sm:text-5xl font-semibold text-neutral-900 mb-4" style={{ letterSpacing: '-2px' }}>
             Never forget your favorite links
           </h1>
           <p className="text-lg text-neutral-500 mb-8">
