@@ -19,7 +19,7 @@ interface EmojiPickerProps {
 
 function EmojiPickerRow({ children, ...props }: EmojiPickerListRowProps) {
   return (
-    <div {...props} className="scroll-my-1 px-1">
+    <div {...props} className="scroll-my-1 px-2">
       {children}
     </div>
   )
@@ -40,7 +40,7 @@ function EmojiPickerCategoryHeader({ category, ...props }: EmojiPickerListCatego
   return (
     <div
       {...props}
-      className="bg-popover text-muted-foreground px-3 pb-2 pt-3.5 text-xs leading-none"
+      className="bg-popover text-muted-foreground px-2.5 pb-2 pt-3.5 text-xs leading-none"
     >
       {category.label}
     </div>
