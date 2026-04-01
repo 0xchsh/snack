@@ -1,4 +1,3 @@
-import Script from 'next/script'
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import './globals.css'
@@ -57,7 +56,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={openRunde.variable}>
       <head>
-        <Script src="https://cdn.visitors.now/v.js" data-token="706f3ada-f68c-4ce3-b72f-22bb1cb34d8c" />
+        <script src="https://cdn.visitors.now/v.js" data-token="706f3ada-f68c-4ce3-b72f-22bb1cb34d8c" data-persist></script>
       </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
