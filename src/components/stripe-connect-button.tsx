@@ -62,7 +62,7 @@ export function StripeConnectButton({
       if (!response.ok) {
         const errorData = await response.json()
         console.error('Onboarding error:', errorData)
-        alert(errorData.error || 'Failed to start onboarding. Please try again.')
+        alert(errorData.error?.message || 'Failed to start onboarding. Please try again.')
         setLoading(false)
         return
       }
