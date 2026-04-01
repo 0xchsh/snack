@@ -55,6 +55,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className={openRunde.variable}>
+      <head>
+        <script src="https://cdn.visitors.now/v.js" data-token="706f3ada-f68c-4ce3-b72f-22bb1cb34d8c"></script>
+      </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <ErrorBoundary>
