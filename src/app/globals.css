@@ -120,6 +120,7 @@
   /* Remove default blue focus outline from Base UI menu components */
   [data-slot="dropdown-menu-trigger"],
   [data-slot="dropdown-menu-positioner"],
+  [data-slot="dropdown-menu-positioner"] *,
   [data-slot="dropdown-menu-content"],
   [data-slot="dropdown-menu-item"] {
     outline: none !important;
