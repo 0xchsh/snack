@@ -55,7 +55,7 @@ export function UserMenu({ user, onLogout, className }: UserMenuProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[200px]">
         <DropdownMenuItem asChild>
-          <Link href="/profile" className="cursor-pointer">
+          <Link href="/profile" className="flex items-center gap-1.5 w-full cursor-pointer">
             <UserCircle weight="bold" className="size-4 text-muted-foreground" />
             <span>Profile</span>
           </Link>

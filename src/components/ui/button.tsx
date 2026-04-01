@@ -20,9 +20,9 @@ const buttonVariants = cva(
         muted:
           'hover:bg-muted hover:text-foreground text-muted-foreground',
         ghost:
-          'hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50',
+          'text-foreground hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50',
         outline:
-          'btn-classic btn-classic-outline bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-input/30 dark:hover:bg-input/50',
+          'btn-classic btn-classic-outline bg-background text-foreground hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-input/30 dark:hover:bg-input/50',
         destructive:
           'btn-classic btn-classic-destructive bg-destructive text-white focus-visible:border-destructive/40 focus-visible:ring-destructive/20',
         link: 'text-primary underline-offset-4 hover:underline hover:decoration-dotted hover:decoration-muted-foreground/50',
