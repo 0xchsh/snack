@@ -6,7 +6,6 @@ import { Star, ChartBar, ListBullets } from '@phosphor-icons/react'
 import { usePathname } from 'next/navigation'
 
 import { ThemeToggle } from '@/components/theme-toggle'
-import { ThemeProvider } from '@/components/theme-provider'
 import { Button } from '@/components/ui'
 import { TopBar, BrandMark, UserMenu } from '@/components/primitives'
 import { useAuth } from '@/hooks/useAuth'
@@ -136,14 +135,6 @@ function MarketingLayoutContent({
       </main>
     </div>
   )
-
-  if (isHomepage) {
-    return (
-      <ThemeProvider attribute="class" forcedTheme="light">
-        {content}
-      </ThemeProvider>
-    )
-  }
 
   return content
 }

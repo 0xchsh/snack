@@ -19,7 +19,7 @@ interface EmojiPickerProps {
 
 function EmojiPickerRow({ children, ...props }: EmojiPickerListRowProps) {
   return (
-    <div {...props} className="scroll-my-1 pl-2 pr-4">
+    <div {...props} className="scroll-my-1 px-2">
       {children}
     </div>
   )
@@ -135,7 +135,7 @@ export function EmojiPicker({
           </div>
 
           {/* Content */}
-          <EmojiPickerPrimitive.Viewport className="outline-none relative flex-1">
+          <EmojiPickerPrimitive.Viewport className="outline-none relative flex-1 [scrollbar-gutter:stable]">
             <EmojiPickerPrimitive.Loading className="absolute inset-0 flex items-center justify-center text-muted-foreground">
               <SpinnerGap className="size-4 animate-spin" />
             </EmojiPickerPrimitive.Loading>

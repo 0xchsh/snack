@@ -425,8 +425,8 @@
   }
 }
 
-/* Remove visited link styling */
-a:visited {
+/* Remove visited link styling, but not for button-styled links */
+a:not([data-slot="button"]):visited {
   color: inherit;
 }
 
