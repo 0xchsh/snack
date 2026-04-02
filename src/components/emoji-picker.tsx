@@ -19,7 +19,7 @@ interface EmojiPickerProps {
 
 function EmojiPickerRow({ children, ...props }: EmojiPickerListRowProps) {
   return (
-    <div {...props} className="scroll-my-1 px-2">
+    <div {...props} className="scroll-my-1 pl-2 pr-4">
       {children}
     </div>
   )
