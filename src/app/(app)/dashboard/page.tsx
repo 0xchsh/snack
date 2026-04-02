@@ -235,7 +235,7 @@ function DashboardContent() {
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                         {isListPaid((list as any).price_cents) && (
-                          <span className="text-xs font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                          <span className="text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-1.5 py-0.5 rounded">
                             {formatListPrice((list as any).price_cents, (list as any).currency || 'usd')}
                           </span>
                         )}
@@ -442,7 +442,7 @@ function DashboardContent() {
                           {list.title || 'Untitled List'}
                         </span>
                         {isListPaid((list as any).price_cents) && (
-                          <span className="text-xs font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded flex-shrink-0">
+                          <span className="text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-1.5 py-0.5 rounded flex-shrink-0">
                             {formatListPrice((list as any).price_cents, (list as any).currency || 'usd')}
                           </span>
                         )}
