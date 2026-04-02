@@ -39,7 +39,7 @@ export default function HomePage() {
             Organize and share them as simple, beautiful&nbsp;lists.
           </p>
 
-          <div className="flex items-center justify-center gap-3 mb-12">
+          <div className="light flex items-center justify-center gap-3 mb-12">
             <Button asChild variant="outline" className="px-6">
               <Link href="/auth/sign-in">Login</Link>
             </Button>

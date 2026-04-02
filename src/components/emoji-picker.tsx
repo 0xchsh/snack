@@ -143,7 +143,7 @@ export function EmojiPicker({
               No emoji found.
             </EmojiPickerPrimitive.Empty>
             <EmojiPickerPrimitive.List
-              className="select-none pb-1"
+              className="select-none pb-3"
               components={{
                 Row: EmojiPickerRow,
                 Emoji: EmojiPickerEmoji,

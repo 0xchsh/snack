@@ -113,9 +113,11 @@ function MarketingLayoutContent({
             {/* Right side */}
             <div className="flex items-center gap-3">
               {isHomepage ? (
-                <Button asChild variant="primary" className="text-white">
-                  <Link href="/auth/sign-in">Get Started</Link>
-                </Button>
+                <div className="light">
+                  <Button asChild variant="primary">
+                    <Link href="/auth/sign-in">Get Started</Link>
+                  </Button>
+                </div>
               ) : (
                 <>
                   <Button asChild variant="secondary">
