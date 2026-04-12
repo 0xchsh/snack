@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 
 import { Button, Spinner } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
-import { LoadingState } from '@/components/loading-state'
+import { Skeleton } from 'boneyard-js/react'
 import { AppContainer } from '@/components/primitives'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { DefaultAvatar } from '@/components/default-avatar'
@@ -31,11 +31,7 @@ export default function ProfilePage() {
 
   // Show loading state while mounting or checking auth
   if (!mounted || loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Loading profile…" />
-      </div>
-    )
+    return <ProfileSkeleton />
   }
 
   // Redirect to sign-in if not authenticated
@@ -57,6 +53,7 @@ export default function ProfilePage() {
   }
 
   return (
+    <Skeleton name="profile" loading={false} animate="pulse">
     <div className="min-h-screen bg-background">
       <AppContainer variant="app">
         <div className="py-8">
@@ -108,6 +105,43 @@ export default function ProfilePage() {
           </div>
         </div>
       </AppContainer>
+    </div>
+    </Skeleton>
+  )
+}
+
+function ProfileSkeleton() {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-[560px] mx-auto px-4 py-8 space-y-3">
+        <div className="h-5 w-32 bg-muted animate-pulse rounded-md" />
+        <div className="flex gap-2 mb-6">
+          <div className="h-8 w-20 bg-muted animate-pulse rounded-md" />
+          <div className="h-8 w-28 bg-muted animate-pulse rounded-md" />
+        </div>
+        <div className="border border-border rounded-xl p-6">
+          <div className="flex items-center gap-6">
+            <div className="w-20 h-20 rounded-full bg-muted animate-pulse" />
+            <div className="space-y-2">
+              <div className="h-5 w-32 bg-muted animate-pulse rounded-md" />
+              <div className="h-4 w-48 bg-muted animate-pulse rounded-md" />
+              <div className="h-8 w-36 bg-muted animate-pulse rounded-md" />
+            </div>
+          </div>
+        </div>
+        <div className="border border-border rounded-xl p-6 space-y-4">
+          <div className="h-5 w-36 bg-muted animate-pulse rounded-md" />
+          <div className="h-10 bg-muted animate-pulse rounded-lg" />
+        </div>
+        <div className="border border-border rounded-xl p-6 space-y-4">
+          <div className="h-5 w-44 bg-muted animate-pulse rounded-md" />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="h-10 bg-muted animate-pulse rounded-lg" />
+            <div className="h-10 bg-muted animate-pulse rounded-lg" />
+          </div>
+          <div className="h-10 bg-muted animate-pulse rounded-lg" />
+        </div>
+      </div>
     </div>
   )
 }

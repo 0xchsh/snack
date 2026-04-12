@@ -9,7 +9,7 @@ import { isListPaid, formatListPrice } from '@/lib/pricing'
 import { useAuth } from '@/hooks/useAuth'
 import { validateUsername } from '@/lib/username-utils'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { LoadingState } from '@/components/loading-state'
+import { Skeleton } from 'boneyard-js/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui'
 import { DefaultAvatar } from '@/components/default-avatar'
@@ -83,15 +83,6 @@ export default function UsernamePage() {
     fetchProfile()
   }, [username])
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Opening profile…" />
-      </div>
-    )
-  }
-
   // Error state
   if (error) {
     return (
@@ -142,6 +133,42 @@ export default function UsernamePage() {
   }
 
   return (
+    <Skeleton
+      name="user-profile"
+      loading={loading}
+      animate="pulse"
+      transition={300}
+      fixture={
+        <div className="min-h-screen bg-background">
+          <div className="mx-auto py-12 max-w-[560px] px-4 space-y-6">
+            <div className="w-12 h-12 rounded-full bg-muted" />
+            <div className="space-y-1">
+              <h1 className="text-xl font-semibold text-foreground">Jane Doe</h1>
+              <p className="text-base text-muted-foreground">@janedoe</p>
+              <p className="text-base text-muted-foreground">Joined March 2026</p>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">3 lists</span>
+              <div className="flex gap-3 text-sm text-muted-foreground">
+                <span>12</span>
+                <span>5</span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between px-3 py-3 bg-neutral-50 dark:bg-neutral-900 rounded-md">
+                  <div className="flex items-center gap-2">
+                    <span>📋</span>
+                    <span className="text-base font-medium">Example List</span>
+                  </div>
+                  <span className="text-base text-muted-foreground">4 links</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      }
+    >
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-background">
@@ -267,5 +294,6 @@ export default function UsernamePage() {
         </div>
       </div>
     </div>
+    </Skeleton>
   )
 }

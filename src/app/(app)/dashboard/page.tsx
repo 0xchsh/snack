@@ -7,7 +7,7 @@ import { Eye, Star, Link as LinkPhosphor, ListBullets, Plus, Globe, CaretUpDown,
 import { useQueryClient } from '@tanstack/react-query'
 
 import { toast } from 'sonner'
-import { Button, ListRowSkeleton, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
+import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 import { celebrate } from '@/lib/confetti'
 import {
@@ -19,7 +19,7 @@ import {
 } from '@/hooks/queries'
 import { AppContainer } from '@/components/primitives'
 import { Breadcrumb } from '@/components/breadcrumb'
-import { LoadingState } from '@/components/loading-state'
+import { Skeleton } from 'boneyard-js/react'
 import { isListPaid, formatListPrice, formatCurrency } from '@/lib/pricing'
 import type { Currency } from '@/types'
 
@@ -27,8 +27,27 @@ function ListsSkeleton({ count = 3 }: { count?: number }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: count }).map((_, i) => (
-        <ListRowSkeleton key={i} />
+        <div key={i} className="flex items-center gap-4 py-2.5 px-2">
+          <div className="w-5 h-5 bg-muted animate-pulse rounded" />
+          <div className="h-4 bg-muted animate-pulse rounded-md flex-1 max-w-[60%]" />
+          <div className="h-4 w-8 bg-muted animate-pulse rounded-md" />
+        </div>
       ))}
+    </div>
+  )
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-[560px] mx-auto px-4 py-8 space-y-4">
+        <div className="h-5 w-40 bg-muted animate-pulse rounded-md" />
+        <div className="flex items-center justify-between">
+          <div className="h-5 w-24 bg-muted animate-pulse rounded-md" />
+          <div className="h-9 w-28 bg-muted animate-pulse rounded-md" />
+        </div>
+        <ListsSkeleton count={4} />
+      </div>
     </div>
   )
 }
@@ -116,11 +135,7 @@ function DashboardContent() {
   }
 
   if (!mounted || loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Opening your dashboard…" />
-      </div>
-    )
+    return <DashboardSkeleton />
   }
 
   if (!user) {
@@ -147,6 +162,7 @@ function DashboardContent() {
   })
 
   return (
+    <Skeleton name="dashboard" loading={listsLoading && lists.length === 0} animate="pulse" transition={300} fallback={<DashboardSkeleton />}>
     <div className="min-h-screen bg-background">
       <AppContainer variant="app">
         <div className="py-8">
@@ -463,16 +479,13 @@ function DashboardContent() {
         </div>
       </AppContainer>
     </div>
+    </Skeleton>
   )
 }
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Opening your dashboard…" />
-      </div>
-    }>
+    <Suspense fallback={<DashboardSkeleton />}>
       <DashboardContent />
     </Suspense>
   )

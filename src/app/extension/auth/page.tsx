@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { Skeleton } from 'boneyard-js/react'
 
 function ExtensionAuthContent() {
   const searchParams = useSearchParams()
@@ -73,59 +74,52 @@ function ExtensionAuthContent() {
     authorize()
   }, [callbackUrl, router])
 
+  const isLoading = status === 'loading' || status === 'authorizing'
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md text-center">
         <div className="text-6xl mb-6">🥨</div>
 
-        {status === 'loading' && (
-          <>
-            <h1 className="text-xl font-semibold text-foreground mb-2">
-              Loading...
-            </h1>
-            <div className="w-8 h-8 border-2 border-muted border-t-primary rounded-full animate-spin mx-auto" />
-          </>
-        )}
+        <Skeleton
+          name="extension-auth"
+          loading={isLoading}
+          animate="pulse"
+          fallback={
+            <div className="space-y-3">
+              <div className="h-7 w-64 bg-muted animate-pulse rounded-md mx-auto" />
+              <div className="h-5 w-48 bg-muted animate-pulse rounded-md mx-auto" />
+            </div>
+          }
+        >
+          {status === 'success' && (
+            <>
+              <h1 className="text-xl font-semibold text-green-500 mb-2">
+                Success!
+              </h1>
+              <p className="text-muted-foreground">
+                Redirecting back to the extension...
+              </p>
+            </>
+          )}
 
-        {status === 'authorizing' && (
-          <>
-            <h1 className="text-xl font-semibold text-foreground mb-2">
-              Connecting to Snack Extension
-            </h1>
-            <p className="text-muted-foreground mb-6">
-              Please wait while we authorize the extension...
-            </p>
-            <div className="w-8 h-8 border-2 border-muted border-t-primary rounded-full animate-spin mx-auto" />
-          </>
-        )}
-
-        {status === 'success' && (
-          <>
-            <h1 className="text-xl font-semibold text-green-500 mb-2">
-              Success!
-            </h1>
-            <p className="text-muted-foreground">
-              Redirecting back to the extension...
-            </p>
-          </>
-        )}
-
-        {status === 'error' && (
-          <>
-            <h1 className="text-xl font-semibold text-destructive mb-2">
-              Authorization Failed
-            </h1>
-            <p className="text-muted-foreground mb-6">
-              {error || 'Something went wrong'}
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors"
-            >
-              Try Again
-            </button>
-          </>
-        )}
+          {status === 'error' && (
+            <>
+              <h1 className="text-xl font-semibold text-destructive mb-2">
+                Authorization Failed
+              </h1>
+              <p className="text-muted-foreground mb-6">
+                {error || 'Something went wrong'}
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors"
+              >
+                Try Again
+              </button>
+            </>
+          )}
+        </Skeleton>
       </div>
     </div>
   )
@@ -136,10 +130,10 @@ function LoadingFallback() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md text-center">
         <div className="text-6xl mb-6">🥨</div>
-        <h1 className="text-xl font-semibold text-foreground mb-2">
-          Loading...
-        </h1>
-        <div className="w-8 h-8 border-2 border-muted border-t-primary rounded-full animate-spin mx-auto" />
+        <div className="space-y-3">
+          <div className="h-7 w-48 bg-muted animate-pulse rounded-md mx-auto" />
+          <div className="h-5 w-40 bg-muted animate-pulse rounded-md mx-auto" />
+        </div>
       </div>
     </div>
   )

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Star, ListBullets, CaretUpDown } from '@phosphor-icons/react'
 import { Spinner, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
 import { useInView } from 'react-intersection-observer'
-import { LoadingState } from '@/components/loading-state'
+import { Skeleton } from 'boneyard-js/react'
 
 interface PublicList {
   id: string
@@ -160,15 +160,40 @@ export default function DiscoverPage() {
       }
     })
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Finding great lists…" />
-      </div>
-    )
-  }
-
   return (
+    <Skeleton
+      name="discover"
+      loading={loading}
+      animate="pulse"
+      transition={300}
+      fixture={
+        <div className="min-h-screen bg-background">
+          <div className="mx-auto py-6 md:py-12 max-w-2xl w-full px-4">
+            <div className="mb-8 text-center">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Discover Lists</h1>
+              <p className="text-muted-foreground">Explore curated lists from the community</p>
+            </div>
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="text-sm">42 lists</span>
+              </div>
+              <span className="text-sm text-muted-foreground">Recent</span>
+            </div>
+            <div className="flex flex-col">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4 py-2.5 px-2">
+                  <span className="text-base">📋</span>
+                  <span className="text-sm font-medium text-foreground flex-1">Example List Title</span>
+                  <span className="text-sm text-muted-foreground">user</span>
+                  <span className="text-sm text-muted-foreground tabular-nums">5</span>
+                  <span className="text-sm text-muted-foreground tabular-nums">3</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      }
+    >
     <div className="min-h-screen bg-background">
       <div className="mx-auto py-6 md:py-12 max-w-2xl w-full px-4">
         <div className="mb-8 text-center">
@@ -290,5 +315,6 @@ export default function DiscoverPage() {
         )}
       </div>
     </div>
+    </Skeleton>
   )
 }

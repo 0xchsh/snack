@@ -9,7 +9,7 @@ import { validateAndNormalizeUrl, getHostname } from '@/lib/url-utils'
 import { Favicon } from './favicon'
 import { fetchOGDataClient } from '@/lib/og-client'
 import { toast } from 'sonner'
-import { Button, LinkCardSkeleton } from '@/components/ui'
+import { Button } from '@/components/ui'
 import { useHaptics } from '@/hooks/use-haptics'
 
 const MAX_LINKS_PER_PASTE = 25
@@ -22,9 +22,20 @@ interface ListEditorProps {
   onReorderLinks?: (links: string[]) => void
 }
 
-// Ghost loading component for card view - uses LinkCardSkeleton for exact dimension matching
+// Ghost loading component for card view
 function GhostLinkItem() {
-  return <LinkCardSkeleton />
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="aspect-video w-full bg-muted animate-pulse rounded-lg" />
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="w-4 h-4 bg-muted animate-pulse rounded-sm flex-shrink-0" />
+          <div className="h-5 bg-muted animate-pulse rounded-md flex-1 max-w-[70%]" />
+        </div>
+        <div className="h-4 w-20 bg-muted animate-pulse rounded-md flex-shrink-0" />
+      </div>
+    </div>
+  )
 }
 
 export function ListEditor({

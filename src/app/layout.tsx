@@ -18,6 +18,7 @@ import { Toaster } from '@/components/ui/toast'
 import { AuthProvider } from '@/hooks/useAuth'
 import { QueryProvider } from '@/providers/query-provider'
 import { Agentation } from 'agentation'
+import '@/bones/registry.js'
 
 export const metadata: Metadata = {
   title: 'Snack - Curated Link Collections',

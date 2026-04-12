@@ -10,7 +10,7 @@ import { PublicListView } from '@/components/public-list-view'
 import { CreateList } from '@/components/create-list'
 import { ListWithLinks, CreateListForm, LinkCreatePayload } from '@/types'
 import { useAuth } from '@/hooks/useAuth'
-import { LoadingState } from '@/components/loading-state'
+import { Skeleton } from 'boneyard-js/react'
 import {
   useUpdateListMutation,
   useAddLinkMutation,
@@ -192,9 +192,35 @@ export default function ListPage({ params }: ListPageProps) {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <LoadingState message="Opening this list…" />
-      </div>
+      <Skeleton
+        name="list-page"
+        loading={true}
+        animate="pulse"
+        fallback={
+          <div className="min-h-screen bg-background">
+            <div className="max-w-[560px] mx-auto px-4 py-12 space-y-6">
+              <div className="space-y-2">
+                <div className="h-8 w-48 bg-muted animate-pulse rounded-md" />
+                <div className="h-5 w-64 bg-muted animate-pulse rounded-md" />
+              </div>
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="space-y-3">
+                    <div className="aspect-video bg-muted animate-pulse rounded-lg" />
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-muted animate-pulse rounded-sm" />
+                      <div className="h-4 bg-muted animate-pulse rounded-md flex-1 max-w-[60%]" />
+                      <div className="h-4 w-20 bg-muted animate-pulse rounded-md" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        }
+      >
+        <div />
+      </Skeleton>
     )
   }
 

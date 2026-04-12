@@ -3,19 +3,29 @@
 import Link from 'next/link'
 import { Star, ChartBar, ListBullets } from '@phosphor-icons/react'
 import { useEffect, Suspense, useState } from 'react'
+import { Skeleton } from 'boneyard-js/react'
 
 import { Button } from '@/components/ui'
 import { TopBar, BrandMark, UserMenu } from '@/components/primitives'
-import { LoadingState } from '@/components/loading-state'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
-/**
- * App Layout
- *
- * Used for authenticated app pages: dashboard, profile, lists
- * Requires authentication and shows user menu
- */
+function AppLayoutSkeleton() {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="h-16 border-b border-border" />
+      <div className="max-w-[560px] mx-auto px-4 py-8 space-y-4">
+        <div className="h-6 w-32 bg-muted animate-pulse rounded-md" />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-10 bg-muted animate-pulse rounded-md" />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function AppLayoutContent({
   children,
 }: {
@@ -29,7 +39,6 @@ function AppLayoutContent({
   const activeTab = searchParams?.get('tab')
   const isOnDashboard = pathname === '/dashboard'
 
-  // Ensure component is mounted on client before rendering tab-specific UI
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -45,27 +54,14 @@ function AppLayoutContent({
     router.push('/')
   }
 
-  // Show loading state while checking auth or before client mount (prevents hydration mismatch)
-  if (loading || !mounted) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="One sec…" />
-      </div>
-    )
-  }
+  const isLoading = loading || !mounted
 
-  // Don't render anything if not authenticated
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Taking you to sign in…" />
-      </div>
-    )
+  if (isLoading || !user) {
+    return <AppLayoutSkeleton />
   }
 
   return (
     <div>
-      {/* Skip to content link for accessibility */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md"
@@ -132,11 +128,7 @@ export default function AppLayout({
   children: React.ReactNode
 }) {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="One sec…" />
-      </div>
-    }>
+    <Suspense fallback={<AppLayoutSkeleton />}>
       <AppLayoutContent>{children}</AppLayoutContent>
     </Suspense>
   )
