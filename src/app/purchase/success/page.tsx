@@ -3,9 +3,11 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle, ArrowRight } from '@phosphor-icons/react'
+import { motion } from 'framer-motion'
 import { Button, Spinner } from '@/components/ui'
 import { Header } from '@/components/header'
 import { useAuth } from '@/hooks/useAuth'
+import { celebrate } from '@/lib/confetti'
 
 function PurchaseSuccessContent() {
   const router = useRouter()
@@ -41,6 +43,12 @@ function PurchaseSuccessContent() {
 
     verifyPurchase()
   }, [sessionId, router])
+
+  useEffect(() => {
+    if (loading) return undefined
+    const t = setTimeout(() => celebrate(), 150)
+    return () => clearTimeout(t)
+  }, [loading])
 
   if (loading) {
     return (
@@ -82,7 +90,12 @@ function PurchaseSuccessContent() {
       />
 
       <div className="max-w-2xl mx-auto px-4 py-16">
-        <div className="bg-card border border-border rounded-lg p-8 text-center">
+        <motion.div
+          initial={{ opacity: 0, transform: 'scale(0.96) translateY(8px)' }}
+          animate={{ opacity: 1, transform: 'scale(1) translateY(0px)' }}
+          transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+          className="bg-card border border-border rounded-lg p-8 text-center"
+        >
           {/* Success Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-20 h-20 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
@@ -129,7 +142,7 @@ function PurchaseSuccessContent() {
               View List
             </Button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Support */}
         <p className="text-center text-sm text-muted-foreground mt-8">

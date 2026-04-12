@@ -6,8 +6,10 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, Star, Link as LinkPhosphor, ListBullets, Plus, Globe, CaretUpDown, Money } from '@phosphor-icons/react'
 import { useQueryClient } from '@tanstack/react-query'
 
+import { toast } from 'sonner'
 import { Button, ListRowSkeleton, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
+import { celebrate } from '@/lib/confetti'
 import {
   useListsQuery,
   useCreateEmptyListMutation,
@@ -95,8 +97,13 @@ function DashboardContent() {
   }, [tab])
 
   const handleCreateList = async () => {
+    const isFirstList = lists.length === 0
     try {
       const newList = await createEmptyListMutation.mutateAsync()
+      if (isFirstList) {
+        celebrate()
+        toast.success('Your first list is live. Welcome to Snack.')
+      }
       if (user?.username) {
         // New lists open directly - owners see the edit view automatically
         router.push(`/${user.username}/${newList.public_id || newList.id}`)
@@ -111,7 +118,7 @@ function DashboardContent() {
   if (!mounted || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Loading..." />
+        <LoadingState message="Opening your dashboard…" />
       </div>
     )
   }
@@ -206,9 +213,9 @@ function DashboardContent() {
                   <div className="w-16 h-16 bg-secondary flex items-center justify-center text-2xl mx-auto mb-4">
                     🥨
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">No lists yet</h3>
+                  <h3 className="text-lg font-semibold mb-2">Nothing here yet</h3>
                   <p className="text-muted-foreground mb-6">
-                    Create your first list to start curating content
+                    Make a list of the links you&apos;d actually send a friend.
                   </p>
                   <Button
                     onClick={handleCreateList}
@@ -289,7 +296,7 @@ function DashboardContent() {
                 </div>
                 <h3 className="text-lg font-semibold mb-2">No saved lists yet</h3>
                 <p className="text-muted-foreground">
-                  Click on the star icon on any list to save it here.
+                  Find a list worth keeping, tap the star, and it lands here.
                 </p>
               </div>
             ) : (
@@ -479,7 +486,7 @@ export default function DashboardPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Loading..." />
+        <LoadingState message="Opening your dashboard…" />
       </div>
     }>
       <DashboardContent />

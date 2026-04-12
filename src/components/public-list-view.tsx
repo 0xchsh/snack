@@ -15,6 +15,8 @@ import { ListPaywall } from './list-paywall'
 import { isListFree } from '@/lib/pricing'
 import { DefaultAvatar } from '@/components/default-avatar'
 import { toast } from 'sonner'
+import { sparkle } from '@/lib/confetti'
+import { useHaptics } from '@/hooks/use-haptics'
 
 interface PublicListViewProps {
   list: ListWithLinks
@@ -54,6 +56,7 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
   const [checkingAccess, setCheckingAccess] = useState(false)
   const router = useRouter()
   const { user } = useAuth()
+  const { trigger: haptic } = useHaptics()
 
   // Update local list when prop changes
   useEffect(() => {
@@ -118,9 +121,19 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
     })
   }
 
-  const handleCopy = async () => {
+  const handleCopy = async (event?: React.MouseEvent) => {
     try {
       await navigator.clipboard.writeText(window.location.href)
+      haptic('light')
+      if (event) {
+        const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+        sparkle({
+          x: (rect.left + rect.width / 2) / window.innerWidth,
+          y: (rect.top + rect.height / 2) / window.innerHeight,
+        })
+      } else {
+        sparkle()
+      }
       toast.success('Link copied to clipboard!')
     } catch {
       // Silently handle error
@@ -168,7 +181,8 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
           const data = await response.json()
           console.log('Save API response:', data)
           setIsSaved(true)
-          toast.success('Saved successfully!')
+          haptic('success')
+          toast.success('Saved to your lists')
 
           // Update save count from API response
           if (data.data && typeof data.data.save_count === 'number') {
@@ -321,6 +335,8 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
               onClick: async () => {
                 const url = `${window.location.origin}/${list.user?.username}/${list.public_id || list.id}`
                 await navigator.clipboard.writeText(url)
+                haptic('light')
+                sparkle()
                 toast.success('Link copied to clipboard!')
               },
               className: "w-icon-button h-icon-button p-0 flex items-center justify-center"
@@ -480,7 +496,7 @@ export function PublicListView({ list: initialList }: PublicListViewProps) {
                 ))
               ) : (
                 <div className="py-12 text-muted-foreground text-center">
-                  <p>This list is empty</p>
+                  <p>{isOwner ? 'No links yet — paste one to get started.' : 'Still cooking. Check back soon.'}</p>
                 </div>
               )}
             </div>

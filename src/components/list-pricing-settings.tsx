@@ -144,7 +144,7 @@ export function ListPricingSettings({
           </div>
 
           <Button onClick={handleSave} disabled={saving} className="w-full">
-            {saving ? 'Saving...' : 'Save Pricing'}
+            {saving ? 'Saving' : 'Save Pricing'}
           </Button>
 
           <div className="bg-accent/50 rounded-md p-3 text-sm">

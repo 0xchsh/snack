@@ -159,7 +159,7 @@ export default function DiscoverPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Loading lists..." />
+        <LoadingState message="Finding great lists…" />
       </div>
     )
   }

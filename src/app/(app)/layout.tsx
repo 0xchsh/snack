@@ -49,7 +49,7 @@ function AppLayoutContent({
   if (loading || !mounted) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Loading..." />
+        <LoadingState message="One sec…" />
       </div>
     )
   }
@@ -58,7 +58,7 @@ function AppLayoutContent({
   if (!user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Redirecting..." />
+        <LoadingState message="Taking you to sign in…" />
       </div>
     )
   }
@@ -134,7 +134,7 @@ export default function AppLayout({
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Loading..." />
+        <LoadingState message="One sec…" />
       </div>
     }>
       <AppLayoutContent>{children}</AppLayoutContent>

@@ -10,6 +10,7 @@ import { Favicon } from './favicon'
 import { fetchOGDataClient } from '@/lib/og-client'
 import { toast } from 'sonner'
 import { Button, LinkCardSkeleton } from '@/components/ui'
+import { useHaptics } from '@/hooks/use-haptics'
 
 const MAX_LINKS_PER_PASTE = 25
 
@@ -53,6 +54,7 @@ export function ListEditor({
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
   const moreMenuRef = useRef<HTMLDivElement>(null)
   const mobilePasteInputRef = useRef<HTMLInputElement>(null)
+  const { trigger: haptic } = useHaptics()
 
   // Detect mobile device on mount
   useEffect(() => {
@@ -75,6 +77,7 @@ export function ListEditor({
       onUpdateList?.({ title: 'Untitled List' })
     } else if (trimmedTitle !== list.title) {
       onUpdateList?.({ title: trimmedTitle })
+      toast.success('Title saved')
     }
   }
 
@@ -122,10 +125,11 @@ export function ListEditor({
     for (let i = 0; i < validUrls.length; i++) {
       const url = validUrls[i]
       if (url) {
-        await onAddLink?.({ 
+        await onAddLink?.({
           url,
           title: url // Use URL as default title, it will be updated with OG data
         })
+        haptic('light')
         // Remove from loading state as each one completes
         setLoadingLinks(prev => prev.filter(loadingUrl => loadingUrl !== url))
       }
@@ -172,9 +176,10 @@ export function ListEditor({
       width: rect.width
     })
 
+    haptic('medium')
     document.body.style.cursor = 'grabbing'
     document.body.style.userSelect = 'none'
-  }, [])
+  }, [haptic])
 
   // Touch event handlers for mobile drag-and-drop
   const handleTouchStart = useCallback((e: React.TouchEvent, linkId: string, index: number) => {
@@ -203,9 +208,10 @@ export function ListEditor({
       width: rect.width
     })
 
+    haptic('medium')
     document.body.style.userSelect = 'none'
     document.body.style.overflow = 'hidden' // Prevent scroll while dragging
-  }, [])
+  }, [haptic])
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging || !draggedItemId) return
@@ -330,13 +336,14 @@ export function ListEditor({
 
       // Update local state immediately for visual feedback
       setOptimisticList(prev => ({ ...prev, links: newLinks }))
+      haptic('light')
 
       // Update the order on the server
       onReorderLinks?.(newLinks.map(link => link.id))
     }
 
     cleanup()
-  }, [isDragging, optimisticList.links, draggedItemId, dragOverIndex, onReorderLinks])
+  }, [isDragging, optimisticList.links, draggedItemId, dragOverIndex, onReorderLinks, haptic])
 
   const handleTouchEnd = useCallback((e: TouchEvent) => {
     if (!isDragging || !optimisticList.links || !draggedItemId) {
@@ -358,13 +365,14 @@ export function ListEditor({
 
       // Update local state immediately for visual feedback
       setOptimisticList(prev => ({ ...prev, links: newLinks }))
+      haptic('light')
 
       // Update the order on the server
       onReorderLinks?.(newLinks.map(link => link.id))
     }
 
     cleanup()
-  }, [isDragging, optimisticList.links, draggedItemId, dragOverIndex, onReorderLinks])
+  }, [isDragging, optimisticList.links, draggedItemId, dragOverIndex, onReorderLinks, haptic])
 
   const cleanup = useCallback(() => {
     setIsDragging(false)
@@ -964,12 +972,19 @@ export function ListEditor({
                   key={link.id}
                   data-link-id={link.id}
                   className={`
-                    transition-all duration-300 ease-out select-none
-                    ${draggedItemId === link.id ? 'opacity-30' : 'opacity-100'}
-                    ${dragOverIndex === index && draggedItemId !== link.id ?
-                      'transform translate-y-2 ring-1 ring-foreground rounded-md' : ''}
+                    relative transition-[transform,opacity] duration-200 ease-out select-none
+                    ${draggedItemId === link.id ? 'opacity-40 scale-[0.98]' : 'opacity-100'}
                   `}
                 >
+                  {dragOverIndex === index && draggedItemId !== link.id && (
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -top-3 left-0 right-0 h-0.5 bg-foreground rounded-full"
+                    >
+                      <span className="absolute -left-1 -top-[3px] w-2 h-2 rounded-full bg-foreground" />
+                      <span className="absolute -right-1 -top-[3px] w-2 h-2 rounded-full bg-foreground" />
+                    </div>
+                  )}
                   <LinkItem
                     link={link}
                     onRemove={() => handleDeleteLink(link.id)}
@@ -1034,6 +1049,7 @@ export function ListEditor({
           onUpdateList?.({
             emoji: emoji
           })
+          haptic('light')
           setShowEmojiPicker(false)
         }}
         onClose={() => setShowEmojiPicker(false)}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { X, Globe, Lock, EyeSlash } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
 import { Button } from './ui/button'
 import { StripeConnectButton } from './stripe-connect-button'
 import { formatCurrency, parseCurrencyToCents, validatePrice, isListFree, PLATFORM_FEE_PERCENTAGE } from '@/lib/pricing'
@@ -158,6 +159,7 @@ export function PricingModal({
         ...(pricingChanged && { priceCents, currency }),
         ...(visibilityChanged && { isPublic: visibility === 'public' }),
       })
+      toast.success('List updated')
       onClose()
     } catch (err: any) {
       setError(err.message || 'Failed to save changes')
@@ -376,7 +378,7 @@ export function PricingModal({
               variant="primary"
               className="w-full"
             >
-              {saving ? 'Saving...' : saved ? 'Saved' : 'Save'}
+              {saving ? 'Saving' : saved ? 'Saved' : 'Save'}
             </Button>
           )}
         </div>

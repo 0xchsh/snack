@@ -234,26 +234,27 @@ export default function UserListPage() {
   // Show error state
   if (error || !currentList) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center space-y-4 max-w-md">
+          <div className="text-5xl mb-2" aria-hidden="true">🫥</div>
           <h1 className="text-2xl font-bold text-foreground">
-            {error === 'List not found' ? 'List not found' : 'Unable to load list'}
+            {error === 'This list is private' ? 'This list is private' : 'This list went missing'}
           </h1>
           <p className="text-muted-foreground">
             {error === 'This list is private'
-              ? 'This list is private and you don\'t have access to it.'
+              ? 'The owner hasn\'t shared it with you.'
               : error === 'List not found'
-              ? 'The list you\'re looking for doesn\'t exist or has been deleted.'
+              ? 'It either moved, got unlisted, or never existed. Try the creator\'s profile?'
               : 'Something went wrong while loading this list. Please try again.'
             }
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex gap-3 justify-center pt-2">
             <Button
               onClick={() => router.push(`/${username}`)}
               variant="secondary"
               className="px-4 py-2 font-semibold"
             >
-              Back to Profile
+              Visit @{username}
             </Button>
             <Button
               onClick={() => router.push('/')}
@@ -414,7 +415,7 @@ export default function UserListPage() {
                   disabled={deleteListMutation.isPending}
                   className="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive-hover rounded-md transition-colors disabled:opacity-50"
                 >
-                  {deleteListMutation.isPending ? 'Deleting...' : 'Delete'}
+                  {deleteListMutation.isPending ? 'Deleting' : 'Delete'}
                 </button>
               </div>
             </motion.div>

@@ -120,7 +120,7 @@ export function AddLinkModal({ isOpen, onClose, onAddLink }: AddLinkModalProps) 
                   setError('')
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder="Enter link"
+                placeholder="Paste a link"
                 className="flex-1 h-icon-button px-3 bg-background text-foreground border border-border rounded-lg text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-colors"
                 disabled={isAdding}
               />

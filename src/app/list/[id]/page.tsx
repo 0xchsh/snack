@@ -193,7 +193,7 @@ export default function ListPage({ params }: ListPageProps) {
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <LoadingState message="Loading list..." />
+        <LoadingState message="Opening this list…" />
       </div>
     )
   }

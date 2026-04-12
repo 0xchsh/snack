@@ -179,7 +179,7 @@ export function CreateList({ onCreateList, onClose }: CreateListProps) {
                 disabled={!formData.title.trim() || isLoading}
                 className="flex-1"
               >
-                {isLoading ? 'Creating...' : 'Create List'}
+                {isLoading ? 'Creating' : 'Create List'}
               </Button>
             </div>
           </form>
