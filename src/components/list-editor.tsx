@@ -1082,7 +1082,7 @@ function LinkItem({
   // Card layout - full-width cards with OG images
   return (
     <div
-      className="rounded-md group cursor-pointer flex flex-col gap-3 transition-transform"
+      className="rounded-lg group cursor-pointer flex flex-col gap-3 transition-transform"
       style={{
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
@@ -1090,7 +1090,7 @@ function LinkItem({
       onClick={onOpenLink}
     >
       {/* OG Image Preview */}
-      <div className="aspect-video bg-accent relative rounded-md overflow-hidden shadow-[0_2px_2px_0_rgba(0,0,0,0.25)]">
+      <div className="aspect-video bg-accent relative rounded-lg overflow-hidden shadow-[0_2px_2px_0_rgba(0,0,0,0.25)]">
         {link.image_url ? (
           <>
             <Image

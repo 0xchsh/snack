@@ -1,13 +1,11 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Star, ListBullets, CaretUpDown } from '@phosphor-icons/react'
 import { Spinner, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
 import { useInView } from 'react-intersection-observer'
 import { LoadingState } from '@/components/loading-state'
-import { DefaultAvatar } from '@/components/default-avatar'
 
 interface PublicList {
   id: string
@@ -254,7 +252,7 @@ export default function DiscoverPage() {
                   key={list.id}
                   href={`/${username}/${listSlug}`}
                   style={{ '--i': index } as React.CSSProperties}
-                  className="animate-card-in flex items-center gap-4 py-2.5 hover:bg-neutral-50 dark:hover:bg-neutral-900 -mx-2 px-2 rounded-md active:scale-[0.99] transition-[background-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="animate-card-in flex items-center gap-4 py-2.5 hover:bg-neutral-50 dark:hover:bg-neutral-900 -mx-2 px-2 rounded-lg active:scale-[0.99] transition-[background-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <span className="text-base shrink-0">{list.emoji || '📋'}</span>
                   <span className="text-sm font-medium text-foreground truncate flex-1 min-w-0">

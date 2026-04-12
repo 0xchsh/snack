@@ -132,7 +132,7 @@ export function AnimatedListDemo() {
                 className="flex flex-col gap-3"
               >
                 {/* OG Image Preview */}
-                <div className="aspect-video bg-neutral-100 rounded-md overflow-hidden">
+                <div className="aspect-video bg-neutral-100 rounded-lg overflow-hidden">
                   <img
                     src={link.ogImage}
                     alt={link.title}
