@@ -205,7 +205,7 @@ function DashboardContent() {
             </div>
 
             {/* Lists */}
-            <div className="space-y-3">
+            <div className="flex flex-col">
               {listsLoading ? (
                 <ListsSkeleton count={3} />
               ) : lists.length === 0 ? (
@@ -227,31 +227,27 @@ function DashboardContent() {
                   </Button>
                 </div>
               ) : (
-                sortedLists.map((list) => (
-                  <div key={list.id}>
-                    <Link
-                      href={`/${user.username}/${list.public_id || list.id}`}
-                      onMouseEnter={() => prefetchList(list.id)}
-                      className="flex items-center justify-between px-3 py-3 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700 active:scale-[0.995] transition-all duration-150 rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <span className="text-base flex-shrink-0">{list.emoji || '📋'}</span>
-                        <span className="text-base font-medium text-foreground group-hover:text-primary transition-colors truncate">
-                          {list.title || 'Untitled List'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-                        {isListPaid((list as any).price_cents) && (
-                          <span className="text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-1.5 py-0.5 rounded">
-                            {formatListPrice((list as any).price_cents, (list as any).currency || 'usd')}
-                          </span>
-                        )}
-                        <span className="text-sm text-muted-foreground">
-                          {list.links?.length || 0} links
-                        </span>
-                      </div>
-                    </Link>
-                  </div>
+                sortedLists.map((list, index) => (
+                  <Link
+                    key={list.id}
+                    href={`/${user.username}/${list.public_id || list.id}`}
+                    onMouseEnter={() => prefetchList(list.id)}
+                    style={{ '--i': index } as React.CSSProperties}
+                    className="animate-card-in flex items-center gap-4 py-2.5 hover:bg-neutral-50 dark:hover:bg-neutral-900 -mx-2 px-2 rounded-md active:scale-[0.99] transition-[background-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <span className="text-base shrink-0">{list.emoji || '📋'}</span>
+                    <span className="text-sm font-medium text-foreground truncate flex-1 min-w-0">
+                      {list.title || 'Untitled List'}
+                    </span>
+                    {isListPaid((list as any).price_cents) && (
+                      <span className="text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-1.5 py-0.5 rounded shrink-0">
+                        {formatListPrice((list as any).price_cents, (list as any).currency || 'usd')}
+                      </span>
+                    )}
+                    <span className="text-sm text-muted-foreground tabular-nums shrink-0">
+                      {list.links?.length || 0}
+                    </span>
+                  </Link>
                 ))
               )}
             </div>
@@ -300,32 +296,26 @@ function DashboardContent() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {savedLists.map((list) => {
+              <div className="flex flex-col">
+                {savedLists.map((list, index) => {
                   const listOwner = list.user?.username || 'unknown'
                   return (
-                    <div key={list.id}>
-                      <Link
-                        href={`/${listOwner}/${list.public_id || list.id}`}
-                        onMouseEnter={() => prefetchList(list.id)}
-                        className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700 active:scale-[0.995] transition-all duration-150 rounded-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                      >
-                        <div className="flex items-center gap-4 min-w-0 flex-1">
-                          <span className="text-2xl flex-shrink-0">{list.emoji || '📋'}</span>
-                          <div className="min-w-0 flex-1">
-                            <span className="text-base font-medium text-foreground group-hover:text-primary transition-colors block truncate">
-                              {list.title || 'Untitled List'}
-                            </span>
-                            <span className="text-sm text-muted-foreground truncate block">
-                              {listOwner}
-                            </span>
-                          </div>
-                        </div>
-                        <span className="text-sm text-muted-foreground flex-shrink-0 ml-4">
-                          {list.links?.length || 0} links
-                        </span>
-                      </Link>
-                    </div>
+                    <Link
+                      key={list.id}
+                      href={`/${listOwner}/${list.public_id || list.id}`}
+                      onMouseEnter={() => prefetchList(list.id)}
+                      style={{ '--i': index } as React.CSSProperties}
+                      className="animate-card-in flex items-center gap-4 py-2.5 hover:bg-neutral-50 dark:hover:bg-neutral-900 -mx-2 px-2 rounded-md active:scale-[0.99] transition-[background-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <span className="text-base shrink-0">{list.emoji || '📋'}</span>
+                      <span className="text-sm font-medium text-foreground truncate flex-1 min-w-0">
+                        {list.title || 'Untitled List'}
+                      </span>
+                      <span className="text-sm text-muted-foreground shrink-0">{listOwner}</span>
+                      <span className="text-sm text-muted-foreground tabular-nums shrink-0">
+                        {list.links?.length || 0}
+                      </span>
+                    </Link>
                   )
                 })}
               </div>
@@ -414,7 +404,7 @@ function DashboardContent() {
             </div>
 
             {/* Per-list stats */}
-            <div className="space-y-3">
+            <div className="flex flex-col">
               {[...lists].sort((a, b) => {
                 const aId = a.public_id || a.id
                 const bId = b.public_id || b.id
@@ -431,7 +421,7 @@ function DashboardContent() {
                   default:
                     return 0
                 }
-              }).map((list) => {
+              }).map((list, index) => {
                 const listId = list.public_id || list.id
                 const stats = analyticsData?.listStats[listId] || { views: 0, clicks: 0 }
 
@@ -440,33 +430,27 @@ function DashboardContent() {
                     key={list.id}
                     href={`/${user.username}/${listId}`}
                     onMouseEnter={() => prefetchList(list.id)}
-                    className="block"
+                    style={{ '--i': index } as React.CSSProperties}
+                    className="animate-card-in flex items-center gap-4 py-2.5 hover:bg-neutral-50 dark:hover:bg-neutral-900 -mx-2 px-2 rounded-md active:scale-[0.99] transition-[background-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <div className="flex items-center justify-between px-3 py-3 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700 active:scale-[0.995] transition-all duration-150 rounded-md cursor-pointer">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span className="text-base">{list.emoji || '📋'}</span>
-                        <span className="text-base font-medium text-foreground truncate">
-                          {list.title || 'Untitled List'}
-                        </span>
-                        {isListPaid((list as any).price_cents) && (
-                          <span className="text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-1.5 py-0.5 rounded flex-shrink-0">
-                            {formatListPrice((list as any).price_cents, (list as any).currency || 'usd')}
-                          </span>
-                        )}
+                    <span className="text-base shrink-0">{list.emoji || '📋'}</span>
+                    <span className="text-sm font-medium text-foreground truncate flex-1 min-w-0">
+                      {list.title || 'Untitled List'}
+                    </span>
+                    {isListPaid((list as any).price_cents) && (
+                      <span className="text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-1.5 py-0.5 rounded shrink-0">
+                        {formatListPrice((list as any).price_cents, (list as any).currency || 'usd')}
+                      </span>
+                    )}
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground shrink-0">
+                      <span className="tabular-nums">{formatCount(list.links?.length || 0)}</span>
+                      <div className="flex items-center gap-1">
+                        <Eye weight="bold" className="size-3.5" />
+                        <span className="tabular-nums">{formatCount(stats.views)}</span>
                       </div>
-                      <div className="flex items-center gap-2 sm:gap-4 text-sm text-muted-foreground flex-shrink-0">
-                        <div className="flex items-center gap-1">
-                          <LinkPhosphor weight="bold" className="size-4" aria-hidden="true" />
-                          <span>{formatCount(list.links?.length || 0)}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Eye weight="bold" className="size-4" aria-hidden="true" />
-                          <span>{formatCount(stats.views)}</span>
-                        </div>
-                        <div className="hidden sm:flex items-center gap-1">
-                          <Star weight="bold" className="size-4" aria-hidden="true" />
-                          <span>{formatCount(list.save_count || 0)}</span>
-                        </div>
+                      <div className="flex items-center gap-1">
+                        <Star weight="bold" className="size-3.5" />
+                        <span className="tabular-nums">{formatCount(list.save_count || 0)}</span>
                       </div>
                     </div>
                   </Link>

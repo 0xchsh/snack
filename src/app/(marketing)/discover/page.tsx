@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Star, Link as LinkPhosphor, ListBullets, CaretUpDown } from '@phosphor-icons/react'
+import { Star, ListBullets, CaretUpDown } from '@phosphor-icons/react'
 import { Spinner, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui'
 import { useInView } from 'react-intersection-observer'
 import { LoadingState } from '@/components/loading-state'
@@ -42,6 +42,8 @@ export default function DiscoverPage() {
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [totalCount, setTotalCount] = useState(0)
+  const [animKey, setAnimKey] = useState(0)
+  const [emojiFilter, setEmojiFilter] = useState<string | null>(null)
 
   const { ref: loadMoreRef, inView } = useInView({
     threshold: 0,
@@ -143,18 +145,22 @@ export default function DiscoverPage() {
     return `${Math.floor(diffInSeconds / 31536000)}y`
   }
 
-  const sortedLists = [...lists].sort((a, b) => {
-    switch (sortBy) {
-      case 'recent':
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      case 'links':
-        return (b.links?.length || 0) - (a.links?.length || 0)
-      case 'stars':
-        return (b.save_count || 0) - (a.save_count || 0)
-      default:
-        return 0
-    }
-  })
+  const uniqueEmojis = [...new Set(lists.map(l => l.emoji || '📋'))]
+
+  const sortedLists = [...lists]
+    .filter(list => !emojiFilter || (list.emoji || '📋') === emojiFilter)
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'recent':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        case 'links':
+          return (b.links?.length || 0) - (a.links?.length || 0)
+        case 'stars':
+          return (b.save_count || 0) - (a.save_count || 0)
+        default:
+          return 0
+      }
+    })
 
   if (loading) {
     return (
@@ -166,7 +172,7 @@ export default function DiscoverPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 md:py-12 max-w-[560px] w-full">
+      <div className="mx-auto py-6 md:py-12 max-w-2xl w-full px-4">
         <div className="mb-8 text-center">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Discover Lists</h1>
           <p className="text-muted-foreground">Explore curated lists from the community</p>
@@ -190,17 +196,41 @@ export default function DiscoverPage() {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setSortBy('recent')}>
+                <DropdownMenuItem onClick={() => { setSortBy('recent'); setAnimKey(k => k + 1) }}>
                   Recent
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('links')}>
+                <DropdownMenuItem onClick={() => { setSortBy('links'); setAnimKey(k => k + 1) }}>
                   Links
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('stars')}>
+                <DropdownMenuItem onClick={() => { setSortBy('stars'); setAnimKey(k => k + 1) }}>
                   Stars
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          </div>
+        )}
+
+        {/* Emoji filter badges */}
+        {lists.length > 0 && uniqueEmojis.length > 1 && (
+          <div className="mb-4 -mx-4 px-4 overflow-x-auto scrollbar-none">
+            <div className="flex items-center gap-2 w-max">
+              <button
+                onClick={() => { setEmojiFilter(null); setAnimKey(k => k + 1) }}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${!emojiFilter ? 'bg-foreground text-background' : 'bg-neutral-100 dark:bg-neutral-800 text-muted-foreground hover:text-foreground'}`}
+              >
+                All
+              </button>
+              {uniqueEmojis.map(emoji => (
+                <button
+                  key={emoji}
+                  onClick={() => { setEmojiFilter(emojiFilter === emoji ? null : emoji); setAnimKey(k => k + 1) }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${emojiFilter === emoji ? 'bg-foreground text-background' : 'bg-neutral-100 dark:bg-neutral-800 text-muted-foreground hover:text-foreground'}`}
+                >
+                  <span>{emoji}</span>
+                  <span className="tabular-nums">{lists.filter(l => (l.emoji || '📋') === emoji).length}</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -213,45 +243,28 @@ export default function DiscoverPage() {
             <p className="text-muted-foreground">No public lists yet. Be the first to create one!</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {sortedLists.map((list) => {
+          <div key={animKey} className="flex flex-col">
+            {sortedLists.map((list, index) => {
               const username = list.users?.username || 'unknown'
               const listSlug = list.public_id || list.id
-              const displayName = getDisplayName(list)
-              const profilePicUrl = list.users?.profile_picture_url
               const linkCount = list.links?.length || 0
 
               return (
                 <Link
                   key={list.id}
                   href={`/${username}/${listSlug}`}
-                  className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700 active:scale-[0.995] transition-all duration-150 rounded-md group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  style={{ '--i': index } as React.CSSProperties}
+                  className="animate-card-in flex items-center gap-4 py-2.5 hover:bg-neutral-50 dark:hover:bg-neutral-900 -mx-2 px-2 rounded-md active:scale-[0.99] transition-[background-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  {/* Left side - emoji and title */}
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className="text-2xl flex-shrink-0">
-                      {list.emoji || '📋'}
-                    </div>
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <span className="text-base font-medium text-foreground truncate">
-                        {list.title || 'Untitled List'}
-                      </span>
-                      <span className="text-sm text-muted-foreground truncate mt-0.5">
-                        {username}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Right side - stats - hide stars on very narrow screens */}
-                  <div className="flex items-center gap-2 sm:gap-3 ml-3 sm:ml-4 flex-shrink-0 text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
-                      <LinkPhosphor weight="bold" className="size-4" />
-                      <span className="text-sm">{linkCount}</span>
-                    </div>
-                    <div className="hidden sm:flex items-center gap-1.5">
-                      <Star weight="bold" className="size-4" />
-                      <span className="text-sm">{list.save_count || 0}</span>
-                    </div>
+                  <span className="text-base shrink-0">{list.emoji || '📋'}</span>
+                  <span className="text-sm font-medium text-foreground truncate flex-1 min-w-0">
+                    {list.title || 'Untitled List'}
+                  </span>
+                  <span className="text-sm text-muted-foreground shrink-0">{username}</span>
+                  <span className="text-sm text-muted-foreground tabular-nums shrink-0">{linkCount}</span>
+                  <div className="flex items-center gap-1 text-muted-foreground shrink-0">
+                    <Star weight="bold" className="size-3.5" />
+                    <span className="text-sm tabular-nums">{list.save_count || 0}</span>
                   </div>
                 </Link>
               )

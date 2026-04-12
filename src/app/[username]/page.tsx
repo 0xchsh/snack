@@ -228,10 +228,10 @@ export default function UsernamePage() {
           {/* Lists */}
           <div className="flex flex-col gap-3">
             {profile.lists.length > 0 ? (
-              profile.lists.map((list) => {
+              profile.lists.map((list, index) => {
                 const linkCount = list.links?.[0]?.count || 0
                 return (
-                  <div key={list.id}>
+                  <div key={list.id} style={{ '--i': index } as React.CSSProperties} className="animate-card-in">
                     <Link
                       href={`/${profile.user.username}/${list.public_id || list.id}`}
                       className="flex items-center justify-between px-3 py-3 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700 active:scale-[0.995] transition-all duration-150 rounded-md group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"

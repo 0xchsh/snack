@@ -269,7 +269,7 @@ export function PricingModal({
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.15 }}
+                transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
                 className="overflow-hidden"
               >
                 <div className="space-y-4">
